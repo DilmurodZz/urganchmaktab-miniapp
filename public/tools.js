@@ -198,13 +198,15 @@ const Tools = (() => {
   function Screen() {
     // every tool is the same card: picture, name, one line about it, order number
     const items = [
+      { go: "location.hash='#/kurslar'", img: "img/ic-courses.webp", round: true, t: T("Kurslar"), d: T("Eng talabgir kurslar, mehnat bozori tahlili va omad g'ildiragi") },
+      { go: "location.hash='#/oyin'", img: "img/ic-game.webp", round: true, t: T("O'yin"), d: T("3D yugurish o'yini: yakka yoki do'stingiz bilan") },
       { go: "location.hash='#/cv'", img: "img/tool-cv.webp", t: T("CV, rezyume va obyektivka"), d: T("Bepul, 3 tilda tayyorlang va sizga mos ishlarga ariza topshiring") },
       { go: "location.hash='#/dtm'", img: "img/tool-dtm.webp", t: T("DTM ball kalkulyatori"), d: T("Ballingizni hisoblang va qaysi OTMda grant yoki shartnomaga yetishini ko'ring") },
       { go: "location.hash='#/ielts'", img: "img/tool-ielts.webp", t: T("IELTS ball kalkulyatori"), d: T("To'g'ri javoblaringizdan har bir ko'nikma va umumiy bandni hisoblang") },
-      { go: "location.hash='#/unis'", img: "img/tool-uni.webp", t: T("Top 300 universitet va grantlar"), d: T("THE reytingi, mahalliy grantlar, stipendiyalar va sertifikatlar") },
+      { go: "location.hash='#/unis'", img: "img/tool-uni.webp", t: T("Grant va sertifikatlar"), d: T("Mahalliy grantlar, stipendiyalar, milliy va xalqaro sertifikatlar") },
     ];
     return `${navbar(T("Foydali vositalar"))}
-    ${window.News ? News.ribbon() : ""}
+    ${window.Stories ? Stories.ribbon() : ""}
     <div class="tool-list">${items.map((x, n) => `<button class="card tool-link" onclick="${x.go}">
       <img class="tool-ic ${x.round ? "round" : ""}" src="${x.img}" alt="" width="56" height="56" decoding="async">
       <span><b>${x.t}</b><small>${x.d}</small></span>

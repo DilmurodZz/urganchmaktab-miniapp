@@ -64,7 +64,7 @@ function langCard() {
   </div>`;
 }
 
-const adminCard = () => isAdmin() ? `<a class="card list-item admin-entry" href="#/admin">${chip("shield", "sm admin-ic")}<span><b>${T("Admin bo'limi")}</b><small>${T("Xabar yuborish, kanalga post, havolalar")}</small></span>${ic("chev", "chev")}</a>` : "";
+const adminCard = () => isAdmin() ? `<a class="card list-item admin-entry" href="#/admin">${chip("shield", "sm admin-ic")}<span><b>${T("Admin bo'limi")}</b><small>${T("Xabar yuborish va havolalar")}</small></span>${ic("chev", "chev")}</a>` : "";
 
 /* ---------- admin screen ---------- */
 let adminInfo = null, adminInfo_busy = false;
@@ -90,20 +90,7 @@ function AdminScreen() {
     <div class="adm-st" id="${id}-st"></div>
   </div>`;
   return `${navbar(T("Admin bo'limi"))}
-  <div class="card box">
-    <h4>${ic("users")} ${T("Foydalanuvchilar")}</h4>
-    ${adminInfo ? `<div class="st-grid">
-      <span class="st-tile"><b>${fmtN(adminInfo.users)}</b><small>${T("Mini ilovani ochgan")}</small></span>
-      <span class="st-tile"><b>${fmtN(adminInfo.reachable)}</b><small>${T("Xabar yetib boradi")}</small></span>
-    </div>` : `<p>${T("Yuklanmoqda…")}</p>`}
-    <p class="st-note">${T("Bot faqat u bilan suhbatni boshlagan va botni bloklamagan foydalanuvchilarga xabar yubora oladi.")}</p>
-  </div>
   ${box("bc", T("Barcha foydalanuvchilarga xabar"), T("Xabar bot orqali har bir foydalanuvchining shaxsiy chatiga boradi."))}
-  ${box("ch", T("Kanalga post: {c}", { c: (adminInfo && adminInfo.channel) || "@ustozai" }), T("Bot kanalda admin bo'lishi kerak (Post messages huquqi bilan)."),
-    `<div class="adm-tpl"><small>${T("Tayyor matnlar:")}</small>
-      <button onclick="admTpl('app')">${T("Mini ilova")}</button><button onclick="admTpl('cv')">${T("CV yaratish")}</button><button onclick="admTpl('kompas')">${T("UniMatch")}</button>
-      <select class="notr" onchange="admTpl('course', this.value)"><option value="">${T("Kursni ulashish…")}</option>${courses.slice().sort((a, b) => (b.students || 0) - (a.students || 0)).map((c) => `<option value="${c.id}">${esc(c.title.slice(0, 60))}</option>`).join("")}</select>
-    </div>`)}
   <div class="card box">
     <h4>${ic("send")} ${T("Havolalar")}</h4><p>${T("Nusxa olish yoki do'stlarga ulashish")}</p>
     ${[[T("Mini ilova"), APP_LINK], [T("Ustoz AI ilovasi (Android)"), PLAY_URL], [T("Ustoz AI ilovasi (iPhone)"), STORE_URL], [T("Ustoz AI kanali"), "https://t.me/ustozai"]]

@@ -142,9 +142,9 @@ const compassSVG = `<svg class="compass" viewBox="0 0 200 200" aria-hidden="true
   <circle cx="100" cy="100" r="5" fill="#fff" stroke="var(--p1)" stroke-width="2.5"/></svg>`;
 
 /* ---------- tab bar ---------- */
-const TABS = [["#/", "Asosiy", "home"], ["#/kurslar", "Kurslar", "play"], ["#/vositalar", "Vositalar", "grid"], ["#/profil", "Profil", "user"]];
+const TABS = [["#/", "Asosiy", "home"], ["#/chat", "Chat", "chat"], ["#/vositalar", "Vositalar", "grid"], ["#/profil", "Profil", "user"]];
 function renderTabs(route) {
-  const hidden = ["#/kompas", "#/natija", "#/oyin", "#/duo"].includes(route);
+  const hidden = ["#/kompas", "#/natija", "#/oyin", "#/duo", "#/chat"].includes(route);
   tabbar.classList.toggle("hide", hidden);
   tabbar.innerHTML = TABS.map(([h, l, i]) => `<a href="${h}" class="${h === route ? "on" : ""}">${ic(i)}<span>${l}</span></a>`).join("");
 }
@@ -154,19 +154,18 @@ window.goBack = () => { if (document.getElementById("sheet")) return closeSheet(
 
 /* ---------- screens ---------- */
 function Home() {
-  const tiles = [["gamepad", "O'yin", "#/oyin", "k1"], ["cap", "Application Studio", "#/ariza", "k2 g"], ["grid", "Foydali vositalar", "#/vositalar", "k3"]];
+  const tiles = [["clock", "Muddatlar", "#/muddatlar", "k1"], ["grid", "Foydali vositalar", "#/vositalar", "k3 g"]];
   return `
   <div class="topbar"><div class="brand"><img class="brand-logo" src="img/logo-emblem-light.webp" alt="" decoding="async"><span class="brand-name"><b>ALUMNI</b><small>MENTOR</small></span></div><span class="school" role="img" aria-label="${T("Maktab")}"><img src="img/school.webp" alt="" decoding="async"></span></div>
   <a class="hero2" href="#/unimatch">
     <img class="hero2-art" src="img/hero-compass.webp" alt="" decoding="async">
     <span class="hero2-tag">Top 300</span>
     <h3>UniMatch</h3>
-    <p>Ko'nikma va sertifikatlaringizga mos universitetni toping</p>
+    <p>Istaklaringiz va sertifikatlaringizga mos universitetni toping</p>
     <span class="btn-orange">Boshlash ${ic("chev")}</span>
   </a>
-  <a class="banner" href="#/kurslar">
-    <span class="bwheel ${store.get("bw_used", false) ? "" : "hint"}" id="bwheel" role="button" aria-label="${T("Omad g'ildiragi")}"><i class="bw-pin"></i><svg class="bw-ring" id="bw-ring" viewBox="0 0 100 100" aria-hidden="true">${bannerRing()}</svg><img src="img/ic-courses.webp" alt="" decoding="async"></span><span class="banner-sep"></span><b>Kurslar</b><span class="banner-go">${ic("chev")}</span>
-    <svg class="banner-wave" viewBox="0 0 400 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 38 C70 18 130 52 210 34 S340 14 400 30 V60 H0Z" fill="rgba(255,255,255,.55)"/><path d="M0 48 C80 34 150 58 230 46 S350 32 400 42 V60 H0Z" fill="rgba(120,140,255,.18)"/></svg>
+  <a class="banner studio-bn" href="#/ariza">
+    <span class="sbn-ic">${ic("cap")}</span><span class="banner-sep"></span><span class="sbn-t"><b>Application Studio</b><small>${T("Profil, insholar, tavsiyalar va topshirish")}</small></span><span class="banner-go">${ic("chev")}</span>
   </a>
   <div class="grid4">${tiles.map(([i, l, h, k]) => `<a class="tile4 ${k}" href="${h}"><i class="tile-ic">${ic(i)}</i><span>${l}</span>${i === "grid" ? `<i class="tile-nb" data-nb></i>` : ""}</a>`).join("")}</div>
 `;
@@ -184,9 +183,10 @@ function Profil() {
   <div class="card prof">
     <div class="pav">${user.photo_url ? `<img src="${esc(user.photo_url)}" alt="">` : esc((user.first_name || "U")[0])}</div>
     <h2>${esc(user.first_name)} ${esc(user.last_name || "")}</h2>
-    <small>${user.username ? "@" + esc(user.username) : "Ustoz AI o'quvchisi"}</small>
+    <small>${user.username ? "@" + esc(user.username) : "Urganch 1-IMI o'quvchisi"}</small>
   </div>
   ${statsCard()}
+  ${langCard()}
   ${adminCard()}
   <div class="card box">
     <h4>${ic("palette")} Ilova rangi</h4><p>O'zingizga yoqqan rangni tanlang</p>
@@ -194,7 +194,6 @@ function Profil() {
       const cur = Object.entries(THEMES).find(([k]) => k === theme);
       return `<details class="dd"><summary>${sw(cur)}${ic("chev", "dd-chev")}</summary><div class="dd-list">${Object.entries(THEMES).map((e) => `<button class="${e[0] === theme ? "on" : ""}" onclick="pickTheme('${e[0]}')">${sw(e)}${e[0] === theme ? ic("check", "dd-ok") : ""}</button>`).join("")}</div></details>`; })()}
   </div>
-  ${langCard()}
   ${startParam ? `<p class="note">Kirish manbasi: ${esc(startParam)}</p>` : ""}
   <p class="credit">O'yin 3D modellari (CC BY 4.0): own.guest, Nicholas-3D, Dimiter, Tom (trbaker), te1ko</p>`;
 }
@@ -274,9 +273,11 @@ function bindDuo() {
 const ROUTES = {
   "#/": Home, "#/kompas": () => needScript("kompas.js", "Compass", "Screen", T("UniMatch")), "#/natija": () => needScript("kompas.js", "Compass", "Result", T("UniMatch")), "#/profil": Profil,
   "#/kurslar": () => Kurslar.List(), "#/kurs": () => Kurslar.Detail(location.hash.slice(7)), "#/oyin": () => "", "#/mutolaa": () => Soon("mutolaa"),
-  "#/duo": DuoScreen, "#/vositalar": () => needTools("Screen"), "#/cv": () => needTools("CV"), "#/dtm": () => needScript("study.js", "Study", "DTM", T("DTM ball kalkulyatori")), "#/ielts": () => needScript("study.js", "Study", "IELTS", T("IELTS ball kalkulyatori")), "#/unis": () => needScript("study.js", "Study", "Unis", T("Top 300 universitet va grantlar")),
+  "#/duo": DuoScreen, "#/vositalar": () => needTools("Screen"), "#/cv": () => needTools("CV"), "#/dtm": () => needScript("study.js", "Study", "DTM", T("DTM ball kalkulyatori")), "#/ielts": () => needScript("study.js", "Study", "IELTS", T("IELTS ball kalkulyatori")), "#/unis": () => needScript("study.js", "Study", "Unis", T("Grant va sertifikatlar")),
+  "#/muddatlar": () => needScript("ariza.js", "Ariza", "Deadlines", T("Muddatlar")),
   "#/unimatch": () => needScript("study.js", "Study", "UniMatch", "UniMatch"), "#/unimatch-natija": () => needScript("study.js", "Study", "UniMatchResult", "UniMatch"),
-  "#/ariza": () => needScript("ariza.js", "Ariza", "Screen", "Application Studio"), "#/admin": () => AdminScreen(), "#/kashf": () => Soon("kashf"),
+  "#/ariza": () => needScript("ariza.js", "Ariza", "Screen", "Application Studio"),
+  "#/chat": () => needScript("chat.js", "Chat", "Screen", "Chat"), "#/admin": () => AdminScreen(), "#/kashf": () => Soon("kashf"),
 };
 let gameOn = false;
 // the 3D game is loaded on its own, after Home: it is not needed to open the app
@@ -327,6 +328,8 @@ function render() {
   const route = ROUTES[location.hash] ? location.hash : location.hash.startsWith("#/kurs/") ? "#/kurs" : "#/";
   if (gameOn && route !== "#/oyin" && typeof Game !== "undefined") { Game.unmount(); gameOn = false; }
   document.body.classList.toggle("fit", route === "#/");     // Home fills the screen exactly, no scrolling
+  document.body.classList.toggle("chat-on", route === "#/chat");
+  if (route !== "#/chat" && window.Chat) Chat.unmount();
   const newPage = route !== shownRoute; shownRoute = route;
   app.innerHTML = ROUTES[route]();
   if (route === "#/oyin") {
@@ -339,6 +342,7 @@ function render() {
   if (newPage) { app.classList.remove("enter"); void app.offsetWidth; app.classList.add("enter"); }
   renderTabs(route === "#/kurs" ? "#/kurslar" : route);
   if (route === "#/") { bindBannerWheel(); bannerOrbit(); }
+  if (route === "#/chat" && window.Chat) Chat.mount();
   if (route === "#/duo") bindDuo(); else if (duoSubs.length) { duoSubs.forEach((u) => u()); duoSubs = []; }
   try { route === "#/" ? tg.BackButton.hide() : tg.BackButton.show(); } catch {}
   track(route);
@@ -583,7 +587,7 @@ window.shareSec = (key, title) => {
 function openShared(key) {
   const [kind, id] = [key.slice(0, 1), key.slice(2)];
   const plan = kind === "g" ? { hash: "#/unis", prep: () => store.set("uni_tab", "grant"), find: () => { if (window.uniTab && !document.querySelector(".sd-g") && document.querySelector(".sd-tabs")) uniTab("grant"); return document.getElementById("g-" + id); } }
-    : kind === "u" ? { hash: "#/unis", prep: () => store.set("uni_tab", "top"), find: () => { if (window.uniOpen && !document.querySelector(".sd-uni") && document.querySelector(".sd-tabs")) uniTab("top"); return window.uniOpen && document.querySelector(".sd-uni") && document.getElementById("app"); } } : null;
+    : kind === "u" ? { hash: "#/ariza", prep: () => store.set("studio_tab", "top"), find: () => window.uniOpen && document.querySelector(".sd-uni") && document.getElementById("app") } : null;
   if (!plan) return;
   if (plan.prep) plan.prep();
   location.hash = plan.hash;
@@ -610,6 +614,9 @@ function glow(el) {
   setTimeout(() => { tag.classList.add("out"); setTimeout(() => tag.remove(), 400); }, 6000);
 }
 
+// "5-dekabr" style dates: browsers often have no Uzbek month names, so they are written here
+const UZ_MONTHS = ["yanvar", "fevral", "mart", "aprel", "may", "iyun", "iyul", "avgust", "sentyabr", "oktabr", "noyabr", "dekabr"];
+window.fmtDay = (d) => LANG === "uz" ? `${d.getDate()}-${UZ_MONTHS[d.getMonth()]}` : d.toLocaleDateString(LANG, { day: "numeric", month: "long" });
 // country names in Uzbek (the Top 300 table has them in English)
 const COUNTRY_UZ = { "United States": "AQSh", "United Kingdom": "Buyuk Britaniya", Germany: "Germaniya", China: "Xitoy", Australia: "Avstraliya", Canada: "Kanada", Netherlands: "Niderlandiya", "South Korea": "Janubiy Koreya", "Hong Kong": "Gonkong", Sweden: "Shvetsiya", Italy: "Italiya", Switzerland: "Shveytsariya", Japan: "Yaponiya", Belgium: "Belgiya", France: "Fransiya", Denmark: "Daniya", Austria: "Avstriya", Spain: "Ispaniya", Ireland: "Irlandiya", Finland: "Finlandiya", Norway: "Norvegiya", Malaysia: "Malayziya", Singapore: "Singapur", Qatar: "Qatar", Macao: "Makao", "Saudi Arabia": "Saudiya Arabistoni", Israel: "Isroil", "United Arab Emirates": "BAA", Taiwan: "Tayvan", Brazil: "Braziliya", "South Africa": "Janubiy Afrika", "New Zealand": "Yangi Zelandiya", Hungary: "Vengriya", Luxembourg: "Lyuksemburg", India: "Hindiston", Bahrain: "Bahrayn" };
 const cnUz = (c) => T(COUNTRY_UZ[c] || c);

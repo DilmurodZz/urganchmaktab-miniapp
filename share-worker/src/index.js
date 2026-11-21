@@ -4,6 +4,9 @@
 // to any chat from Telegram's own share window (Bot API: savePreparedInlineMessage + WebApp.shareMessage).
 // The bot token is a secret of the worker (BOT_TOKEN); it never reaches the Mini App.
 
+import { ChatRoom } from "./chat.js";
+export { ChatRoom };
+
 const ALLOWED_ORIGIN = "https://dilmurodzz.github.io";
 const MAX_BYTES = 9 * 1024 * 1024;
 
@@ -64,6 +67,18 @@ export default {
     const origin = req.headers.get("Origin") || "";
     if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors(origin) });
     const url = new URL(req.url);
+    // the students' chat: images are public by id; the live connection needs Telegram's signed initData
+    if (url.pathname.startsWith("/chat/")) {
+      const room = env.CHAT.get(env.CHAT.idFromName("main"));
+      if (url.pathname.startsWith("/chat/img/")) return room.fetch(req);
+      if (url.pathname === "/chat/ws") {
+        if (origin && origin !== ALLOWED_ORIGIN && !/^http:\/\/localhost(:\d+)?$/.test(origin)) return new Response("forbidden", { status: 403 });
+        const user = await verifyInitData(url.searchParams.get("init"), env.BOT_TOKEN, 7 * 86400);
+        if (!user) return new Response("unauthorized", { status: 401 });
+        const h = new Headers(req.headers); h.set("X-User", JSON.stringify({ id: user.id, first_name: user.first_name, photo_url: user.photo_url }));
+        return room.fetch(new Request(req, { headers: h }));
+      }
+    }
     // colour choice counts: each Telegram user is counted once, with their latest colour
     if (url.pathname === "/colors" && req.method === "GET") {
       const c = (await env.COLORS.get("counts", "json")) || {};

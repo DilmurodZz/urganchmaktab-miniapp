@@ -178,3 +178,73 @@
 .st-row .ic { flex: none; width: 20px; height: 20px; color: var(--muted); }
 .st-row.cur { border-color: var(--p1); box-shadow: 0 0 0 2px var(--p-soft); }
 .st-row.done .ic { color: var(--c-green, #165936); } .st-row.done b { color: var(--muted); }
+
+/* ---------- UniMatch v2: equal option grids, score wheel, SAT sections ---------- */
+.um-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.um-grid button { display: flex; align-items: center; gap: 8px; min-height: 52px; padding: 8px 10px; border-radius: 14px; text-align: left; font-size: 13px; font-weight: 600; line-height: 1.25;
+  background: #FFFFFF; border: 1.5px solid var(--line); color: var(--text); transition: background .15s, border-color .15s; }
+.um-grid button i { width: 20px; height: 20px; flex: none; border-radius: 6px; border: 1.5px solid #CFC6BB; display: grid; place-items: center; color: transparent; }
+.um-grid button i .ic { width: 14px; height: 14px; stroke-width: 3; }
+.um-grid button.on { border-color: var(--p1); background: var(--p-soft); color: var(--p-text); }
+.um-grid button.on i { background: var(--p1); border-color: var(--p1); color: #fff; }
+.um-cap { margin-left: auto; font-size: 12px; font-weight: 600; color: var(--muted); }
+.um-logo { margin-left: auto; width: 36px; height: 36px; border-radius: 9px; object-fit: cover; box-shadow: 0 4px 10px -6px rgba(0,0,0,.5); }
+.um-tabs { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; padding: 4px; border-radius: 14px; background: #EDE3D7; margin-bottom: 10px; }
+.um-tabs button { padding: 9px 2px; border-radius: 10px; font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.um-tabs button.on { background: #FFFFFF; color: var(--p-text); box-shadow: 0 1px 3px rgba(17,17,17,.12); }
+.um-dialbox { display: flex; justify-content: center; }
+.um-dial { width: min(260px, 74vw); height: auto; touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
+.um-dial .tr { fill: none; stroke: #EDE3D7; stroke-width: 14; stroke-linecap: round; }
+.um-dial .fg { fill: none; stroke: var(--p1); stroke-width: 14; stroke-linecap: round; }
+.um-dial .tk { stroke: #CFC6BB; stroke-width: 2; } .um-dial .tk.on { stroke: #fff; }
+.um-dial .lb { font: 600 10.5px Inter, sans-serif; fill: var(--muted); text-anchor: middle; dominant-baseline: middle; }
+.um-dial .lb.on { fill: var(--p1); font-weight: 800; font-size: 12.5px; }
+.um-dial .kn { fill: #FFFFFF; stroke: var(--p1); stroke-width: 5; filter: drop-shadow(0 3px 5px rgba(0,0,0,.3)); }
+.um-dial .big { font: 800 44px Inter, sans-serif; fill: var(--text); text-anchor: middle; dominant-baseline: middle; }
+.um-dial .sm { font: 600 13px Inter, sans-serif; fill: var(--p1); text-anchor: middle; }
+.um-hint.c { text-align: center; margin-top: 0; }
+.um-warn, .um-ok { display: flex; gap: 8px; margin: 12px 0 0; padding: 10px 12px; border-radius: 12px; font-size: 12.5px; line-height: 1.45; }
+.um-warn { background: #FBEFD9; color: #7A4A06; } .um-ok { background: #DDEFE5; color: #165936; }
+.um-warn .ic, .um-ok .ic { flex: none; width: 17px; height: 17px; margin-top: 1px; }
+.um-res + .um-warn { margin-top: 12px; }
+.um-sats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.um-sat { padding: 12px 10px; border-radius: 16px; color: #fff; }
+.um-sat.m { background: linear-gradient(160deg, #FF9A3C, #E8590C); } .um-sat.e { background: linear-gradient(160deg, #3BA4F0, #1565C0); }
+.um-sat small { display: block; margin-bottom: 8px; font-size: 12.5px; font-weight: 700; opacity: .95; }
+.um-num { display: grid; grid-template-columns: 30px 1fr 30px; align-items: center; gap: 4px; }
+.um-num button { height: 34px; border-radius: 10px; background: rgba(255,255,255,.22); font-size: 20px; font-weight: 700; color: #fff; }
+.um-num input { width: 100%; min-width: 0; height: 40px; border: 0; border-radius: 10px; text-align: center; font: 800 18px Inter, sans-serif; color: #111; background: #fff; -moz-appearance: textfield; }
+.um-num input::-webkit-inner-spin-button, .um-num input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.um-num input::placeholder { font-size: 12px; font-weight: 500; color: #999; }
+.um-sattotal { margin-top: 10px; text-align: center; font-size: 13.5px; color: var(--muted); } .um-sattotal b { color: var(--text); font-size: 17px; }
+.um-more { margin-top: 10px; } .um-more summary { list-style: none; display: flex; align-items: center; gap: 6px; padding: 10px 2px; font-size: 13.5px; font-weight: 600; color: var(--p-text); cursor: pointer; }
+.um-more summary::-webkit-details-marker { display: none; } .um-more summary .ic { width: 16px; height: 16px; transition: transform .2s; } .um-more[open] summary .ic { transform: rotate(90deg); }
+.um-sum em { display: block; margin-top: 2px; font-style: normal; font-size: 10.5px; font-weight: 500; color: var(--muted); text-align: center; line-height: 1.3; }
+.um-perks { display: flex; gap: 4px; margin-top: 4px; } .um-perk { font-style: normal; font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 999px; background: #DDEFE5; color: #165936; }
+
+/* ---------- Application Studio: six tabs ---------- */
+.st-tabs { grid-template-columns: repeat(6, 1fr); gap: 4px; }
+.st-tabs button { font-size: 10.5px; padding: 8px 1px; }
+
+/* ---------- Muddatlar ---------- */
+.dl-list { display: flex; flex-direction: column; gap: 8px; }
+.dl-row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px; text-align: left; }
+.dl-row > span:not(.dl-left) { flex: 1; min-width: 0; } .dl-row b { display: block; font-size: 14px; line-height: 1.3; } .dl-row small { font-size: 12.5px; color: var(--muted); }
+.dl-row > .ic { flex: none; width: 18px; height: 18px; color: var(--muted); }
+.dl-left { width: 52px; height: 52px; flex: none; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; background: var(--grad); line-height: 1; }
+.dl-left b { font-size: 19px; } .dl-left small { font-size: 10px; opacity: .85; margin-top: 2px; }
+.dl-left.soon { background: linear-gradient(160deg, #F59E0B, #B45309); } .dl-left.late { background: #9CA3AF; }
+.dl-left.mo { background: #EDE3D7; color: var(--p-text); } .dl-left.mo .ic { width: 22px; height: 22px; }
+
+/* ---------- university stories (stories.js) ---------- */
+.sto .nw-head b { font-size: 15.5px; line-height: 1.25; text-align: left; }
+.sto .nw-card { background: var(--card); border: 1px solid #fff; }
+.sto-ic { display: grid; place-items: center; color: #fff; background: var(--grad); }
+.sto-ic .ic { width: 28px; height: 28px; }
+.sto-ic.k-story { background: linear-gradient(160deg, #E0A33A, #B07C1E); } .sto-ic.k-fact { background: linear-gradient(160deg, #1F7A4B, #165936); }
+.sto-ic.k-res { background: linear-gradient(160deg, #3BA4F0, #1565C0); }
+.sto-badge { display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; padding: 5px 11px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #fff; background: var(--grad); }
+.sto-badge .ic { width: 14px; height: 14px; }
+.sto-badge.k-story { background: #B07C1E; } .sto-badge.k-fact { background: #165936; } .sto-badge.k-res { background: #1565C0; }
+.sto-read h3 { font-size: 20px; } .sto-read p { font-size: 15px; line-height: 1.6; color: #222; }
+.sto-read .btn-primary, .sto-read .btn-ghost { margin-top: 6px; }

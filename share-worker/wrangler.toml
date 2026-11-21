@@ -7,13 +7,13 @@ compatibility_date = "2026-10-01"
 
 [[kv_namespaces]]
 binding = "COLORS"
-id = "PUT_NEW_KV_ID_HERE"   # npx wrangler kv namespace create COLORS
+id = "b75cf2d1c7cf4b8fbd2b21b61dfd5158"   # npx wrangler kv namespace create COLORS
 
 # usage statistics and the user list for admin messages
 [[d1_databases]]
 binding = "DB"
 database_name = "urganch-stats"
-database_id = "PUT_NEW_D1_ID_HERE"   # npx wrangler d1 create urganch-stats
+database_id = "01791776-b9df-4f6a-8764-77a42c99e81b"   # npx wrangler d1 create urganch-stats
 
 [vars]
 # Telegram user ids that see the admin section and may use /admin/* (comma separated)
@@ -24,6 +24,11 @@ CHANNEL = ""
 [ai]
 binding = "AI"
 
-# rebuilds the youth news list (one language each time)
-[triggers]
-crons = ["*/5 * * * *"]
+# the students' chat room (SQLite-backed Durable Object, works on the free plan)
+[[durable_objects.bindings]]
+name = "CHAT"
+class_name = "ChatRoom"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["ChatRoom"]

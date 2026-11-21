@@ -60,7 +60,7 @@ const Ariza = (() => {
     <div class="ap-more">
       <a href="#/cv">${chip("file", "sm")}<span>${T("CV va rezyume")}</span></a>
       <a href="#/ielts">${chip("globe", "sm")}<span>${T("IELTS ball kalkulyatori")}</span></a>
-      <a href="#/unis" onclick="store.set('uni_tab','grant')">${chip("coin", "sm")}<span>${T("Grant va sertifikatlar")}</span></a>
+      <a href="#/unis">${chip("coin", "sm")}<span>${T("Grant va sertifikatlar")}</span></a>
     </div>`;
   }
   function appCard(a) {
@@ -286,10 +286,17 @@ const Ariza = (() => {
     const es = Math.min(1, words(S.ca.text) / 250), act = Math.min(1, S.acts.length / 3), rec = Math.min(1, S.recs.filter((r) => r.st === "yes" || r.st === "done").length / 3);
     return Math.round((prof * .35 + es * .3 + act * .2 + rec * .15) * 100);
   }
-  const TABS = () => [["prof", T("Profil"), "user"], ["essay", T("Insholar"), "pen"], ["rec", T("Tavsiyalar"), "users"], ["apps", T("Arizalar"), "cap"], ["submit", T("Topshirish"), "send"]];
+  const TABS = () => [["prof", T("Profil"), "user"], ["essay", T("Insholar"), "pen"], ["rec", T("Tavsiyalar"), "users"], ["top", "Top 300", "globe"], ["apps", T("Arizalar"), "cap"], ["submit", T("Topshirish"), "send"]];
+  // the Top 300 list comes from study.js (loaded the first time this tab opens)
+  function TopTab() {
+    if (window.Study && Study.TopList) return Study.TopList();
+    loadScripts(["study.js"]).then(() => { if (location.hash === "#/ariza") render(); }).catch(() => toast(T("Yuklab bo'lmadi")));
+    return spinner();
+  }
   function Screen() {
+    tab = store.get("studio_tab", tab);
     const name = esc((user.first_name || "") + (user.last_name ? " " + user.last_name : "")), r = readiness();
-    const body = { prof: ProfTab, essay: EssayTab, rec: RecTab, apps: AppsTab, submit: SubmitTab }[tab] || ProfTab;
+    const body = { prof: ProfTab, essay: EssayTab, rec: RecTab, top: TopTab, apps: AppsTab, submit: SubmitTab }[tab] || ProfTab;
     return `${navbar("Application Studio")}
     <div class="ap-me st-head"><div class="um-ring st-ring"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" class="bg"/><circle cx="60" cy="60" r="52" class="fg" style="stroke-dasharray:${(r / 100 * 326.7).toFixed(1)} 326.7"/></svg><div><b>${r}%</b></div></div>
       <div><small>${T("Tayyorlik darajasi")}</small><b class="notr">${name || "Alumni Mentor"}</b><em>${ic("shield")} ${T("Telegram hisobingiz orqali kirdingiz, parol kerak emas")}</em></div></div>
@@ -320,6 +327,37 @@ const Ariza = (() => {
     const el = e.target, path = el && el.dataset && el.dataset.sk; if (!path || el.tagName !== "SELECT") return;
     setPath(path, el.value); saveS(); if (el.dataset.rerender) keepY();
   });
-  return { Screen };
+  /* ---------- Muddatlar: the student's own deadlines and the main yearly ones ---------- */
+  // fixed yearly dates get a countdown to their next occurrence; dates that move every year are shown as months only
+  const KEY_DATES = () => [
+    { m: 10, d: 15, t: T("UCAS: Oksford, Kembrij, tibbiyot va stomatologiya"), p: "ucas" },
+    { m: 11, d: 1, t: T("Common App: erta muddat (Early Decision, Early Action)"), p: "commonapp" },
+    { m: 1, d: 1, t: T("Common App: asosiy muddat (Regular Decision), ko'p universitetlarda"), p: "commonapp" },
+    { m: 1, d: 15, t: T("Germaniya: yozgi semestrga ariza"), p: "daad" },
+    { m: 7, d: 15, t: T("Germaniya: qishki semestrga ariza"), p: "daad" },
+    { when: T("Yanvar"), t: T("UCAS: boshqa kurslar uchun asosiy muddat"), p: "ucas" },
+    { when: T("Aprel va noyabr"), t: T("El-yurt umidi jamg'armasi tanlovlari") },
+    { when: T("Mart, may, iyun, avgust, oktabr, noyabr, dekabr"), t: T("SAT xalqaro sanalari") },
+    { when: T("Iyun-iyul"), t: T("DTM: OTMlarga hujjat topshirish") },
+  ];
+  const nextDate = (m, d) => { const now = new Date(), y = now.getFullYear(); let x = new Date(y, m - 1, d, 23, 59); if (x < now) x = new Date(y + 1, m - 1, d, 23, 59); return x; };
+  const fmtDate = (x) => fmtDay(x);
+  function Deadlines() {
+    const mine = list().filter((a) => a.deadline).map((a) => ({ a, left: daysLeft(a.deadline) })).sort((x, y) => x.left - y.left);
+    const keys = KEY_DATES().map((k) => k.m ? { ...k, date: nextDate(k.m, k.d) } : k).map((k) => k.date ? { ...k, left: Math.ceil((k.date - Date.now()) / 864e5) } : k)
+      .sort((x, y) => (x.left ?? 9999) - (y.left ?? 9999));
+    const badge = (left) => `<span class="dl-left ${left < 0 ? "late" : left <= 14 ? "soon" : ""}"><b>${left < 0 ? "!" : left}</b><small>${left < 0 ? T("o'tgan") : T("kun")}</small></span>`;
+    return `${navbar(T("Muddatlar"))}
+    <div class="section-title">${T("Mening muddatlarim")}<small>${mine.length}</small></div>
+    ${mine.length ? `<div class="dl-list">${mine.map(({ a, left }) => `<button class="card dl-row" onclick="store.set('studio_tab','apps');location.hash='#/ariza'">${badge(left)}
+      <span class="notr"><b>${esc(a.name)}</b><small>${esc((PLAT()[a.plat] || PLAT().direct).name)} · ${esc(fmtDate(new Date(a.deadline + "T12:00:00")))}</small></span>${ic("chev")}</button>`).join("")}</div>`
+      : `<div class="card ap-empty">${chip("clock", "lg")}<p>${T("Application Studio'da universitet qo'shib, topshirish muddatini kiriting: u shu yerda ko'rinadi.")}</p>
+        <button class="btn-ghost" onclick="store.set('studio_tab','apps');location.hash='#/ariza'">${ic("plus")} ${T("Universitet qo'shish")}</button></div>`}
+    <div class="section-title">${T("Asosiy muddatlar")}</div>
+    <div class="dl-list">${keys.map((k) => `<div class="card dl-row ${k.left == null ? "nodate" : ""}">${k.left != null ? badge(k.left) : `<span class="dl-left mo">${ic("clock")}</span>`}
+      <span><b>${k.t}</b><small>${k.date ? esc(fmtDate(k.date)) : k.when}</small></span></div>`).join("")}</div>
+    <p class="note">${T("Har bir universitetning aniq muddatini uning rasmiy saytidan tekshiring.")}</p>`;
+  }
+  return { Screen, Deadlines };
 })();
 window.Ariza = Ariza;

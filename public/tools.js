@@ -198,12 +198,13 @@ const Tools = (() => {
   function Screen() {
     // every tool is the same card: picture, name, one line about it, order number
     const items = [
-      { go: "location.hash='#/kurslar'", img: "img/ic-courses.webp", round: true, t: T("Kurslar"), d: T("Eng talabgir kurslar, mehnat bozori tahlili va omad g'ildiragi") },
+      { go: "location.hash='#/unis'", img: "img/tool-uni.webp", t: T("Grant va sertifikatlar"), d: T("Mahalliy grantlar, stipendiyalar, milliy va xalqaro sertifikatlar") },
       { go: "location.hash='#/meet'", icon: "video", t: "Online meeting", d: T("Top universitet bitiruvchilari bilan jonli uchrashuvlar") },
-      { go: "location.hash='#/cv'", img: "img/tool-cv.webp", t: T("CV, rezyume va obyektivka"), d: T("Bepul, 3 tilda tayyorlang va sizga mos ishlarga ariza topshiring") },
+      { go: "location.hash='#/kurslar'", img: "img/ic-courses.webp", round: true, t: T("Kurslar"), d: T("Eng talabgir kurslar, mehnat bozori tahlili va omad g'ildiragi") },
       { go: "location.hash='#/dtm'", img: "img/tool-dtm.webp", t: T("DTM ball kalkulyatori"), d: T("Ballingizni hisoblang va qaysi OTMda grant yoki shartnomaga yetishini ko'ring") },
       { go: "location.hash='#/ielts'", img: "img/tool-ielts.webp", t: T("IELTS ball kalkulyatori"), d: T("To'g'ri javoblaringizdan har bir ko'nikma va umumiy bandni hisoblang") },
-      { go: "location.hash='#/unis'", img: "img/tool-uni.webp", t: T("Grant va sertifikatlar"), d: T("Mahalliy grantlar, stipendiyalar, milliy va xalqaro sertifikatlar") },
+      { go: "location.hash='#/cv'", img: "img/tool-cv.webp", t: T("CV, rezyume va obyektivka"), d: T("Bepul, 3 tilda tayyorlang va sizga mos ishlarga ariza topshiring") },
+      { go: "location.hash='#/oyin'", img: "img/ic-game.webp", round: true, t: T("O'yin"), d: T("3D yugurish o'yini: yakka yoki do'stingiz bilan") },
     ];
     return `${navbar(T("Foydali vositalar"))}
     ${window.Stories ? Stories.ribbon() : ""}

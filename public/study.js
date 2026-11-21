@@ -379,24 +379,34 @@ const Study = (() => {
       <circle cx="${kx.toFixed(1)}" cy="${ky.toFixed(1)}" r="13" class="kn"/>
       <text x="120" y="122" class="big">${E.f(E.v[idx])}</text><text x="120" y="150" class="sm">${sub}</text></svg>`;
   }
+  // the wheel is drawn once; while the finger moves only the knob, the coloured arc and the numbers change in place,
+  // so the drag never breaks. The knob follows the finger smoothly and settles on the nearest score when released.
   function bindDial() {
     const svg = document.getElementById("um-dial"); if (!svg) return;
-    const E = ENG[um.eng], n = E.v.length; let drag = false, last = null;
-    const pick = (e) => {
-      const b = svg.getBoundingClientRect(), x = (e.clientX - b.left) / b.width * 240 - 120, y = (e.clientY - b.top) / b.height * 240 - 120;
-      let a = Math.atan2(x, -y) * 180 / Math.PI; a = clamp(a, A0, A1);
-      const i = Math.round((a - A0) / (A1 - A0) * (n - 1));
-      if (i !== last) { last = i; um.engv = E.v[i]; haptic("light"); svg.outerHTML = dialHTML(); rebind(); }
+    const E = ENG[um.eng], n = E.v.length, ang = (i) => A0 + (A1 - A0) * (n === 1 ? 0 : i / (n - 1));
+    const fg = svg.querySelector(".fg"), kn = svg.querySelector(".kn"), big = svg.querySelector(".big"), sm = svg.querySelector(".sm");
+    const ticks = [...svg.querySelectorAll(".tk")], labels = [...svg.querySelectorAll(".lb")];
+    let idx = Math.max(0, E.v.findIndex((v) => String(v) === String(um.engv))), cur = ang(idx), drag = false, anim = 0;
+    const draw = (a) => { const [x, y] = pt(a, R); kn.setAttribute("cx", x.toFixed(1)); kn.setAttribute("cy", y.toFixed(1)); fg.setAttribute("d", arc(A0, Math.max(A0 + .1, a), R)); };
+    const setIdx = (i) => {
+      if (i === idx) return; idx = i; um.engv = E.v[i]; haptic("light");
+      ticks.forEach((t, k) => t.classList.toggle("on", k <= i)); labels.forEach((l, k) => l.classList.toggle("on", k === i));
+      big.textContent = E.f(E.v[i]); sm.textContent = um.eng === "ielts" ? `CEFR ${cefrOf(+um.engv)}` : um.eng === "cefr" ? T("milliy sertifikat") : `≈ IELTS ${engEq().toFixed(1)}`;
     };
-    const rebind = () => { const s = document.getElementById("um-dial"); if (!s) return; s.addEventListener("pointerdown", down); s.addEventListener("pointermove", move); s.addEventListener("pointerup", up); s.addEventListener("pointercancel", up); };
-    const down = (e) => { drag = true; try { e.currentTarget.setPointerCapture(e.pointerId); } catch {} pick(e); };
-    const move = (e) => { if (drag) pick(e); };
-    const up = () => { if (!drag) return; drag = false; saveUm(); const box = document.getElementById("um-cefr"); if (box) box.innerHTML = cefrNote(); };
-    rebind();
+    const angleOf = (e) => { const b = svg.getBoundingClientRect(), x = (e.clientX - b.left) / b.width * 240 - 120, y = (e.clientY - b.top) / b.height * 240 - 120;
+      return clamp(Math.atan2(x, -y) * 180 / Math.PI, A0, A1); };
+    const follow = (e) => { cur = angleOf(e); draw(cur); setIdx(Math.round((cur - A0) / (A1 - A0) * (n - 1))); };
+    const settle = () => { cancelAnimationFrame(anim); const to = ang(idx);
+      const step = () => { cur += (to - cur) * .3; if (Math.abs(to - cur) < .3) cur = to; draw(cur); if (cur !== to) anim = requestAnimationFrame(step); }; step(); };
+    svg.addEventListener("pointerdown", (e) => { e.preventDefault(); drag = true; cancelAnimationFrame(anim); try { svg.setPointerCapture(e.pointerId); } catch {} follow(e); });
+    svg.addEventListener("pointermove", (e) => { if (drag) { e.preventDefault(); follow(e); } });
+    const end = () => { if (!drag) return; drag = false; settle(); saveUm(); };
+    svg.addEventListener("pointerup", end); svg.addEventListener("pointercancel", end); svg.addEventListener("lostpointercapture", end);
+    svg.addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });   // keep the page from scrolling under the finger
   }
   const cefrNote = () => um.eng === "cefr"
     ? `<p class="um-warn">${ic("alert")}<span>${T("Milliy CEFR sertifikati xorijiy universitetlarda qabul qilinmaydi. U O'zbekistondagi OTMlarga kirishda ishlaydi; Top 300 universitetlari IELTS, TOEFL yoki Duolingo natijasini so'raydi.")}</span></p>`
-    : `<p class="um-ok">${ic("check")}<span>${T("{t} Top 300 universitetlarning deyarli barchasida qabul qilinadi. Milliy CEFR sertifikati esa xorijda qabul qilinmaydi.", { t: ENG[um.eng] ? ENG[um.eng].t : "IELTS" })}</span></p>`;
+    : `<p class="um-ok">${ic("check")}<span>${T("{t} Top 300 universitetlarning deyarli barchasida qabul qilinadi.", { t: ENG[um.eng] ? ENG[um.eng].t : "IELTS" })}</span></p>`;
   const satCard = (k, name, cls) => { const v = um[k] || 0;
     return `<div class="um-sat ${cls}"><small>${name}</small><div class="um-num"><button onclick="umSat('${k}',-10)" aria-label="-">−</button>
       <input type="number" inputmode="numeric" min="200" max="800" step="10" value="${v || ""}" placeholder="200-800" onchange="umSatSet('${k}',this.value)"><button onclick="umSat('${k}',10)" aria-label="+">+</button></div></div>`; };

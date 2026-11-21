@@ -152,6 +152,8 @@ const Stories = (() => {
         "The most common mistake is doing a little of everything. Admissions officers remember the student who does one thing really well, not the one who does everything.",
         "In Application Studio you can prepare all five parts step by step."]] },
   ];
+  // photos: Wikimedia Commons (free licences); each story shows its author and licence under the picture
+  const PHOTO = {"harvard400": ["Jessica Williams", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:John_Harvard_statue_at_Harvard_University.jpg"], "qarawiyyin": ["Khonsali", "Public domain", "https://commons.wikimedia.org/wiki/File:Al-Qarawiyyin_University%2C_Fes%2C_Morocco_-_Var_132.jpg"], "oxford-aztec": ["Julian Herzog", "CC BY 4.0", "https://commons.wikimedia.org/wiki/File:Radcliffe_Camera_Oxford_2018_03.jpg"], "buffett": ["King of Hearts", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Columbia_University_New_York_November_2016_002.jpg"], "stanford-son": ["King of Hearts", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Stanford_Memorial_Church_October_2019_HDR.jpg"], "stanford-odds": ["King of Hearts", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:Stanford_University_from_Hoover_Tower_May_2011_001.jpg"], "jensen": ["Owen", "Public domain", "https://commons.wikimedia.org/wiki/File:Memorial_Union_at_Oregon_State_University.jpg"], "malala": ["Ed Webster", "CC BY 2.0", "https://commons.wikimedia.org/wiki/File:Lady_Margaret_Hall_%286148510434%29.jpg"], "mit-ocw": ["Peacearth", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Great_dome_of_MIT%2C_Feb_2021.jpg"], "newton": ["Rafa Esteve", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Trinity_College_-_Great_Court_01.jpg"], "what-they-see": ["Atilin", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:Harvard_Yard_North_Chapel.jpg"], "einstein": ["Roland zh", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:ETH_Z%C3%BCrich_Hauptgeb%C3%A4ude%2C_Ansicht_von_der_Polyterrasse_2011-08-06_ShiftN.jpg"]};
   const txt = (a) => a[L] || a[0];
   const mins = (s) => Math.max(1, Math.round(txt(s.p).join(" ").split(/\s+/).length / 180));
   const kind = (s) => K[s.k][L];
@@ -165,7 +167,7 @@ const Stories = (() => {
     return `<div id="nw" class="nw sto">
       <button class="nw-head" onclick="storyList()"><b>${T("Universitetlar haqida qiziqarli ma'lumotlar")}</b>${n ? `<em>${n}</em>` : ""}<span>${T("Barchasi")} ${ic("chev")}</span></button>
       <div class="nw-track" id="nw-track">${ALL.map((x, i) => `<button class="nw-card ${s.has(x.id) ? "" : "new"}" onclick="storyOpen(${i})">
-        <span class="nw-img sto-ic k-${x.k}">${ic(K[x.k][3])}</span><span class="nw-txt"><b>${esc(txt(x.t))}</b><small>${kind(x)} · ${T("{n} daqiqa", { n: mins(x) })}</small></span></button>`).join("")}</div>
+        ${PHOTO[x.id] ? `<span class="nw-img sto-ph"><img src="img/stories/${x.id}.webp" alt="" loading="lazy" decoding="async"><i class="k-${x.k}">${ic(K[x.k][3])}</i></span>` : `<span class="nw-img sto-ic k-${x.k}">${ic(K[x.k][3])}</span>`}<span class="nw-txt"><b>${esc(txt(x.t))}</b><small>${kind(x)} · ${T("{n} daqiqa", { n: mins(x) })}</small></span></button>`).join("")}</div>
       <div class="nw-dots">${ALL.map((_, i) => `<i class="${i ? "" : "on"}"></i>`).join("")}</div></div>`;
   }
   function bind() {
@@ -184,7 +186,8 @@ const Stories = (() => {
     const x = ALL[i]; if (!x) return; haptic("light");
     const s = seenSet(); s.add(x.id); store.set("stories_seen", [...s]); paint();
     const next = ALL[(i + 1) % ALL.length];
-    sheet(`<div class="nw-read sto-read"><span class="sto-badge k-${x.k}">${ic(K[x.k][3])} ${kind(x)} · ${T("{n} daqiqa", { n: mins(x) })}</span>
+    const ph = PHOTO[x.id];
+    sheet(`<div class="nw-read sto-read">${ph ? `<figure class="sto-hero"><img src="img/stories/${x.id}.webp" alt=""><figcaption>${T("Rasm")}: ${esc(ph[0])}, ${esc(ph[1])}, <a href="#" onclick="openExt('${encodeURIComponent(ph[2])}');return false">Wikimedia Commons</a></figcaption></figure>` : ""}<span class="sto-badge k-${x.k}">${ic(K[x.k][3])} ${kind(x)} · ${T("{n} daqiqa", { n: mins(x) })}</span>
       <h3>${esc(txt(x.t))}</h3>${txt(x.p).map((p) => `<p>${esc(p)}</p>`).join("")}
       <button class="btn-primary" onclick="storyOpen(${(i + 1) % ALL.length})">${T("Keyingisi")}: ${esc(txt(next.t))}</button>
       <button class="btn-ghost" onclick="shareStory(${i})">${ic("send")} ${T("Do'stga ulashish")}</button></div>`);

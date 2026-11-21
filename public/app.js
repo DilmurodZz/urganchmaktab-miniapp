@@ -68,7 +68,7 @@ const ICONS = {
   megaphone: '<path d="M3 10v4a1 1 0 0 0 1 1h2l8 4V5L6 9H4a1 1 0 0 0-1 1zM18 9a4 4 0 0 1 0 6M7 15v4a1 1 0 0 0 1 1h1.5"/>',
   bot: '<rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4.5M9 13v2M15 13v2M2 13v3M22 13v3"/><circle cx="12" cy="3.5" r="1"/>',
   layers: '<path d="m12 3 9 4.5-9 4.5-9-4.5zM3 12l9 4.5 9-4.5M3 16.5 12 21l9-4.5"/>',
-  chat: '<path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-8l-5 4v-4H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/>',
+  chat: '<path d="M12 3.5a8.5 8.5 0 0 0-7.4 12.7L3.5 20.5l4.4-1.1A8.5 8.5 0 1 0 12 3.5z"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01"/>',
   phone: '<rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M11 18h2"/>',
   search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',
   rocket: '<path d="M12 15c-1.5-1-3-2.5-3-3 0-4 3-8 9-9 1 6-3 9-6 12zM9 12l-4 1-2 3 4-.5M12 15l-1 4 3-2 .5-4M15.5 8.5h.01"/>',
@@ -163,7 +163,7 @@ function Home() {
     <img class="hero2-art" src="img/hero-compass.webp" alt="" decoding="async">
     <span class="hero2-tag">Top 300</span>
     <h3>UniMatch</h3>
-    <p>Istaklaringiz va sertifikatlaringizga mos universitetni toping</p>
+    <p>Sertifikatlaringiz va istaklaringizga mos universitetni toping</p>
     <span class="btn-orange">Boshlash ${ic("chev")}</span>
   </a>
   <a class="banner studio-bn" href="#/ariza">

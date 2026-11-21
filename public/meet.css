@@ -71,6 +71,8 @@
 .mt-passbox { padding: 14px; border-radius: 14px; background: #111; color: #FFE7A3; font: 700 20px ui-monospace, Menlo, Consolas, monospace; letter-spacing: 1px; text-align: center; word-break: break-all; user-select: all; }
 .mt-poster { display: flex; flex-direction: column; gap: 10px; } .mt-poster img { width: 100%; border-radius: 14px; box-shadow: 0 10px 24px -12px rgba(0,0,0,.5); }
 .mt-poster .btn-primary, .mt-poster .btn-ghost { margin: 0; }
-.tool-icn { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 16px; color: #fff; background: linear-gradient(160deg, var(--c-sec, var(--p3)), var(--c-main, var(--p1))); }
+.tool-icn { flex: 0 0 56px; display: grid; place-items: center; width: 56px !important; height: 56px !important; max-width: 56px; border-radius: 16px; color: #fff; background: linear-gradient(160deg, var(--c-sec, var(--p3)), var(--c-main, var(--p1))); }
 .tool-icn .ic { width: 28px; height: 28px; }
 :is([data-theme="purple"], [data-theme="bordo"]) .grid4 { grid-template-columns: repeat(3, 1fr); }
+
+.mt-mk > b { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--p-text); } .mt-mk > b .ic { width: 18px; height: 18px; }

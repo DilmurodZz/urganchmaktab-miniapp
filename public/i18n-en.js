@@ -1354,3 +1354,14 @@ Object.assign(I18N.en, {
 "Yuborib bo'lmadi": "Couldn't send",
 "Online meeting": "Online meeting",
 });
+// --- short note
+Object.assign(I18N.en, {
+"{t} Top 300 universitetlarning deyarli barchasida qabul qilinadi.": "{t} is accepted by almost all Top 300 universities.",
+"Sertifikatlaringiz va istaklaringizga mos universitetni toping": "Find universities that match your certificates and wishes",
+});
+// --- Google Meet
+Object.assign(I18N.en, {
+"1. Tugmani bosing: Google Meet yangi uchrashuv ochadi. 2. Havolani nusxalang (meet.google.com/...). 3. Shu yerga qo'ying.": "1. Tap the button: Google Meet creates a new meeting. 2. Copy the link (meet.google.com/...). 3. Paste it here.",
+"Google Meet havolasi": "Google Meet link",
+"Uchrashuvlar Google Meet'da o'tadi: video, ekranni ulashish va chat. Telefoningizga Google Meet ilovasini o'rnatib qo'ying, \"Qo'shilish\" bosilganda u o'zi ochiladi.": "Meetings run on Google Meet: video, screen sharing and chat. Install the Google Meet app and it opens by itself when you tap \"Join\".",
+});

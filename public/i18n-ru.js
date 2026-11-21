@@ -1354,3 +1354,14 @@ Object.assign(I18N.ru, {
 "Yuborib bo'lmadi": "Не удалось отправить",
 "Online meeting": "Online meeting",
 });
+// --- short note
+Object.assign(I18N.ru, {
+"{t} Top 300 universitetlarning deyarli barchasida qabul qilinadi.": "{t} принимают почти все университеты Топ-300.",
+"Sertifikatlaringiz va istaklaringizga mos universitetni toping": "Найдите университет по вашим сертификатам и желаниям",
+});
+// --- Google Meet
+Object.assign(I18N.ru, {
+"1. Tugmani bosing: Google Meet yangi uchrashuv ochadi. 2. Havolani nusxalang (meet.google.com/...). 3. Shu yerga qo'ying.": "1. Нажмите кнопку: Google Meet создаст новую встречу. 2. Скопируйте ссылку (meet.google.com/...). 3. Вставьте сюда.",
+"Google Meet havolasi": "Ссылка Google Meet",
+"Uchrashuvlar Google Meet'da o'tadi: video, ekranni ulashish va chat. Telefoningizga Google Meet ilovasini o'rnatib qo'ying, \"Qo'shilish\" bosilganda u o'zi ochiladi.": "Встречи проходят в Google Meet: видео, демонстрация экрана и чат. Установите приложение Google Meet, и по кнопке «Присоединиться» оно откроется само.",
+});

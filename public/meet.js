@@ -63,7 +63,7 @@ const Meet = (() => {
   function MeetTab() {
     const list = S.meetings;
     return `${list.length ? list.map(meetCard).join("") : `<div class="card ap-empty">${chip("video", "lg")}<p>${T("Hozircha rejalashtirilgan uchrashuv yo'q. Mentorlardan uchrashuv so'rang!")}</p><button class="btn-ghost" onclick="mtTab('mentors')">${ic("users")} ${T("Mentorlar")}</button></div>`}
-    <div class="card ap-safe">${ic("video")}<p>${T("Uchrashuvlar Google Meet, Telegram video chat yoki Zoom'da o'tadi: ekranni ulashish va chat bor. Telefoningizda Google Meet ilovasi bo'lsa qulayroq.")}</p></div>`;
+    <div class="card ap-safe">${ic("video")}<p>${T("Uchrashuvlar Google Meet'da o'tadi: video, ekranni ulashish va chat. Telefoningizga Google Meet ilovasini o'rnatib qo'ying, \"Qo'shilish\" bosilganda u o'zi ochiladi.")}</p></div>`;
   }
   function MentorsTab() {
     const isM = S.me.mentor;
@@ -115,7 +115,9 @@ const Meet = (() => {
 
   /* ---------- student actions ---------- */
   const meetOf = (id) => S && S.meetings.find((m) => m.id === id);
-  window.mtJoin = (id) => { const m = meetOf(id); if (!m) return; haptic("medium"); if (Date.now() < m.starts - 15 * 60000) toast(T("Uchrashuv hali boshlanmagan. Havola ochiladi, mentor boshlaganda kiring")); openExt(encodeURIComponent(m.link)); };
+  window.mtJoin = (id) => { const m = meetOf(id); if (!m) return; haptic("medium"); if (Date.now() < m.starts - 15 * 60000) toast(T("Uchrashuv hali boshlanmagan. Havola ochiladi, mentor boshlaganda kiring"));
+    // outside Telegram's own browser, so a Google Meet link opens the Meet app (camera, screen sharing, chat) when it is installed
+    try { if (tg && tg.openLink) return tg.openLink(m.link, { try_instant_view: false }); } catch {} window.open(m.link, "_blank"); };
   window.mtGo = (id, on) => { haptic("medium"); api("/rsvp", { id, on }).then(() => { if (on) toast(T("Boshlanishidan 1 soat oldin va boshlanganda eslatamiz")); load(); }).catch(fail);
     S.going = on ? S.going.concat(id) : S.going.filter((x) => x !== id); const m = meetOf(id); if (m) m.going = (m.going || 0) + (on ? 1 : -1); keep(); };
   window.mtCancel = (id) => { const go = (ok) => { if (ok) api("/cancel", { id }).then(() => { toast(T("Uchrashuv bekor qilindi")); load(); }).catch(fail); }; try { tg.showConfirm(T("Uchrashuvni bekor qilasizmi? Qatnashuvchilarga xabar boradi."), go); } catch { go(confirm(T("Uchrashuvni bekor qilasizmi? Qatnashuvchilarga xabar boradi."))); } };
@@ -190,8 +192,13 @@ const Meet = (() => {
   const timeFields = (pfx, title) => { const d = new Date(Date.now() + 864e5); const ds = d.toISOString().slice(0, 10);
     return `<div class="mt-2"><label>${T("Sana")}<input id="${pfx}-date" type="date" value="${ds}" min="${new Date().toISOString().slice(0, 10)}"></label><label>${T("Vaqt")}<input id="${pfx}-time" type="time" value="18:00"></label></div>
     <label>${T("Davomiyligi")}<select id="${pfx}-dur">${[30, 45, 60, 90, 120].map((n) => `<option value="${n}" ${n === 60 ? "selected" : ""}>${T("{n} daqiqa", { n })}</option>`).join("")}</select></label>
-    <label>${T("Uchrashuv havolasi")}<input id="${pfx}-link" type="url" inputmode="url" placeholder="https://meet.google.com/abc-defg-hij"></label>
-    <div class="mt-mk"><button onclick="openExt('${encodeURIComponent("https://meet.google.com/new")}')">${ic("video")} ${T("Google Meet havolasi yaratish")}</button><small>${T("Ochilgan sahifadagi havolani nusxalab, shu yerga qo'ying. Telegram video chat yoki Zoom havolasi ham bo'ladi.")}</small></div>`; };
+    <div class="mt-mk"><b>${ic("video")} Google Meet</b>
+      <small>${T("1. Tugmani bosing: Google Meet yangi uchrashuv ochadi. 2. Havolani nusxalang (meet.google.com/...). 3. Shu yerga qo'ying.")}</small>
+      <button onclick="mtMakeMeet()">${ic("plus")} ${T("Google Meet havolasi yaratish")}</button></div>
+    <label>${T("Google Meet havolasi")}<input id="${pfx}-link" type="url" inputmode="url" placeholder="https://meet.google.com/abc-defg-hij" onblur="mtFixLink(this)"></label>`; };
+  window.mtMakeMeet = () => { haptic("light"); try { if (tg && tg.openLink) return tg.openLink("https://meet.google.com/new", { try_instant_view: false }); } catch {} window.open("https://meet.google.com/new", "_blank"); };
+  // "abc-defg-hij" or "meet.google.com/abc-defg-hij" become a full link
+  window.mtFixLink = (el) => { let v = el.value.trim(); if (/^[a-z]{3}-[a-z]{4}-[a-z]{3}$/i.test(v)) v = "https://meet.google.com/" + v; else if (/^meet\.google\.com\//i.test(v)) v = "https://" + v; el.value = v; };
   const readTime = (pfx) => { const d = document.getElementById(pfx + "-date").value, t = document.getElementById(pfx + "-time").value; return { starts: d && t ? new Date(d + "T" + t).getTime() : NaN, dur: +document.getElementById(pfx + "-dur").value, link: document.getElementById(pfx + "-link").value.trim() }; };
   window.mtNew = () => {
     if (!S.me.mentor.photo) { toast(T("Avval profil rasmingizni yuklang")); return mtProfile(); }

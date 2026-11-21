@@ -16,9 +16,16 @@ const Meet = (() => {
     google_reconnect: T("Google ulanishi eskirdi. Mentor panelida Google'ni qayta ulang"), google_failed: T("Google Meet havolasini yaratib bo'lmadi. Qo'lda kiriting"),
     google_not_connected: T("Avval Google akkauntingizni ulang"), google_off: T("Google ulanishi hali yoqilmagan"), no_space: T("Bu uchrashuv avtomatik Google Meet bilan yaratilmagan"), weak: T("Parol kamida 12 belgi: katta va kichik harf, raqam va belgi bo'lsin"), photo_big: T("Rasm juda katta") });
   const fail = (e) => toast(ERR()[e.message] || T("Xatolik: {e}", { e: e.message }));
-  function load() {
-    if (busy || !tgInit()) return; busy = true;
-    api("/state").then((d) => { S = d; store.set("meet_cache", d); paintBadge(); if (/^#\/meet/.test(location.hash)) keep(); }).catch(() => {}).finally(() => { busy = false; });
+  // fresh data: when the page opens (at most every 20 seconds) and right after an action; the page is redrawn
+  // only when something actually changed, so drawing never triggers another request
+  let lastLoad = 0, again = false;
+  function load(force) {
+    if (!tgInit()) return;
+    if (busy) { if (force) again = true; return; }
+    if (!force && Date.now() - lastLoad < 20000) return;
+    busy = true; lastLoad = Date.now();
+    api("/state").then((d) => { const same = S && JSON.stringify(S) === JSON.stringify(d); S = d; if (!same) { store.set("meet_cache", d); if (/^#\/meet/.test(location.hash)) keep(); } paintBadge(); })
+      .catch(() => {}).finally(() => { busy = false; if (again) { again = false; load(true); } });
   }
   const keep = () => { const y = scrollY; render(); scrollTo(0, y); };
   const photo = (m, cls = "") => m && m.photo ? `<img class="mt-ph ${cls}" src="${SHARE_API}/meet/photo/${m.id}?v=${m.photo}" alt="" crossorigin="anonymous">` : `<span class="mt-ph ${cls} none">${esc(((m && m.name) || "?")[0])}</span>`;
@@ -65,8 +72,7 @@ const Meet = (() => {
   }
   function MeetTab() {
     const list = S.meetings;
-    return `${list.length ? list.map(meetCard).join("") : `<div class="card ap-empty">${chip("video", "lg")}<p>${T("Hozircha rejalashtirilgan uchrashuv yo'q. Mentorlardan uchrashuv so'rang!")}</p><button class="btn-ghost" onclick="mtTab('mentors')">${ic("users")} ${T("Mentorlar")}</button></div>`}
-    <div class="card ap-safe">${ic("video")}<p>${T("Uchrashuvlar Google Meet'da o'tadi: video, ekranni ulashish va chat. Telefoningizga Google Meet ilovasini o'rnatib qo'ying, \"Qo'shilish\" bosilganda u o'zi ochiladi.")}</p></div>`;
+    return `${list.length ? list.map(meetCard).join("") : `<div class="card ap-empty">${chip("video", "lg")}<p>${T("Hozircha rejalashtirilgan uchrashuv yo'q. Mentorlardan uchrashuv so'rang!")}</p><button class="btn-ghost" onclick="mtTab('mentors')">${ic("users")} ${T("Mentorlar")}</button></div>`}`;
   }
   function MentorsTab() {
     const isM = S.me.mentor;
@@ -91,9 +97,11 @@ const Meet = (() => {
   function ReqTab() {
     const pubOpen = S.requests.filter((q) => q.kind === "public" && q.status === "open");
     const mine = S.requests.filter((q) => q.uid === S.me.uid && !(q.kind === "public" && q.status === "open"));
-    return `<p class="st-tip">${ic("users")}${T("Ommaviy uchrashuv so'rovi kamida {n} ta talaba qo'llab-quvvatlaganda mentorga yuboriladi. Shaxsiy so'rov esa darhol mentorga boradi.", { n: S.need })}</p>
-      <div class="section-title">${T("Ommaviy so'rovlar")}<small>${pubOpen.length}</small></div>
-      ${pubOpen.map((q) => reqCard(q)).join("") || `<p class="note">${T("Hozircha ommaviy so'rov yo'q. Mentorlar bo'limidan birinchisini boshlang.")}</p>`}
+    return `<div class="mt-ways">
+        <button class="mt-way one" onclick="mtPick('individual')"><i>${ic("user")}</i><b>${T("Shaxsiy so'rov")}</b><small>${T("Faqat siz va mentor. So'rov darhol mentorga boradi.")}</small><em>${ic("plus")} ${T("Yuborish")}</em></button>
+        <button class="mt-way grp" onclick="mtPick('public')"><i>${ic("users")}</i><b>${T("Guruh so'rovi")}</b><small>${T("{n} ta talaba qo'llab-quvvatlasa, mentorga yuboriladi.", { n: S.need })}</small><em>${ic("plus")} ${T("Boshlash")}</em></button></div>
+      <div class="section-title">${T("Guruh so'rovlari")}<small>${pubOpen.length}</small></div>
+      ${pubOpen.map((q) => reqCard(q)).join("") || `<p class="note">${T("Hozircha guruh so'rovi yo'q. Yuqoridagi \"Guruh so'rovi\" tugmasi bilan birinchisini boshlang.")}</p>`}
       <div class="section-title">${T("Mening so'rovlarim")}<small>${mine.length}</small></div>
       ${mine.map((q) => reqCard(q, true)).join("") || `<p class="note">${T("Siz hali so'rov yubormagansiz.")}</p>`}`;
   }
@@ -124,23 +132,31 @@ const Meet = (() => {
   window.mtJoin = (id) => { const m = meetOf(id); if (!m) return; haptic("medium"); if (Date.now() < m.starts - 15 * 60000) toast(T("Uchrashuv hali boshlanmagan. Havola ochiladi, mentor boshlaganda kiring"));
     // outside Telegram's own browser, so a Google Meet link opens the Meet app (camera, screen sharing, chat) when it is installed
     try { if (tg && tg.openLink) return tg.openLink(m.link, { try_instant_view: false }); } catch {} window.open(m.link, "_blank"); };
-  window.mtGo = (id, on) => { haptic("medium"); api("/rsvp", { id, on }).then(() => { if (on) toast(T("Boshlanishidan 1 soat oldin va boshlanganda eslatamiz")); load(); }).catch(fail);
+  window.mtGo = (id, on) => { haptic("medium"); api("/rsvp", { id, on }).then(() => { if (on) toast(T("Boshlanishidan 1 soat oldin va boshlanganda eslatamiz")); load(true); }).catch(fail);
     S.going = on ? S.going.concat(id) : S.going.filter((x) => x !== id); const m = meetOf(id); if (m) m.going = (m.going || 0) + (on ? 1 : -1); keep(); };
-  window.mtCancel = (id) => { const go = (ok) => { if (ok) api("/cancel", { id }).then(() => { toast(T("Uchrashuv bekor qilindi")); load(); }).catch(fail); }; try { tg.showConfirm(T("Uchrashuvni bekor qilasizmi? Qatnashuvchilarga xabar boradi."), go); } catch { go(confirm(T("Uchrashuvni bekor qilasizmi? Qatnashuvchilarga xabar boradi."))); } };
+  window.mtCancel = (id) => { const go = (ok) => { if (ok) api("/cancel", { id }).then(() => { toast(T("Uchrashuv bekor qilindi")); load(true); }).catch(fail); }; try { tg.showConfirm(T("Uchrashuvni bekor qilasizmi? Qatnashuvchilarga xabar boradi."), go); } catch { go(confirm(T("Uchrashuvni bekor qilasizmi? Qatnashuvchilarga xabar boradi."))); } };
   window.mtChat = (id) => { const m = meetOf(id); store.set("mchat", { room: "m_" + id, title: m ? m.topic : "Online meeting" }); location.hash = "#/mchat"; };
-  window.mtVote = (id) => { haptic("medium"); api("/vote", { id }).then((r) => { toast(r.votes >= S.need ? T("So'rov mentorga yuborildi!") : T("Qo'llab-quvvatladingiz: {a} / {b}", { a: r.votes, b: S.need })); load(); }).catch(fail); };
+  window.mtVote = (id) => { haptic("medium"); api("/vote", { id }).then((r) => { toast(r.votes >= S.need ? T("So'rov mentorga yuborildi!") : T("Qo'llab-quvvatladingiz: {a} / {b}", { a: r.votes, b: S.need })); load(true); }).catch(fail); };
   window.mtInvite = (id) => { const q = S.requests.find((x) => x.id === id); openTg(`https://t.me/share/url?url=${encodeURIComponent("https://t.me/" + BOT)}&text=${encodeURIComponent(T("Mentor bilan ommaviy uchrashuv uchun ovoz bering: \"{t}\". Alumni Mentor ilovasida So'rovlar bo'limini oching.", { t: q ? q.topic : "" }))}`); };
-  window.mtAnswer = (id, okk) => { api("/answer", { id, ok: okk }).then(() => { toast(okk ? T("Uchrashuv tasdiqlandi!") : T("Taklif rad etildi")); load(); }).catch(fail); };
-  window.mtAsk = (mentorId) => {
+  window.mtAnswer = (id, okk) => { api("/answer", { id, ok: okk }).then(() => { toast(okk ? T("Uchrashuv tasdiqlandi!") : T("Taklif rad etildi")); load(true); }).catch(fail); };
+  window.mtAsk = (mentorId, kind) => {
     const t = mentorOf(mentorId); haptic("light");
     sheet(`<div class="ap-sheet mt-form"><div class="mt-who">${photo(t)}<span><b>${esc(t.name)}</b><small>${esc(t.uni || "")}</small></span></div>
       <h3>${T("Uchrashuv so'rash")}</h3>
-      <div class="seg mt-kindsel"><button class="on" data-k="individual" onclick="mtKind(this)">${T("Shaxsiy")}</button><button data-k="public" onclick="mtKind(this)">${T("Ommaviy")}</button></div>
+      <div class="seg mt-kindsel"><button class="on" data-k="individual" onclick="mtKind(this)">${ic("user")} ${T("Shaxsiy")}</button><button data-k="public" onclick="mtKind(this)">${ic("users")} ${T("Guruh (ommaviy)")}</button></div>
       <p class="mt-hint" id="mt-khint">${T("Faqat siz va mentor. Mentor qabul qilsa yoki boshqa vaqt taklif qilsa, xabar olasiz.")}</p>
       <label>${T("Mavzu")}<input id="mt-topic" maxlength="120" placeholder="${T("Masalan: Stanfordga hujjat topshirish")}"></label>
       <label>${T("Izoh")}<textarea id="mt-note" rows="3" maxlength="600" placeholder="${T("Nimani bilmoqchisiz?")}"></textarea></label>
       <label id="mt-prefbox">${T("Sizga qulay vaqt (ixtiyoriy)")}<input id="mt-pref" type="datetime-local"></label>
       <button class="btn-primary" onclick="mtSendReq(${mentorId})">${ic("send")} ${T("So'rov yuborish")}</button></div>`);
+    if (kind === "public") { const b = document.querySelector('.mt-kindsel [data-k="public"]'); if (b) mtKind(b); }
+  };
+  // "Shaxsiy so'rov" / "Guruh so'rovi" from the Requests tab: first pick the mentor, then the form opens with that kind chosen
+  window.mtPick = (kind) => {
+    const list = S.mentors.filter((t) => t.photo && !(S.me.mentor && S.me.mentor.id === t.id)); haptic("light");
+    if (!list.length) return toast(T("Mentorlar tez orada qo'shiladi."));
+    sheet(`<div class="ap-sheet"><h3>${kind === "public" ? T("Guruh so'rovi") : T("Shaxsiy so'rov")}</h3><p>${T("Qaysi mentor bilan uchrashmoqchisiz?")}</p>
+      <div class="mt-pick">${list.map((t) => `<button onclick="mtAsk(${t.id},'${kind}')">${photo(t)}<span><b>${esc(t.name)}</b><small>${esc(t.uni || "")}${t.field ? " · " + esc(t.field) : ""}</small></span>${ic("chev")}</button>`).join("")}</div></div>`);
   };
   window.mtKind = (b) => { b.parentNode.querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b)); const pub = b.dataset.k === "public";
     document.getElementById("mt-khint").textContent = pub ? T("Boshqa talabalar ham qo'shiladi. {n} ta talaba qo'llab-quvvatlaganda so'rov mentorga yuboriladi.", { n: (S && S.need) || 10 }) : T("Faqat siz va mentor. Mentor qabul qilsa yoki boshqa vaqt taklif qilsa, xabar olasiz.");
@@ -149,7 +165,7 @@ const Meet = (() => {
     const kind = document.querySelector(".mt-kindsel .on").dataset.k, topic = document.getElementById("mt-topic").value.trim(), pv = document.getElementById("mt-pref").value;
     if (!topic) return toast(T("Mavzuni yozing"));
     api("/request", { mentorId, kind, topic, note: document.getElementById("mt-note").value, pref: pv ? new Date(pv).getTime() : null }).then(() => {
-      closeSheet(); haptic("medium"); toast(kind === "public" ? T("Ommaviy so'rov ochildi. Do'stlaringizni chaqiring!") : T("So'rov mentorga yuborildi")); tab = "req"; store.set("meet_tab", "req"); load(); render();
+      closeSheet(); haptic("medium"); toast(kind === "public" ? T("Ommaviy so'rov ochildi. Do'stlaringizni chaqiring!") : T("So'rov mentorga yuborildi")); tab = "req"; store.set("meet_tab", "req"); load(true); render();
     }).catch(fail);
   };
 
@@ -158,7 +174,7 @@ const Meet = (() => {
     <p class="mt-hint">${T("Admin sizga bergan maxsus parolni kiriting. Parol faqat bir marta, sizning Telegram akkauntingizga bog'lanadi.")}</p>
     <label>${T("Parol")}<input id="mt-pass" type="password" autocomplete="current-password" maxlength="64"></label>
     <button class="btn-primary" onclick="mtLoginGo()">${ic("check")} ${T("Kirish")}</button></div>`);
-  window.mtLoginGo = () => { const p = document.getElementById("mt-pass").value; if (!p) return; api("/mentor/login", { pass: p }).then(() => { closeSheet(); haptic("medium"); toast(T("Xush kelibsiz, mentor!")); tab = "panel"; store.set("meet_tab", "panel"); load(); setTimeout(() => { if (S && S.me.mentor && !S.me.mentor.photo) mtProfile(); }, 1200); }).catch(fail); };
+  window.mtLoginGo = () => { const p = document.getElementById("mt-pass").value; if (!p) return; api("/mentor/login", { pass: p }).then(() => { closeSheet(); haptic("medium"); toast(T("Xush kelibsiz, mentor!")); tab = "panel"; store.set("meet_tab", "panel"); load(true); setTimeout(() => { if (S && S.me.mentor && !S.me.mentor.photo) mtProfile(); }, 1200); }).catch(fail); };
   let newPhoto = null;
   window.mtProfile = () => {
     const me = S.me.mentor; newPhoto = null;
@@ -183,7 +199,7 @@ const Meet = (() => {
   window.mtSaveProfile = () => {
     const v = (id) => document.getElementById(id).value;
     if (!newPhoto && !S.me.mentor.photo) return toast(T("Avval profil rasmingizni yuklang"));
-    api("/mentor/profile", { name: v("mp-name"), uni: v("mp-uni"), field: v("mp-field"), bio: v("mp-bio"), photo: newPhoto }).then((r) => { S.me.mentor = r.mentor; closeSheet(); toast(T("Saqlandi")); load(); keep(); }).catch(fail);
+    api("/mentor/profile", { name: v("mp-name"), uni: v("mp-uni"), field: v("mp-field"), bio: v("mp-bio"), photo: newPhoto }).then((r) => { S.me.mentor = r.mentor; closeSheet(); toast(T("Saqlandi")); load(true); keep(); }).catch(fail);
   };
   window.mtPass = () => sheet(`<div class="ap-sheet mt-form"><h3>${T("Parolni o'zgartirish")}</h3>
     <label>${T("Hozirgi parol")}<input id="mp-old" type="password" autocomplete="current-password"></label>
@@ -192,14 +208,14 @@ const Meet = (() => {
     <button class="btn-primary" onclick="mtPassGo()">${ic("check")} ${T("Saqlash")}</button></div>`);
   window.mtStrength = (p) => { const n = [p.length >= 12, /[a-z]/.test(p), /[A-Z]/.test(p), /\d/.test(p), /[^A-Za-z0-9]/.test(p)].filter(Boolean).length; const el = document.getElementById("mp-meter"); if (el) { el.style.width = n * 20 + "%"; el.className = n === 5 ? "ok" : n >= 3 ? "mid" : ""; } };
   window.mtPassGo = () => api("/mentor/password", { old: document.getElementById("mp-old").value, pass: document.getElementById("mp-new").value }).then(() => { closeSheet(); toast(T("Parol o'zgartirildi")); }).catch(fail);
-  window.mtLogout = () => { const go = (ok) => { if (ok) api("/mentor/logout").then(() => { tab = "meet"; load(); toast(T("Mentor rejimidan chiqdingiz")); }).catch(fail); }; try { tg.showConfirm(T("Mentor rejimidan chiqasizmi? Qayta kirish uchun parol kerak bo'ladi."), go); } catch { go(confirm(T("Mentor rejimidan chiqasizmi? Qayta kirish uchun parol kerak bo'ladi."))); } };
+  window.mtLogout = () => { const go = (ok) => { if (ok) api("/mentor/logout").then(() => { tab = "meet"; load(true); toast(T("Mentor rejimidan chiqdingiz")); }).catch(fail); }; try { tg.showConfirm(T("Mentor rejimidan chiqasizmi? Qayta kirish uchun parol kerak bo'ladi."), go); } catch { go(confirm(T("Mentor rejimidan chiqasizmi? Qayta kirish uchun parol kerak bo'ladi."))); } };
 
   /* ---------- mentor: Google Meet ---------- */
   // Google refuses sign-in inside app web views, so the sign-in page opens in the phone's browser; on return the panel refreshes
   window.mtGoogle = () => api("/google/ticket").then((r) => { haptic("medium"); try { tg.openLink(r.url, { try_instant_view: false }); } catch { window.open(r.url, "_blank"); }
     toast(T("Brauzerda Google bilan kiring, keyin shu yerga qayting")); }).catch(fail);
-  window.mtGoogleOff = () => { const go = (ok) => { if (ok) api("/google/disconnect").then(() => { toast(T("Google uzildi")); load(); }).catch(fail); }; try { tg.showConfirm(T("Google akkauntini uzasizmi?"), go); } catch { go(confirm(T("Google akkauntini uzasizmi?"))); } };
-  document.addEventListener("visibilitychange", () => { if (!document.hidden && location.hash === "#/meet") load(); });
+  window.mtGoogleOff = () => { const go = (ok) => { if (ok) api("/google/disconnect").then(() => { toast(T("Google uzildi")); load(true); }).catch(fail); }; try { tg.showConfirm(T("Google akkauntini uzasizmi?"), go); } catch { go(confirm(T("Google akkauntini uzasizmi?"))); } };
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && location.hash === "#/meet") load(true); });
   window.mtAttend = (id) => {
     sheet(`<div class="ap-sheet mt-att"><h3>${T("Kim qatnashdi")}</h3><div class="busy-in"><div class="run-spin"></div></div></div>`);
     api("/attendance", { id }).then((r) => { const box = document.querySelector(".mt-att"); if (!box) return;
@@ -233,7 +249,7 @@ const Meet = (() => {
   };
   window.mtCreate = () => {
     const x = readTime("mn"), topic = document.getElementById("mn-topic").value.trim(); if (!topic) return toast(T("Mavzuni yozing"));
-    api("/create", { topic, about: document.getElementById("mn-about").value, ...x }).then((r) => { closeSheet(); haptic("medium"); S.meetings.push({ ...r.meeting, going: 0 }); S.meetings.sort((a, b) => a.starts - b.starts); toast(T("Uchrashuv e'lon qilindi!")); setTimeout(() => mtPoster(r.meeting.id), 400); load(); }).catch(fail);
+    api("/create", { topic, about: document.getElementById("mn-about").value, ...x }).then((r) => { closeSheet(); haptic("medium"); S.meetings.push({ ...r.meeting, going: 0 }); S.meetings.sort((a, b) => a.starts - b.starts); toast(T("Uchrashuv e'lon qilindi!")); setTimeout(() => mtPoster(r.meeting.id), 400); load(true); }).catch(fail);
   };
   window.mtRespond = (id, action) => {
     const q = S.requests.find((x) => x.id === id);
@@ -242,8 +258,8 @@ const Meet = (() => {
       <button class="btn-primary" onclick="mtRespondGo(${id},'${action}')">${ic(action === "accept" ? "check" : "send")} ${action === "accept" ? T("Tasdiqlash va e'lon qilish") : T("Taklifni yuborish")}</button></div>`);
     if (q && q.pref) { const d = new Date(q.pref); document.getElementById("mr-date").value = new Date(q.pref - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); document.getElementById("mr-time").value = hm(q.pref); }
   };
-  window.mtRespondGo = (id, action) => { const x = readTime("mr"), note = (document.getElementById("mr-note") || {}).value || ""; api("/respond", { id, action, note, ...x }).then(() => { closeSheet(); haptic("medium"); toast(action === "accept" ? T("Uchrashuv e'lon qilindi!") : T("Taklif yuborildi")); load(); }).catch(fail); };
-  window.mtDecline = (id) => { const go = (ok) => { if (ok) api("/respond", { id, action: "decline" }).then(() => { toast(T("So'rov rad etildi")); load(); }).catch(fail); }; try { tg.showConfirm(T("So'rovni rad etasizmi?"), go); } catch { go(confirm(T("So'rovni rad etasizmi?"))); } };
+  window.mtRespondGo = (id, action) => { const x = readTime("mr"), note = (document.getElementById("mr-note") || {}).value || ""; api("/respond", { id, action, note, ...x }).then(() => { closeSheet(); haptic("medium"); toast(action === "accept" ? T("Uchrashuv e'lon qilindi!") : T("Taklif yuborildi")); load(true); }).catch(fail); };
+  window.mtDecline = (id) => { const go = (ok) => { if (ok) api("/respond", { id, action: "decline" }).then(() => { toast(T("So'rov rad etildi")); load(true); }).catch(fail); }; try { tg.showConfirm(T("So'rovni rad etasizmi?"), go); } catch { go(confirm(T("So'rovni rad etasizmi?"))); } };
 
   /* ---------- the poster: mentor, photo, topic, day, time, link, over a campus at dusk ---------- */
   const SKY = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1350"><defs>

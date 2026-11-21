@@ -1422,4 +1422,14 @@ Object.assign(I18N.en, {
 "El-yurt umidi jamg'armasi xorijdagi nufuzli universitetlarda o'qish uchun grantlar beradi. Tanlovlar odatda bahor va kuzda e'lon qilinadi. Shartlar va hujjatlar ro'yxatini jamg'armaning rasmiy saytidan kuzatib boring.": "The El-yurt umidi foundation gives grants for study at leading universities abroad. Competitions are usually announced in spring and autumn. Follow the conditions and document list on the foundation's official site.",
 "SAT yiliga bir necha marta xalqaro sanalarda topshiriladi. Ro'yxatdan o'tish imtihondan taxminan bir oy oldin yopiladi. Natijani universitet muddatidan oldin yuborish uchun imtihonni erta rejalashtiring.": "The SAT is offered several times a year on international dates. Registration closes about a month before the test. Plan it early so you can send your score before the university deadline.",
 "O'zbekiston OTMlariga hujjatlar odatda iyun-iyul oylarida rasmiy portal orqali topshiriladi, test esa yozda o'tkaziladi. Aniq sanalar har yili alohida e'lon qilinadi.": "Documents for universities in Uzbekistan are usually submitted in June and July through the official portal, and the test is held in summer. Exact dates are announced each year.",
+// --- Online meeting requests, Application Workshop
+"Garvard (HGSE) qabul bo'limidan Stanislav Rivkinning seminari: kitob shaklida, o'zbek va ingliz tilida": "A workshop by Stanislav Rivkin of Harvard (HGSE) admissions: as a book, in Uzbek and English",
+"Guruh (ommaviy)": "Group (public)",
+"Guruh so'rovi": "Group request",
+"Guruh so'rovlari": "Group requests",
+"Qaysi mentor bilan uchrashmoqchisiz?": "Which mentor would you like to meet?",
+"Faqat siz va mentor. So'rov darhol mentorga boradi.": "Just you and the mentor. The request goes to the mentor at once.",
+"{n} ta talaba qo'llab-quvvatlasa, mentorga yuboriladi.": "Goes to the mentor once {n} students support it.",
+"Hozircha guruh so'rovi yo'q. Yuqoridagi \"Guruh so'rovi\" tugmasi bilan birinchisini boshlang.": "No group requests yet. Start the first one with the \"Group request\" button above.",
+"Keyingi": "Next",
 });

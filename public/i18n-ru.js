@@ -1422,4 +1422,14 @@ Object.assign(I18N.ru, {
 "El-yurt umidi jamg'armasi xorijdagi nufuzli universitetlarda o'qish uchun grantlar beradi. Tanlovlar odatda bahor va kuzda e'lon qilinadi. Shartlar va hujjatlar ro'yxatini jamg'armaning rasmiy saytidan kuzatib boring.": "Фонд «Эл-юрт умиди» даёт гранты на учёбу в ведущих зарубежных университетах. Конкурсы обычно объявляются весной и осенью. Условия и список документов смотрите на официальном сайте фонда.",
 "SAT yiliga bir necha marta xalqaro sanalarda topshiriladi. Ro'yxatdan o'tish imtihondan taxminan bir oy oldin yopiladi. Natijani universitet muddatidan oldin yuborish uchun imtihonni erta rejalashtiring.": "SAT сдаётся несколько раз в год в международные даты. Регистрация закрывается примерно за месяц до экзамена. Планируйте экзамен заранее, чтобы успеть отправить результат до срока университета.",
 "O'zbekiston OTMlariga hujjatlar odatda iyun-iyul oylarida rasmiy portal orqali topshiriladi, test esa yozda o'tkaziladi. Aniq sanalar har yili alohida e'lon qilinadi.": "Документы в вузы Узбекистана обычно подаются в июне и июле через официальный портал, а тест проходит летом. Точные даты объявляются отдельно каждый год.",
+// --- Online meeting requests, Application Workshop
+"Garvard (HGSE) qabul bo'limidan Stanislav Rivkinning seminari: kitob shaklida, o'zbek va ingliz tilida": "Семинар Станислава Ривкина из приёмной комиссии Гарварда (HGSE): в виде книги, на узбекском и английском",
+"Guruh (ommaviy)": "Группа (открытый)",
+"Guruh so'rovi": "Групповой запрос",
+"Guruh so'rovlari": "Групповые запросы",
+"Qaysi mentor bilan uchrashmoqchisiz?": "С каким ментором вы хотите встретиться?",
+"Faqat siz va mentor. So'rov darhol mentorga boradi.": "Только вы и ментор. Запрос сразу уходит ментору.",
+"{n} ta talaba qo'llab-quvvatlasa, mentorga yuboriladi.": "Уходит ментору, когда поддержат {n} учеников.",
+"Hozircha guruh so'rovi yo'q. Yuqoridagi \"Guruh so'rovi\" tugmasi bilan birinchisini boshlang.": "Групповых запросов пока нет. Начните первый кнопкой «Групповой запрос» выше.",
+"Keyingi": "Далее",
 });

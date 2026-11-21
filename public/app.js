@@ -164,6 +164,7 @@ function Home() {
     <span class="hero2-tag">Top 300</span>
     <h3>UniMatch</h3>
     <span class="btn-orange">Boshlash ${ic("chev")}</span>
+    <span class="hero2-letter" role="link" tabindex="0" onclick="event.preventDefault();event.stopPropagation();location.hash='#/orzu'">${ic("plane")}<b>${T("Orzu xati")}</b></span>
   </a>
   <a class="banner studio-bn" href="#/ariza">
     <span class="sbn-ic">${ic("cap")}</span><span class="banner-sep"></span><span class="sbn-t"><b>Application Studio</b><small>${T("Profil, insholar, tavsiyalar va topshirish")}</small></span><span class="banner-go">${ic("chev")}</span>

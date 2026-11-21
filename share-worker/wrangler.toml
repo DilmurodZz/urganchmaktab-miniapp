@@ -1,6 +1,8 @@
 name = "urganch-share"
 main = "src/index.js"
 compatibility_date = "2026-10-01"
+# the Cloudflare account that owns this server (pinned, so a login to another account can never deploy here by mistake)
+account_id = "e3bd285cf159f89120942e2bbe2aa169"
 
 # The bot token is stored as a secret, never in this file:
 #   npx wrangler secret put BOT_TOKEN

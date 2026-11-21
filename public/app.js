@@ -33,7 +33,7 @@ function toast(msg) {
 }
 
 /* ---------- theme ---------- */
-const THEMES = { purple: ["Binafsha", "#2E1065", "#6D28D9"], bordo: ["Bordo", "#650514", "#B51F3A"], blue: ["Ko'k", "#2748F5", "#6C95FF"], orange: ["To'q sariq", "#F2600C", "#FFB066"], green: ["Yashil", "#0B8F6A", "#5FD3AE"] };
+const THEMES = { bordo: ["Bordo", "#650514", "#B51F3A"], purple: ["Binafsha", "#2E1065", "#6D28D9"], blue: ["Ko'k", "#2748F5", "#6C95FF"], orange: ["To'q sariq", "#F2600C", "#FFB066"], green: ["Yashil", "#0B8F6A", "#5FD3AE"] };
 function applyTheme(name) {
   document.body.dataset.theme = name;
   store.set("theme", name);
@@ -41,8 +41,9 @@ function applyTheme(name) {
   try { tg.setHeaderColor(bg); tg.setBackgroundColor(bg); } catch {}
 }
 // dark purple is the default; everyone moves to it once (the Alumni Mentor launch), after that their own choice stays
-if (!store.get("theme_am", false)) { store.set("theme_am", true); store.set("theme", "purple"); }
-applyTheme(THEMES[store.get("theme", "purple")] ? store.get("theme", "purple") : "purple");
+// bordo (the brand palette) is the default; everyone moves to it once, after that their own choice stays
+if (!store.get("theme_bordo", false)) { store.set("theme_bordo", true); store.set("theme", "bordo"); }
+applyTheme(THEMES[store.get("theme", "bordo")] ? store.get("theme", "bordo") : "bordo");
 
 /* ---------- icons: one consistent outline set, 24x24, drawn with currentColor ---------- */
 const ICONS = {
@@ -153,7 +154,7 @@ window.goBack = () => { if (document.getElementById("sheet")) return closeSheet(
 
 /* ---------- screens ---------- */
 function Home() {
-  const tiles = [["gamepad", "O'yin", "#/oyin", "k1"], ["cap", "Universitetga ariza", "#/ariza", "k2 g"], ["grid", "Foydali vositalar", "#/vositalar", "k3"]];
+  const tiles = [["gamepad", "O'yin", "#/oyin", "k1"], ["cap", "Application Studio", "#/ariza", "k2 g"], ["grid", "Foydali vositalar", "#/vositalar", "k3"]];
   return `
   <div class="topbar"><div class="brand"><img class="brand-logo" src="img/logo-emblem-light.webp" alt="" decoding="async"><span class="brand-name"><b>ALUMNI</b><small>MENTOR</small></span></div><span class="school" role="img" aria-label="${T("Maktab")}"><img src="img/school.webp" alt="" decoding="async"></span></div>
   <a class="hero2" href="#/unimatch">
@@ -176,7 +177,7 @@ function Home() {
 
 function Profil() {
   if (typeof loadColors === "function") setTimeout(loadColors, 0);
-  const theme = store.get("theme", "purple");
+  const theme = store.get("theme", "bordo");
   const invited = store.get("invited", 1);
   const link = `https://t.me/${BOT}?start=ref_${user.id}`;
   return `${navbar("Profil")}
@@ -204,13 +205,13 @@ let colorCounts = store.get("color_counts", null);
 function gotCounts(c) { if (c && typeof c.blue === "number") { c.purple = c.purple || 0; c.bordo = c.bordo || 0; }
   if (c && typeof c.blue === "number") { const same = JSON.stringify(c) === JSON.stringify(colorCounts); colorCounts = c; store.set("color_counts", c); if (!same && location.hash === "#/profil") render(); } }
 function sendColor() {
-  const t = store.get("theme", "purple");
+  const t = store.get("theme", "bordo");
   if (!tg || !tg.initData) return loadColors();
   fetch(SHARE_API + "/color?c=" + t, { method: "POST", headers: { "X-Init-Data": tg.initData } })
     .then((r) => r.ok ? r.json() : null).then((c) => { if (c) { store.set("color_sent", t); gotCounts(c); } }).catch(() => {});
 }
 function loadColors() { fetch(SHARE_API + "/colors").then((r) => r.json()).then(gotCounts).catch(() => {}); }
-setTimeout(() => { if (store.get("color_sent", "") !== store.get("theme", "purple")) sendColor(); else loadColors(); }, 1500);
+setTimeout(() => { if (store.get("color_sent", "") !== store.get("theme", "bordo")) sendColor(); else loadColors(); }, 1500);
 window.invite = (link) => {
   const url = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(T("Ustoz AI: kasbingizni toping va bepul o'rganing"))}`;
   if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, "_blank");
@@ -275,7 +276,7 @@ const ROUTES = {
   "#/kurslar": () => Kurslar.List(), "#/kurs": () => Kurslar.Detail(location.hash.slice(7)), "#/oyin": () => "", "#/mutolaa": () => Soon("mutolaa"),
   "#/duo": DuoScreen, "#/vositalar": () => needTools("Screen"), "#/cv": () => needTools("CV"), "#/dtm": () => needScript("study.js", "Study", "DTM", T("DTM ball kalkulyatori")), "#/ielts": () => needScript("study.js", "Study", "IELTS", T("IELTS ball kalkulyatori")), "#/unis": () => needScript("study.js", "Study", "Unis", T("Top 300 universitet va grantlar")),
   "#/unimatch": () => needScript("study.js", "Study", "UniMatch", "UniMatch"), "#/unimatch-natija": () => needScript("study.js", "Study", "UniMatchResult", "UniMatch"),
-  "#/ariza": () => needScript("ariza.js", "Ariza", "Screen", T("Universitetga ariza")), "#/admin": () => AdminScreen(), "#/kashf": () => Soon("kashf"),
+  "#/ariza": () => needScript("ariza.js", "Ariza", "Screen", "Application Studio"), "#/admin": () => AdminScreen(), "#/kashf": () => Soon("kashf"),
 };
 let gameOn = false;
 // the 3D game is loaded on its own, after Home: it is not needed to open the app

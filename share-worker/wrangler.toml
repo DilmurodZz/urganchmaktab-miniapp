@@ -19,6 +19,8 @@ database_id = "01791776-b9df-4f6a-8764-77a42c99e81b"   # npx wrangler d1 create 
 # Telegram user ids that see the admin section and may use /admin/* (comma separated)
 ADMIN_IDS = "5199387523,957578083"
 CHANNEL = ""
+# Google Meet for mentors: the OAuth client id is public; GOOGLE_CLIENT_SECRET is a secret (npx wrangler secret put GOOGLE_CLIENT_SECRET)
+GOOGLE_CLIENT_ID = "67781824351-032j1dui4jkg851ti6hothal7nfea2bp.apps.googleusercontent.com"
 
 # Workers AI: translates the youth news into the reader's language
 [ai]

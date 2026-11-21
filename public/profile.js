@@ -1,6 +1,6 @@
 // Profil extras: usage statistics (for everyone), language choice, and the admin section (two Telegram ids only).
 // The numbers come from the share server (share-worker/, Cloudflare D1): every section a user opens is counted once a day.
-const ADMIN_IDS = [5199387523, 2094753316];   // Dilmurod, @sakumter; the server checks this list again
+const ADMIN_IDS = [5199387523, 957578083];   // the two admins; the server checks this list again (ADMIN_IDS in wrangler.toml)
 const isAdmin = () => ADMIN_IDS.includes(Number(user.id));
 const APP_LINK = `https://t.me/${BOT}`;
 
@@ -90,6 +90,7 @@ function AdminScreen() {
     <div class="adm-st" id="${id}-st"></div>
   </div>`;
   return `${navbar(T("Admin bo'limi"))}
+  ${mentorAdminCard()}
   ${box("bc", T("Barcha foydalanuvchilarga xabar"), T("Xabar bot orqali har bir foydalanuvchining shaxsiy chatiga boradi."))}
   <div class="card box">
     <h4>${ic("send")} ${T("Havolalar")}</h4><p>${T("Nusxa olish yoki do'stlarga ulashish")}</p>
@@ -134,3 +135,37 @@ window.admSend = async (id, route) => {
     adminInfo = null;
   } catch (e) { st.textContent = T("Xatolik: {e}", { e: e.message }); }
 };
+
+/* ---------- admin: mentor accounts for Online meeting ----------
+   Adding a mentor makes a strong random password on the server (stored only as a hash). It is shown here once:
+   send it to the mentor privately. The first Telegram account that signs in with it becomes that mentor. */
+let mentorList = null;
+const meetAdmin = (path, body) => fetch(SHARE_API + "/meet/admin/" + path, { method: "POST", headers: { "X-Init-Data": tgInit(), "Content-Type": "application/json" }, body: JSON.stringify(body || {}) })
+  .then(async (r) => { const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || r.status); return j; });
+function mentorAdminCard() {
+  if (!mentorList) meetAdmin("mentors").then((j) => { mentorList = j.mentors; if (location.hash === "#/admin") { const y = scrollY; render(); scrollTo(0, y); } }).catch(() => { mentorList = []; });
+  return `<div class="card box adm">
+    <h4>${ic("video")} ${T("Mentorlar (Online meeting)")}</h4><p>${T("Mentor qo'shing: tizim kuchli parol yaratadi. Parolni mentorga shaxsan yuboring, u faqat bir marta ko'rinadi.")}</p>
+    ${(mentorList || []).map((m) => `<div class="adm-link"><span><b>${esc(m.name)}${m.active ? "" : " · " + T("o'chirilgan")}</b><small>${esc(m.uni || "")} · ${m.bound ? T("kirgan") : T("hali kirmagan")}${m.photo ? "" : " · " + T("rasm yo'q")}</small></span>
+      <button class="icon-btn" onclick="admMentorReset(${m.id})" aria-label="reset">${ic("refresh")}</button>${m.active ? `<button class="icon-btn" onclick="admMentorDel(${m.id})" aria-label="x">${ic("x")}</button>` : ""}</div>`).join("") || `<p class="st-note">${mentorList ? T("Hali mentor yo'q.") : T("Yuklanmoqda…")}</p>`}
+    <div class="adm-row"><input id="am-name" maxlength="60" placeholder="${T("Ism va familiya")}"><input id="am-uni" maxlength="80" placeholder="${T("Universitet")}"></div>
+    <input id="am-field" maxlength="80" placeholder="${T("Yo'nalish va bitirgan yil")}">
+    <button class="btn-primary" onclick="admMentorAdd()">${ic("plus")} ${T("Mentor qo'shish va parol yaratish")}</button>
+  </div>`;
+}
+const showPass = (name, pass) => sheet(`<div class="ap-sheet mt-form"><span class="mt-lock">${ic("shield")}</span><h3>${T("Mentor paroli")}</h3><p class="mt-hint">${esc(name)}</p>
+  <div class="mt-passbox notr">${esc(pass)}</div>
+  <button class="btn-primary" onclick="admCopyPass()">${ic("file")} ${T("Nusxa olish")}</button>
+  <p class="mt-hint">${T("Bu parol faqat hozir ko'rinadi. Uni mentorga shaxsiy xabarda yuboring: Online meeting, Mentorlar, \"Mentor sifatida kirish\". Kirgandan keyin mentor parolni o'zgartirishi mumkin.")}</p></div>`) || (window._admPass = pass);
+window.admCopyPass = () => { try { navigator.clipboard.writeText(window._admPass); toast(T("Nusxa olindi")); } catch { toast(T("Nusxa olib bo'lmadi")); } };
+window.admMentorAdd = () => {
+  const v = (id) => document.getElementById(id).value.trim(), name = v("am-name");
+  if (!name) return toast(T("Mentor ismini yozing"));
+  meetAdmin("add", { name, uni: v("am-uni"), field: v("am-field") }).then((j) => { window._admPass = j.password; mentorList = null; render(); showPass(name, j.password); }).catch((e) => toast(T("Xatolik: {e}", { e: e.message })));
+};
+window.admMentorReset = (id) => {
+  const m = (mentorList || []).find((x) => x.id === id);
+  confirmAsk(T("{n} uchun yangi parol yaratilsinmi? Eski parol ishlamay qoladi va mentor qayta kirishi kerak.", { n: m ? m.name : "" })).then((ok) => { if (!ok) return;
+    meetAdmin("reset", { id }).then((j) => { window._admPass = j.password; mentorList = null; render(); showPass(m ? m.name : "", j.password); }).catch((e) => toast(T("Xatolik: {e}", { e: e.message }))); });
+};
+window.admMentorDel = (id) => confirmAsk(T("Mentorni o'chirasizmi? U endi uchrashuv e'lon qila olmaydi.")).then((ok) => { if (ok) meetAdmin("remove", { id }).then(() => { mentorList = null; render(); }).catch((e) => toast(T("Xatolik: {e}", { e: e.message }))); });

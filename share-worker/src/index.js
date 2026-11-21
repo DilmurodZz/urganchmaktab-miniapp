@@ -5,6 +5,7 @@
 // The bot token is a secret of the worker (BOT_TOKEN); it never reaches the Mini App.
 
 import { ChatRoom } from "./chat.js";
+import { meet, meetCron } from "./meet.js";
 export { ChatRoom };
 
 const ALLOWED_ORIGIN = "https://dilmurodzz.github.io";
@@ -49,33 +50,35 @@ async function tg(token, method, body) {
 
 export default {
   // every 5 minutes one language's list is rebuilt, so new stories get translated before anyone opens the app
+  // every minute: meeting reminders and the queued bot messages (see meet.js)
   async scheduled(event, env) {
-    const l = ["uz", "ru", "en"][Math.floor(Date.now() / 300000) % 3];
-    try {
-      const res = await news(new URL("https://local/news?fresh=1&l=" + l), env, "*");
-      const list = ((await res.json()).items || []).filter((x) => x.o !== l).slice(0, 12);
-      let n = 0;
-      for (const x of list) {
-        if (n >= 2) break;
-        const key = "art:v4:" + l + ":" + (await sha(x.u));
-        if (await env.COLORS.get(key)) continue;
-        n++; await newsRead(new URL("https://local/news/read?" + new URLSearchParams({ u: x.u, l, o: x.o })), env, "*");
-      }
-    } catch {}
+    try { await meetCron(env, { tg, APP_URL }); } catch {}
   },
   async fetch(req, env) {
     const origin = req.headers.get("Origin") || "";
     if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors(origin) });
     const url = new URL(req.url);
     // the students' chat: images are public by id; the live connection needs Telegram's signed initData
+    if (url.pathname.startsWith("/meet/")) return meet(req, env, url, origin, { json, verifyInitData, tg, APP_URL });
     if (url.pathname.startsWith("/chat/")) {
-      const room = env.CHAT.get(env.CHAT.idFromName("main"));
-      if (url.pathname.startsWith("/chat/img/")) return room.fetch(req);
+      // rooms: "main" (everyone) and "m_<id>" (one meeting); pictures are /chat/img/<id> (main) or /chat/img/<room>/<id>
+      const parts = url.pathname.split("/"), imgRoom = parts.length === 5 ? parts[3] : "main";
+      const roomName = url.pathname.startsWith("/chat/img/") ? imgRoom : (url.searchParams.get("room") || "main");
+      if (!/^(main|m_\d{1,9})$/.test(roomName)) return new Response("bad room", { status: 400 });
+      const room = env.CHAT.get(env.CHAT.idFromName(roomName));
+      if (url.pathname.startsWith("/chat/img/")) return room.fetch(new Request(new URL("/chat/img/" + parts[parts.length - 1], url), req));
       if (url.pathname === "/chat/ws") {
         if (origin && origin !== ALLOWED_ORIGIN && !/^http:\/\/localhost(:\d+)?$/.test(origin)) return new Response("forbidden", { status: 403 });
         const user = await verifyInitData(url.searchParams.get("init"), env.BOT_TOKEN, 7 * 86400);
         if (!user) return new Response("unauthorized", { status: 401 });
-        const h = new Headers(req.headers); h.set("X-User", JSON.stringify({ id: user.id, first_name: user.first_name, photo_url: user.photo_url }));
+        // in a meeting's room its mentor can pin and delete, like an admin
+        let mod = false;
+        if (roomName.startsWith("m_")) {
+          const m = await env.DB.prepare("SELECT t.tg_id FROM meetings m JOIN mentors t ON t.id = m.mentor_id WHERE m.id = ?1").bind(Number(roomName.slice(2))).first();
+          if (!m) return new Response("no meeting", { status: 404 });
+          mod = m.tg_id === Number(user.id);
+        }
+        const h = new Headers(req.headers); h.set("X-User", JSON.stringify({ id: user.id, first_name: user.first_name, photo_url: user.photo_url, mod }));
         return room.fetch(new Request(req, { headers: h }));
       }
     }

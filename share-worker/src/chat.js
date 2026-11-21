@@ -32,7 +32,7 @@ export class ChatRoom extends DurableObject {
     if (!user || !user.id) return new Response("unauthorized", { status: 401 });
     const pair = new WebSocketPair();
     this.ctx.acceptWebSocket(pair[1]);
-    const me = { id: Number(user.id), name: String(user.first_name || "").slice(0, 40) || "Talaba", photo: String(user.photo_url || "").slice(0, 500), admin: this.admins.includes(Number(user.id)), hits: [] };
+    const me = { id: Number(user.id), name: String(user.first_name || "").slice(0, 40) || "Talaba", photo: String(user.photo_url || "").slice(0, 500), admin: this.admins.includes(Number(user.id)) || !!user.mod, hits: [] };
     pair[1].serializeAttachment(me);
     pair[1].send(JSON.stringify({ t: "hello", me: { id: me.id, admin: me.admin }, msgs: this.page(), pin: this.pinned(), online: this.ctx.getWebSockets().length }));
     this.broadcast({ t: "online", n: this.ctx.getWebSockets().length });

@@ -17,7 +17,7 @@ database_id = "01791776-b9df-4f6a-8764-77a42c99e81b"   # npx wrangler d1 create 
 
 [vars]
 # Telegram user ids that see the admin section and may use /admin/* (comma separated)
-ADMIN_IDS = "5199387523"
+ADMIN_IDS = "5199387523,957578083"
 CHANNEL = ""
 
 # Workers AI: translates the youth news into the reader's language
@@ -32,3 +32,7 @@ class_name = "ChatRoom"
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["ChatRoom"]
+
+# every minute: meeting reminders and the queued bot messages
+[triggers]
+crons = ["* * * * *"]

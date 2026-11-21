@@ -8,23 +8,27 @@ const Chat = (() => {
   const COLORS = ["#8B0920", "#165936", "#1565C0", "#B07C1E", "#6D28D9", "#0E7490", "#BE185D", "#4D7C0F"];
   let ws = null, me = null, msgs = [], byId = {}, pin = null, online = 0, typing = {}, reply = null, editing = null, alive = false, retry = 0, retryT = null, noMore = false, loadingOld = false;
   let lastTypingSent = 0, pingT = null, tmpN = 0;
-  const initData = () => (tg && tg.initData) || (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? store.get("dev_init", "") : "");
+  const initData = () => tgInit();
+  // which room: "main" for the students' chat, "m_<id>" for one meeting's chat (#/mchat)
+  let room = "main", wsRoom = null;
+  const roomNow = () => (location.hash === "#/mchat" ? (store.get("mchat", {}).room || "main") : "main");
   const $ = (id) => document.getElementById(id);
   const tm = (t) => new Date(t).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
   const dayKey = (t) => new Date(t).toDateString();
   const dayLabel = (t) => { const d = new Date(t), now = new Date(), y = new Date(Date.now() - 864e5);
     return d.toDateString() === now.toDateString() ? T("Bugun") : d.toDateString() === y.toDateString() ? T("Kecha") : fmtDay(d); };
-  const imgUrl = (id) => `${SHARE_API}/chat/img/${id}`;
+  const imgUrl = (id) => room === "main" ? `${SHARE_API}/chat/img/${id}` : `${SHARE_API}/chat/img/${room}/${id}`;
   const linkify = (s) => esc(s).replace(/https?:\/\/[^\s<]+/g, (u) => `<a href="#" onclick="openExt('${encodeURIComponent(u.replace(/&amp;/g, "&"))}');return false">${u}</a>`).replace(/\n/g, "<br>");
   const avatar = (m) => m.photo ? `<img class="ca" src="${esc(m.photo)}" alt="" referrerpolicy="no-referrer" onerror="this.outerHTML='<span class=\\'ca\\' style=\\'background:${COLORS[m.uid % COLORS.length]}\\'>${esc((m.name || "?")[0])}</span>'">`
     : `<span class="ca" style="background:${COLORS[m.uid % COLORS.length]}">${esc((m.name || "?")[0])}</span>`;
 
   /* ---------- the page ---------- */
   function Screen() {
+    room = roomNow();
     if (!initData()) return `${navbar("Chat")}<div class="card ap-empty">${chip("chat", "lg")}<p>${T("Chat faqat Telegram ichida ishlaydi. Mini ilovani bot orqali oching.")}</p></div>`;
     return `<div class="ch">
       <div class="ch-top"><button class="icon-btn" onclick="goBack()">${ic("back")}</button>
-        <div class="ch-title"><b>${T("Talabalar chati")}</b><small id="ch-st">${T("Ulanmoqda…")}</small></div><span class="ch-logo"><img src="img/logo-emblem-light.webp" alt=""></span></div>
+        <div class="ch-title"><b class="notr">${room === "main" ? T("Talabalar chati") : esc(store.get("mchat", {}).title || "Online meeting")}</b><small id="ch-st">${T("Ulanmoqda…")}</small></div><span class="ch-logo"><img src="img/logo-emblem-light.webp" alt=""></span></div>
       <div id="ch-pin"></div>
       <div class="ch-list" id="ch-list"><div class="ch-older" id="ch-older"></div><div id="ch-msgs"></div></div>
       <button class="ch-down" id="ch-down" onclick="chatBottom(true)" hidden>${ic("down")}<em id="ch-new"></em></button>
@@ -41,6 +45,8 @@ const Chat = (() => {
   }
   function mount() {
     if (!initData()) return;
+    room = roomNow();
+    if (wsRoom !== room) { try { ws && ws.close(); } catch {} ws = null; msgs = []; byId = {}; pin = null; reply = null; editing = null; noMore = false; }
     paintAll(); paintPin(); paintStatus(); paintCtx();
     const inp = $("ch-in");
     inp.addEventListener("input", () => { inp.style.height = "auto"; inp.style.height = Math.min(inp.scrollHeight, 120) + "px"; if (Date.now() - lastTypingSent > 3000 && inp.value.trim()) { lastTypingSent = Date.now(); send({ t: "typing" }); } });
@@ -54,12 +60,13 @@ const Chat = (() => {
     }, { passive: true });
     keyboard(); connect(); chatBottom();
   }
-  function unmount() { alive = false; clearTimeout(retryT); clearInterval(pingT); try { ws && ws.close(); } catch {} ws = null; if (vvOff) vvOff(); }
+  function unmount() { alive = false; wsRoom = null; clearTimeout(retryT); clearInterval(pingT); try { ws && ws.close(); } catch {} ws = null; if (vvOff) vvOff(); }
 
   /* ---------- connection ---------- */
   function connect() {
     alive = true; if (ws && ws.readyState <= 1) return;
-    ws = new WebSocket(SHARE_API.replace(/^http/, "ws") + "/chat/ws?init=" + encodeURIComponent(initData()));
+    wsRoom = room;
+    ws = new WebSocket(SHARE_API.replace(/^http/, "ws") + "/chat/ws?room=" + room + "&init=" + encodeURIComponent(initData()));
     ws.onopen = () => { retry = 0; clearInterval(pingT); pingT = setInterval(() => send({ t: "ping" }), 25000); };
     ws.onmessage = (e) => { let d; try { d = JSON.parse(e.data); } catch { return; } onData(d); };
     ws.onclose = () => { clearInterval(pingT); paintStatus(true); if (alive) { retryT = setTimeout(connect, Math.min(15000, 1000 * 2 ** retry++)); } };

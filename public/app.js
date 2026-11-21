@@ -16,6 +16,8 @@ window.amStore = store;
 
 const user = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) || { id: 0, first_name: "Aziz" };
 const startParam = tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param;
+// Telegram's signed initData (on localhost a saved test value can stand in for it, for development only)
+window.tgInit = () => (tg && tg.initData) || (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? store.get("dev_init", "") : "");
 // the Ustoz AI phone app. ustoz.ai links are registered app links (Android assetlinks, iOS apple-app-site-association),
 // so a course link opened outside Telegram opens that course in the app when it is installed, otherwise the website.
 const PLAY_URL = "https://play.google.com/store/apps/details?id=uz.uztozedu.ustozai";
@@ -144,7 +146,7 @@ const compassSVG = `<svg class="compass" viewBox="0 0 200 200" aria-hidden="true
 /* ---------- tab bar ---------- */
 const TABS = [["#/", "Asosiy", "home"], ["#/chat", "Chat", "chat"], ["#/vositalar", "Vositalar", "grid"], ["#/profil", "Profil", "user"]];
 function renderTabs(route) {
-  const hidden = ["#/kompas", "#/natija", "#/oyin", "#/duo", "#/chat"].includes(route);
+  const hidden = ["#/kompas", "#/natija", "#/oyin", "#/duo", "#/chat", "#/mchat"].includes(route);
   tabbar.classList.toggle("hide", hidden);
   tabbar.innerHTML = TABS.map(([h, l, i]) => `<a href="${h}" class="${h === route ? "on" : ""}">${ic(i)}<span>${l}</span></a>`).join("");
 }
@@ -154,7 +156,7 @@ window.goBack = () => { if (document.getElementById("sheet")) return closeSheet(
 
 /* ---------- screens ---------- */
 function Home() {
-  const tiles = [["clock", "Muddatlar", "#/muddatlar", "k1"], ["grid", "Foydali vositalar", "#/vositalar", "k3 g"]];
+  const tiles = [["video", "Online meeting", "#/meet", "k1"], ["clock", "Muddatlar", "#/muddatlar", "k2"], ["grid", "Foydali vositalar", "#/vositalar", "k3 g"]];
   return `
   <div class="topbar"><div class="brand"><img class="brand-logo" src="img/logo-emblem-light.webp" alt="" decoding="async"><span class="brand-name"><b>ALUMNI</b><small>MENTOR</small></span></div><span class="school" role="img" aria-label="${T("Maktab")}"><img src="img/school.webp" alt="" decoding="async"></span></div>
   <a class="hero2" href="#/unimatch">
@@ -167,7 +169,7 @@ function Home() {
   <a class="banner studio-bn" href="#/ariza">
     <span class="sbn-ic">${ic("cap")}</span><span class="banner-sep"></span><span class="sbn-t"><b>Application Studio</b><small>${T("Profil, insholar, tavsiyalar va topshirish")}</small></span><span class="banner-go">${ic("chev")}</span>
   </a>
-  <div class="grid4">${tiles.map(([i, l, h, k]) => `<a class="tile4 ${k}" href="${h}"><i class="tile-ic">${ic(i)}</i><span>${l}</span>${i === "grid" ? `<i class="tile-nb" data-nb></i>` : ""}</a>`).join("")}</div>
+  <div class="grid4">${tiles.map(([i, l, h, k]) => `<a class="tile4 ${k}" href="${h}"><i class="tile-ic">${ic(i)}</i><span>${l}</span>${i === "grid" ? `<i class="tile-nb" data-nb></i>` : i === "video" ? `<i class="tile-nb" data-mb></i>` : ""}</a>`).join("")}</div>
 `;
 }
 
@@ -277,7 +279,8 @@ const ROUTES = {
   "#/muddatlar": () => needScript("ariza.js", "Ariza", "Deadlines", T("Muddatlar")),
   "#/unimatch": () => needScript("study.js", "Study", "UniMatch", "UniMatch"), "#/unimatch-natija": () => needScript("study.js", "Study", "UniMatchResult", "UniMatch"),
   "#/ariza": () => needScript("ariza.js", "Ariza", "Screen", "Application Studio"),
-  "#/chat": () => needScript("chat.js", "Chat", "Screen", "Chat"), "#/admin": () => AdminScreen(), "#/kashf": () => Soon("kashf"),
+  "#/chat": () => needScript("chat.js", "Chat", "Screen", "Chat"), "#/mchat": () => needScript("chat.js", "Chat", "Screen", "Chat"),
+  "#/meet": () => Meet.Screen(), "#/admin": () => AdminScreen(), "#/kashf": () => Soon("kashf"),
 };
 let gameOn = false;
 // the 3D game is loaded on its own, after Home: it is not needed to open the app
@@ -328,8 +331,9 @@ function render() {
   const route = ROUTES[location.hash] ? location.hash : location.hash.startsWith("#/kurs/") ? "#/kurs" : "#/";
   if (gameOn && route !== "#/oyin" && typeof Game !== "undefined") { Game.unmount(); gameOn = false; }
   document.body.classList.toggle("fit", route === "#/");     // Home fills the screen exactly, no scrolling
-  document.body.classList.toggle("chat-on", route === "#/chat");
-  if (route !== "#/chat" && window.Chat) Chat.unmount();
+  const isChat = route === "#/chat" || route === "#/mchat";
+  document.body.classList.toggle("chat-on", isChat);
+  if (!isChat && window.Chat) Chat.unmount();
   const newPage = route !== shownRoute; shownRoute = route;
   app.innerHTML = ROUTES[route]();
   if (route === "#/oyin") {
@@ -342,7 +346,8 @@ function render() {
   if (newPage) { app.classList.remove("enter"); void app.offsetWidth; app.classList.add("enter"); }
   renderTabs(route === "#/kurs" ? "#/kurslar" : route);
   if (route === "#/") { bindBannerWheel(); bannerOrbit(); }
-  if (route === "#/chat" && window.Chat) Chat.mount();
+  if (isChat && window.Chat) Chat.mount();
+  if (route === "#/" && window.Meet) Meet.paintBadge();
   if (route === "#/duo") bindDuo(); else if (duoSubs.length) { duoSubs.forEach((u) => u()); duoSubs = []; }
   try { route === "#/" ? tg.BackButton.hide() : tg.BackButton.show(); } catch {}
   track(route);
@@ -371,7 +376,7 @@ window.addEventListener("DOMContentLoaded", () => {
   try { if (tg) { requestAnimationFrame(() => tg.ready()); setTimeout(() => tg.ready(), 400); } } catch {}
   // opened from a shared section link (t.me/<bot>?startapp=g_cefr): go there and glow it; "?shared=" works in a browser too
   const shared = startParam || new URLSearchParams(location.search).get("shared");
-  if (shared && /^[gu]_[A-Za-z0-9_-]{1,40}$/.test(shared)) setTimeout(() => openShared(shared), 500);
+  if (shared && /^[gumr]_[A-Za-z0-9_-]{1,40}$/.test(shared)) setTimeout(() => openShared(shared), 500);
   // course data is fetched quietly in the background, so the Kurslar page opens complete in one go
   // course data and the CV maker come when the phone is idle (or at once when their page opens)
   const idle = (f, ms) => setTimeout(() => (window.requestIdleCallback || setTimeout)(f), ms);
@@ -587,6 +592,7 @@ window.shareSec = (key, title) => {
 function openShared(key) {
   const [kind, id] = [key.slice(0, 1), key.slice(2)];
   const plan = kind === "g" ? { hash: "#/unis", prep: () => store.set("uni_tab", "grant"), find: () => { if (window.uniTab && !document.querySelector(".sd-g") && document.querySelector(".sd-tabs")) uniTab("grant"); return document.getElementById("g-" + id); } }
+    : kind === "m" || kind === "r" ? { hash: "#/meet", prep: () => store.set("meet_tab", kind === "m" ? "meet" : "req"), find: () => { const el = document.getElementById((kind === "m" ? "mt-" : "rq-") + id); if (!el && window.Meet && !openShared._l) { openShared._l = 1; Meet.load(); } return el; } }
     : kind === "u" ? { hash: "#/ariza", prep: () => store.set("studio_tab", "top"), find: () => window.uniOpen && document.querySelector(".sd-uni") && document.getElementById("app") } : null;
   if (!plan) return;
   if (plan.prep) plan.prep();

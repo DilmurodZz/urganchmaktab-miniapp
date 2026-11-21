@@ -16,7 +16,7 @@ function track(route) {
 }
 
 /* ---------- statistics card ---------- */
-const SECTION_NAME = () => ({ kompas: T("Kasb Kompasi"), natija: T("Kompas natijasi"), kurslar: T("Kurslar"), kurs: T("Kurs sahifalari"), tanlov: T("Tanlov"), profil: T("Profil"),
+const SECTION_NAME = () => ({ kompas: T("UniMatch"), natija: T("Kompas natijasi"), kurslar: T("Kurslar"), kurs: T("Kurs sahifalari"), tanlov: T("Tanlov"), profil: T("Profil"),
   oyin: T("O'yin"), duo: T("Do'st bilan o'yin"), vositalar: T("Foydali vositalar"), cv: T("CV va rezyume"), chegirma: T("Chegirmalar") });
 let appStats = store.get("app_stats", null), statsAt = 0;
 function loadStats(force) {
@@ -101,7 +101,7 @@ function AdminScreen() {
   ${box("bc", T("Barcha foydalanuvchilarga xabar"), T("Xabar bot orqali har bir foydalanuvchining shaxsiy chatiga boradi."))}
   ${box("ch", T("Kanalga post: {c}", { c: (adminInfo && adminInfo.channel) || "@ustozai" }), T("Bot kanalda admin bo'lishi kerak (Post messages huquqi bilan)."),
     `<div class="adm-tpl"><small>${T("Tayyor matnlar:")}</small>
-      <button onclick="admTpl('app')">${T("Mini ilova")}</button><button onclick="admTpl('cv')">${T("CV yaratish")}</button><button onclick="admTpl('kompas')">${T("Kasb Kompasi")}</button>
+      <button onclick="admTpl('app')">${T("Mini ilova")}</button><button onclick="admTpl('cv')">${T("CV yaratish")}</button><button onclick="admTpl('kompas')">${T("UniMatch")}</button>
       <select class="notr" onchange="admTpl('course', this.value)"><option value="">${T("Kursni ulashish…")}</option>${courses.slice().sort((a, b) => (b.students || 0) - (a.students || 0)).map((c) => `<option value="${c.id}">${esc(c.title.slice(0, 60))}</option>`).join("")}</select>
     </div>`)}
   <div class="card box">

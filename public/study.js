@@ -162,7 +162,7 @@ const Study = (() => {
   };
 
   /* ================= Top 300 universities + grants ================= */
-  const COUNTRY = { "United States": "AQSh", "United Kingdom": "Buyuk Britaniya", Germany: "Germaniya", China: "Xitoy", Australia: "Avstraliya", Canada: "Kanada", Netherlands: "Niderlandiya", "South Korea": "Janubiy Koreya", "Hong Kong": "Gonkong", Sweden: "Shvetsiya", Italy: "Italiya", Switzerland: "Shveytsariya", Japan: "Yaponiya", Belgium: "Belgiya", France: "Fransiya", Denmark: "Daniya", Austria: "Avstriya", Spain: "Ispaniya", Ireland: "Irlandiya", Finland: "Finlandiya", Norway: "Norvegiya", Malaysia: "Malayziya", Singapore: "Singapur", Qatar: "Qatar", Macao: "Makao", "Saudi Arabia": "Saudiya Arabistoni", Israel: "Isroil", "United Arab Emirates": "BAA", Taiwan: "Tayvan", Brazil: "Braziliya", "South Africa": "Janubiy Afrika", "New Zealand": "Yangi Zelandiya", Hungary: "Vengriya", Luxembourg: "Lyuksemburg", India: "Hindiston", Bahrain: "Bahrayn" };
+  const COUNTRY = COUNTRY_UZ;
   const cn = (c) => T(COUNTRY[c] || c);
   const CRIT = () => [["overall", T("Umumiy reyting"), 3], ["teaching", T("O'qitish sifati"), 4], ["research", T("Tadqiqot muhiti"), 5], ["citations", T("Tadqiqot sifati"), 6], ["industry", T("Sanoat bilan aloqa"), 7], ["international", T("Xalqaro muhit"), 8]];
   let uni = null, uniFail = false, uniLoading = false;
@@ -197,6 +197,7 @@ const Study = (() => {
     <div id="sd-uni">${uniList()}</div>
     <p class="note">${T("Manba: Times Higher Education, World University Rankings 2027. Ballar 100 ballik shkalada.")}</p>` : grantsHTML()}`;
   }
+  window.uniName = (i) => uni.rows[i][1]; window.uniCountry = (i) => uni.rows[i][2]; window.uniSite = (i) => uni.rows[i][14] || "";
   window.uniTab = (k) => { uf.tab = k; store.set("uni_tab", k); haptic("light"); render(); };
   window.uniF = (k, v) => { uf[k] = v; uf.more = 50; refreshUni(); };
   window.uniMore = () => { uf.more += 50; refreshUni(); };
@@ -209,6 +210,7 @@ const Study = (() => {
       <div class="sd-bars">${CRIT().map(bar).join("")}</div>
       <div class="sd-stats">${r[15] != null ? `<span class="acc"><b>${r[15]}%</b><small>${T("qabul darajasi")}${r[16] ? ` (${r[16]})` : ""}</small></span>` : `<span class="acc"><b>${T("yo'q")}</b><small>${T("qabul darajasi")}</small></span>`}${stat(r[9], T("talaba"))}${stat(r[10], T("1 o'qituvchiga talaba"))}${stat(r[11], T("xorijiy talabalar"))}${stat(r[12], T("ayollar : erkaklar"))}</div>
       ${r[14] ? `<button class="btn-primary sd-site" onclick="openExt('${encodeURIComponent(r[14])}')">${ic("globe")} ${T("Rasmiy sayt")}: ${esc(r[14].replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, ""))}</button>` : ""}
+      <button class="btn-primary sd-addapp" onclick="appsAdd({ name: uniName(${i}), country: uniCountry(${i}), site: uniSite(${i}) }) && closeSheet()">${ic("plus")} ${T("Arizalarimga qo'shish")}</button>
       <button class="btn-ghost sd-share wide" onclick="shareSec('u_${i}', '${esc(r[1]).replace(/'/g, "")}')">${ic("send")} ${T("Do'stga ulashish")}</button>
       <button class="btn-ghost sd-thebtn" onclick="openExt('${encodeURIComponent("https://www.timeshighereducation.com" + r[13])}')">${ic("chart")} ${T("THE saytida ko'rish")}</button>
       <p class="note">${T("Qabul darajasi: arizachilarning necha foizi qabul qilingani (Wikidata ma'lumoti, oxirgi mavjud yil).")}</p></div>`);
@@ -305,6 +307,125 @@ const Study = (() => {
       + `<p class="note">${T("Ma'lumotlar rasmiy manbalar asosida 2026-yil noyabr holatiga tayyorlandi.")}</p>`;
   }
 
-  return { DTM, IELTS, Unis };
+  /* ================= UniMatch: which of the Top 300 fit this student ================= */
+  // A transparent estimate, not a promise: the student's profile becomes a strength score (0-100),
+  // every university gets a selectivity score from its THE rank and, where known, its acceptance rate.
+  // Their difference puts the university in one of three groups: ambitious (reach), fitting (target), safe (safety).
+  const ENG = {
+    ielts: { t: "IELTS", v: [9, 8.5, 8, 7.5, 7, 6.5, 6, 5.5, 5, 4.5], eq: (x) => x },
+    toefl: { t: "TOEFL iBT", v: [118, 115, 110, 102, 94, 79, 60, 46, 35], eq: (x) => (x >= 118 ? 9 : x >= 115 ? 8.5 : x >= 110 ? 8 : x >= 102 ? 7.5 : x >= 94 ? 7 : x >= 79 ? 6.5 : x >= 60 ? 6 : x >= 46 ? 5.5 : 5) },
+    duolingo: { t: "Duolingo", v: [155, 145, 135, 125, 115, 105, 95], eq: (x) => (x >= 155 ? 8.5 : x >= 145 ? 8 : x >= 135 ? 7.5 : x >= 125 ? 7 : x >= 115 ? 6.5 : x >= 105 ? 6 : 5.5) },
+    cefr: { t: "CEFR (milliy)", v: ["C1", "B2", "B1"], eq: (x) => ({ C1: 7, B2: 6, B1: 5 })[x] || 0 },
+  };
+  const ACH = () => [["intl", T("Xalqaro olimpiada medali"), 25], ["nat", T("Respublika olimpiadasi g'olibi"), 14], ["res", T("Ilmiy maqola yoki tadqiqot"), 10],
+    ["lead", T("Liderlik va volontyorlik"), 7], ["work", T("Ish tajribasi yoki amaliyot"), 8], ["proj", T("Loyiha, startap yoki portfolio"), 7], ["sport", T("Sport yoki san'atdagi yutuqlar"), 4]];
+  const PRI = () => [["teach", T("O'qitish sifati"), 4], ["res", T("Tadqiqot"), 5], ["ind", T("Sanoat va ish"), 7], ["intl", T("Xalqaro muhit"), 8], ["easy", T("Qabul imkoniyati"), 0]];
+  const UM_COUNTRIES = ["United States", "United Kingdom", "Canada", "Germany", "Netherlands", "Australia", "South Korea", "Japan", "China", "Singapore", "Switzerland", "Italy", "France", "Sweden", "Hong Kong", "Malaysia"];
+  const SAT = () => [[0, T("Topshirmaganman")], [1100, "1000-1190"], [1250, "1200-1290"], [1350, "1300-1390"], [1450, "1400-1490"], [1530, "1500+"]];
+  let um = Object.assign({ lvl: "bak", gpa: 4.5, eng: "ielts", engv: 6.5, sat: 0, ach: [], pri: [], cty: [] }, store.get("um", {}));
+  const saveUm = () => store.set("um", um);
+  const umF = { cat: "all", more: 30 };
+  const rankNum = (r) => parseInt(String(r[0]).replace(/\D+/g, " ").trim(), 10) || 300;
+  const engEq = (p = um) => (p.eng === "none" ? 0 : (ENG[p.eng] || ENG.ielts).eq(p.engv));
+  function strength(p = um) {
+    const mag = p.lvl === "mag";
+    const E = clamp((engEq(p) - 5) / 3, 0, 1) * 25;
+    const G = clamp((+p.gpa - 3.5) / 1.5, 0, 1) * (mag ? 35 : 20);
+    const A = mag ? 0 : p.sat ? clamp((p.sat - 1050) / 500, 0, 1) * 25 : 8;
+    const C = Math.min(mag ? 40 : 30, ACH().filter(([k]) => p.ach.includes(k)).reduce((s, a) => s + a[2], 0));
+    return Math.round(E + G + A + C);
+  }
+  const selectivity = (r) => {
+    const n = rankNum(r), Dr = 100 - Math.pow(Math.log(n) / Math.log(300), 1.6) * 68;
+    return r[15] != null ? .55 * Dr + .45 * (100 - clamp(r[15], 2, 90) * .75) : Dr;
+  };
+  const engNeed = (r) => { const n = rankNum(r); return n <= 50 ? 7 : n <= 150 ? 6.5 : 6; };
+  const CATS = ["safe", "fit", "reach", "hard"];
+  function judge(r, p = um, S = strength(p)) {
+    const diff = S - selectivity(r);
+    let c = diff >= 8 ? 0 : diff >= -6 ? 1 : diff >= -22 ? 2 : 3;
+    const eng = engEq(p), need = engNeed(r);
+    if (eng < need - .5) c = 3; else if (eng < need) c = Math.min(3, c + 1);
+    return { cat: CATS[c], pct: clamp(Math.round(55 + diff * 1.8), 8, 96), need, short: eng < need };
+  }
+  function matchList(p = um) {
+    const S = strength(p);
+    return uni.rows.map((r, i) => ({ r, i, ...judge(r, p, S) }))
+      .filter((x) => !p.cty.length || p.cty.includes(x.r[2]));
+  }
+  const prefScore = (r) => { const keys = PRI().filter(([k, , idx]) => um.pri.includes(k) && idx); return keys.length ? keys.reduce((s, [, , idx]) => s + (r[idx] || 0), 0) / keys.length : 0; };
+  const reachable = (p) => matchList(p).filter((x) => x.cat === "fit" || x.cat === "safe").length;
+
+  function UniMatch() {
+    loadUni();
+    const mag = um.lvl === "mag", E = ENG[um.eng];
+    const chips = (list, key) => `<div class="um-chips">${list.map(([k, t]) => `<button class="${um[key].includes(k) ? "on" : ""}" onclick="umToggle('${key}','${k}')">${um[key].includes(k) ? ic("check") : ""}${t}</button>`).join("")}</div>`;
+    return `${navbar("UniMatch")}
+    <div class="um-hero"><span class="um-badge">Top 300 · THE 2027</span><h2>${T("Sizga mos universitetlarni topamiz")}</h2>
+      <p>${T("Baholaringiz, sertifikatlaringiz va yutuqlaringizni kiriting: UniMatch dunyoning eng yaxshi 300 ta universitetini sizning imkoniyatingizga qarab saralaydi.")}</p></div>
+    <div class="card um-step"><h4><i>1</i>${T("Qaysi bosqichga topshirasiz?")}</h4>
+      <div class="seg um-seg">${[["bak", T("Bakalavriat")], ["mag", T("Magistratura")]].map(([k, t]) => `<button class="${um.lvl === k ? "on" : ""}" onclick="umSet('lvl','${k}')">${t}</button>`).join("")}</div></div>
+    <div class="card um-step"><h4><i>2</i>${mag ? T("Diplom o'rtacha bahosi") : T("Attestat o'rtacha bahosi")}<b class="um-val" id="um-gpa">${(+um.gpa).toFixed(1)}</b></h4>
+      <input type="range" min="3" max="5" step="0.1" value="${um.gpa}" oninput="umGpa(this.value)"><div class="um-scale"><span>3.0</span><span>${T("5 ballik tizim")}</span><span>5.0</span></div></div>
+    <div class="card um-step"><h4><i>3</i>${T("Ingliz tili sertifikati")}</h4>
+      <div class="um-row"><select onchange="umSet('eng',this.value)"><option value="none" ${um.eng === "none" ? "selected" : ""}>${T("Hozircha yo'q")}</option>${Object.entries(ENG).map(([k, e]) => `<option value="${k}" ${um.eng === k ? "selected" : ""}>${T(e.t)}</option>`).join("")}</select>
+      ${E ? `<select onchange="umSet('engv',this.value)">${E.v.map((v) => `<option value="${v}" ${String(um.engv) === String(v) ? "selected" : ""}>${typeof v === "number" && um.eng === "ielts" ? v.toFixed(1) : v}</option>`).join("")}</select>` : ""}</div>
+      ${um.eng !== "none" && um.eng !== "ielts" ? `<small class="um-hint">${T("IELTS bo'yicha taxminan {n}", { n: engEq().toFixed(1) })}</small>` : ""}</div>
+    ${mag ? "" : `<div class="card um-step"><h4><i>4</i>SAT</h4>
+      <div class="um-chips one">${SAT().map(([v, t]) => `<button class="${+um.sat === v ? "on" : ""}" onclick="umSet('sat',${v})">${t}</button>`).join("")}</div>
+      <small class="um-hint">${T("AQSh universitetlari uchun ayniqsa muhim; ko'p universitetlarda ixtiyoriy.")}</small></div>`}
+    <div class="card um-step"><h4><i>${mag ? 4 : 5}</i>${T("Yutuqlaringiz")}</h4>${chips(ACH(), "ach")}</div>
+    <div class="card um-step"><h4><i>${mag ? 5 : 6}</i>${T("Siz uchun nima muhim?")}</h4>${chips(PRI(), "pri")}</div>
+    <div class="card um-step"><h4><i>${mag ? 6 : 7}</i>${T("Qaysi davlatlarda o'qimoqchisiz?")}</h4>
+      ${chips(UM_COUNTRIES.map((c) => [c, cn(c)]), "cty")}<small class="um-hint">${T("Hech birini tanlamasangiz, barcha davlatlar ko'rsatiladi.")}</small></div>
+    <button class="btn-primary um-go" onclick="umRun()">${ic("target")} ${T("Mos universitetlarni ko'rish")}</button>`;
+  }
+  function UniMatchResult() {
+    loadUni();
+    if (!uni) return `${navbar("UniMatch")}${uniFail ? `<p class="note">${T("Ma'lumotni yuklab bo'lmadi. Internetni tekshirib, qayta oching.")}</p>` : spinner()}`;
+    const S = strength(), all = matchList(), shown = all.filter((x) => x.cat !== "hard");
+    const n = (c) => all.filter((x) => x.cat === c).length;
+    const order = { fit: 0, reach: 1, safe: 2 };
+    let rows = shown.filter((x) => umF.cat === "all" || x.cat === umF.cat);
+    rows.sort(um.pri.includes("easy") ? (a, b) => b.pct - a.pct
+      : (a, b) => (umF.cat === "all" ? order[a.cat] - order[b.cat] : 0) || (prefScore(b.r) - prefScore(a.r)) || rankNum(a.r) - rankNum(b.r));
+    const level = S >= 75 ? T("Juda kuchli") : S >= 55 ? T("Kuchli") : S >= 35 ? T("O'rtacha") : T("Boshlang'ich");
+    // what would open the most doors: a better English score, an SAT, an olympiad or research result
+    const base = reachable(um), tips = [];
+    const tryP = (ch, text) => { const k = reachable(Object.assign({}, um, ch)) - base; if (k > 0) tips.push([k, text(k)]); };
+    if (engEq() < 7.5) tryP({ eng: "ielts", engv: engEq() < 6.5 ? 6.5 : engEq() < 7 ? 7 : 7.5 }, (k) => T("IELTS {b} bo'lsa, yana {n} ta universitet mos keladi", { b: (engEq() < 6.5 ? 6.5 : engEq() < 7 ? 7 : 7.5).toFixed(1), n: k }));
+    if (um.lvl === "bak" && (!um.sat || um.sat < 1450)) tryP({ sat: 1450 }, (k) => T("SAT 1400+ natijasi yana {n} ta universitetni ochadi", { n: k }));
+    if (!um.ach.includes("res")) tryP({ ach: um.ach.concat("res") }, (k) => T("Ilmiy maqola yoki tadqiqot yana {n} ta universitet imkoniyatini beradi", { n: k }));
+    tips.sort((a, b) => b[0] - a[0]);
+    const tag = { reach: T("Ambitsiyali"), fit: T("Mos"), safe: T("Ishonchli") };
+    return `${navbar("UniMatch")}
+    <div class="um-res">
+      <div class="um-ring"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" class="bg"/><circle cx="60" cy="60" r="52" class="fg" style="stroke-dasharray:${(S / 100 * 326.7).toFixed(1)} 326.7"/></svg><div><b>${S}</b><small>/ 100</small></div></div>
+      <div class="um-res-t"><small>${T("Profilingiz kuchi")}</small><h3>${level}</h3><p>${T("{n} ta universitet sizga mos yoki ishonchli", { n: n("fit") + n("safe") })}</p>
+        <button class="um-edit" onclick="location.hash='#/unimatch'">${ic("pen")} ${T("Ma'lumotlarni o'zgartirish")}</button></div>
+    </div>
+    <div class="um-sum">${[["reach", "ic-reach"], ["fit", ""], ["safe", ""]].map(([c]) => `<span class="${c}"><b>${n(c)}</b>${tag[c]}</span>`).join("")}</div>
+    ${tips.length ? `<div class="card um-tips"><h4>${ic("trend")} ${T("Imkoniyatingizni qanday oshirish mumkin")}</h4>${tips.slice(0, 3).map(([, t]) => `<p>${ic("chev")}${t}</p>`).join("")}</div>` : ""}
+    <div class="seg um-filter">${[["all", T("Barchasi")], ["fit", tag.fit], ["reach", tag.reach], ["safe", tag.safe]].map(([k, t]) => `<button class="${umF.cat === k ? "on" : ""}" onclick="umCat('${k}')">${t}</button>`).join("")}</div>
+    <div class="um-list">${rows.slice(0, umF.more).map((x) => `<button class="um-uni ${x.cat}" onclick="uniOpen(${x.i})">
+        <span class="sd-rank">${esc(x.r[0])}</span><span class="notr"><b>${esc(x.r[1])}</b><small>${esc(cn(x.r[2]))}${x.short ? ` · <em>${T("IELTS {n} kerak", { n: x.need.toFixed(1) })}</em>` : ""}</small></span>
+        <span class="um-pct"><b>${x.pct}%</b><i>${tag[x.cat]}</i></span></button>`).join("") || `<div class="card um-empty">${chip("search", "lg")}<p>${T("Hozircha mos universitet topilmadi. Davlatlar tanlovini kengaytiring yoki ingliz tili natijangizni yangilang.")}</p></div>`}</div>
+    ${rows.length > umF.more ? `<button class="btn-ghost" onclick="umMore()">${T("Yana ko'rsatish ({n})", { n: rows.length - umF.more })}</button>` : ""}
+    <button class="btn-primary um-apply" onclick="location.hash='#/ariza'">${ic("send")} ${T("Ariza topshirishga tayyorlanish")}</button>
+    <p class="note">${T("Bu taxminiy baho: THE 2027 reytingi, qabul darajasi va kiritgan ma'lumotlaringiz asosida hisoblanadi. Yakuniy qarorni universitet insho, tavsiyanomalar va boshqa hujjatlarga qarab qabul qiladi.")}</p>`;
+  }
+  const umRefresh = () => { const y = scrollY; render(); scrollTo(0, y); };
+  window.umSet = (k, v) => {
+    um[k] = k === "sat" ? +v : k === "engv" ? (isNaN(+v) ? v : +v) : v;
+    if (k === "eng" && ENG[v]) um.engv = ENG[v].v[Math.min(4, ENG[v].v.length - 1)];
+    saveUm(); haptic("light"); umRefresh();
+  };
+  window.umGpa = (v) => { um.gpa = +v; saveUm(); const el = document.getElementById("um-gpa"); if (el) el.textContent = (+v).toFixed(1); };
+  window.umToggle = (key, k) => { const a = um[key]; um[key] = a.includes(k) ? a.filter((x) => x !== k) : a.concat(k); saveUm(); haptic("light"); umRefresh(); };
+  window.umRun = () => { haptic("medium"); umF.cat = "all"; umF.more = 30; location.hash = "#/unimatch-natija"; };
+  window.umCat = (k) => { umF.cat = k; umF.more = 30; haptic("light"); umRefresh(); };
+  window.umMore = () => { umF.more += 30; umRefresh(); };
+
+  return { DTM, IELTS, Unis, UniMatch, UniMatchResult };
 })();
 window.Study = Study;

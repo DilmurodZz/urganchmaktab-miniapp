@@ -1,0 +1,80 @@
+/* ---------- Alumni Mentor opening intro (intro.js) ---------- */
+body.ami-on { overflow: hidden; }
+.ami { position: fixed; inset: 0; z-index: 200; overflow: hidden; cursor: pointer; user-select: none; -webkit-user-select: none;
+  background: radial-gradient(120% 80% at 50% 36%, #3D1779 0%, #1C0A3A 46%, #0A0416 100%); transition: opacity .6s ease; }
+.ami.out { opacity: 0; pointer-events: none; }
+
+/* slow gold dust drifting up */
+.ami-dust { position: absolute; inset: -20% 0 0; opacity: .7; pointer-events: none; animation: amiDust 14s linear infinite;
+  background-image: radial-gradient(1.4px 1.4px at 12% 22%, #F6DCA0, transparent), radial-gradient(1px 1px at 27% 64%, #fff, transparent),
+    radial-gradient(1.6px 1.6px at 44% 38%, #E3B866, transparent), radial-gradient(1px 1px at 61% 80%, #F6DCA0, transparent),
+    radial-gradient(1.3px 1.3px at 78% 30%, #fff, transparent), radial-gradient(1.5px 1.5px at 90% 70%, #E3B866, transparent),
+    radial-gradient(1px 1px at 6% 86%, #fff, transparent), radial-gradient(1.2px 1.2px at 53% 10%, #F6DCA0, transparent);
+  background-size: 100% 60%; }
+.ami-dust2 { opacity: .45; animation-duration: 22s; transform: scale(1.4); }
+@keyframes amiDust { from { transform: translateY(0); } to { transform: translateY(-60%); } }
+.ami-dust2 { animation-name: amiDust2; }
+@keyframes amiDust2 { from { transform: scale(1.4) translateY(0); } to { transform: scale(1.4) translateY(-40%); } }
+
+/* a soft golden horizon under the cards */
+.ami-floor { position: absolute; left: -20%; right: -20%; top: 71%; height: 46%; pointer-events: none;
+  background: radial-gradient(50% 40% at 50% 0%, rgba(227,184,102,.28), rgba(227,184,102,.06) 55%, transparent 75%); }
+.ami-floor::before { content: ""; position: absolute; left: 22%; right: 22%; top: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(246,220,160,.85), transparent); }
+
+.ami-src { position: absolute; left: 0; right: 0; top: calc(26px + var(--tg-safe-top, 0px)); text-align: center;
+  font: 600 10.5px/1 "Cinzel", Georgia, serif; letter-spacing: 3px; text-transform: uppercase; color: rgba(246,220,160,.7);
+  animation: amiFade .9s .2s both; transition: opacity .5s; }
+.ami.end .ami-src { opacity: 0; }
+
+/* the 3D stage and the university cards */
+.ami-stage { position: absolute; inset: 0; perspective: 1100px; perspective-origin: 50% 34%; transform-style: preserve-3d; }
+.ami-card { position: absolute; left: 50%; top: 53%; width: 236px; height: 300px; margin: -150px 0 0 -118px; box-sizing: border-box;
+  padding: 22px 18px 20px; border-radius: 24px; text-align: center; color: #fff; overflow: hidden;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+  background: linear-gradient(160deg, #401E7A, #1B0B38); border: 1px solid rgba(227,184,102,.28);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 30px 60px -22px rgba(0,0,0,.85);
+  opacity: 0; transform: translate3d(0, 60px, -1500px); will-change: transform, opacity;
+  transition: transform 1s cubic-bezier(.16,.84,.24,1), opacity .8s ease, filter .8s ease, border-color .6s, box-shadow .6s; }
+.ami-card.front { border-color: rgba(246,220,160,.7);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 34px 70px -24px rgba(0,0,0,.9), 0 0 46px -8px rgba(227,184,102,.42); }
+.ami-shine { position: absolute; inset: -40% -60%; pointer-events: none; opacity: 0;
+  background: linear-gradient(105deg, transparent 42%, rgba(255,240,205,.22) 50%, transparent 58%); transform: translateX(-60%); }
+.ami-card.front .ami-shine { animation: amiShine 1.3s .25s ease-out both; }
+@keyframes amiShine { 0% { opacity: 1; transform: translateX(-60%); } 100% { opacity: 1; transform: translateX(60%); } }
+
+.ami-tier { display: flex; align-items: baseline; gap: 6px; font-family: "Cinzel", Georgia, serif; line-height: 1; }
+.ami-tier small { font-size: 14px; font-weight: 600; letter-spacing: 3px; color: #E3B866; }
+.ami-tier b { font-size: 50px; font-weight: 700; letter-spacing: 1px;
+  background: linear-gradient(180deg, #FFF1CC 10%, #E3B866 60%, #B8862F); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.ami-crest { width: 74px; height: 85px; margin: 14px 0 12px; filter: drop-shadow(0 10px 16px rgba(0,0,0,.45)); }
+.ami-card h3 { margin: 0; font-size: 17px; font-weight: 700; line-height: 1.25; letter-spacing: -.1px; }
+.ami-card p { margin: 7px 0 0; font-size: 12.5px; color: rgba(233,222,255,.66); letter-spacing: .3px; }
+
+/* the logo at the end */
+.ami-end { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+  padding: 0 28px 40px; pointer-events: none; }
+.ami-halo { position: absolute; left: 50%; top: 44%; width: 420px; height: 420px; margin: -210px 0 0 -210px; border-radius: 50%; opacity: 0;
+  background: radial-gradient(closest-side, rgba(227,184,102,.32), rgba(139,92,246,.18) 55%, transparent 100%); transform: scale(.6); }
+.ami-logo { position: relative; width: min(78vw, 330px); height: auto; opacity: 0; transform: translateY(26px) scale(.92); filter: blur(6px);
+  will-change: transform, opacity, filter; }
+.ami-tag { position: relative; font: 600 12px/1.4 "Cinzel", Georgia, serif; letter-spacing: 2.6px; text-transform: uppercase; color: #F6DCA0; text-align: center; opacity: 0; }
+.ami-bar { position: relative; display: block; width: 120px; height: 2px; border-radius: 2px; background: rgba(255,255,255,.1); overflow: hidden; opacity: 0; }
+.ami-bar em { display: block; height: 100%; background: linear-gradient(90deg, #B8862F, #F6DCA0, #B8862F); transform-origin: left; transform: scaleX(0); }
+.ami.end .ami-halo { animation: amiHalo 2.6s ease-out both; }
+.ami.end .ami-logo { animation: amiLogo 1.2s cubic-bezier(.16,.84,.24,1) both; }
+.ami.end .ami-tag { animation: amiFade .8s .55s both; }
+.ami.end .ami-bar { animation: amiFade .5s .8s both; }
+.ami.end .ami-bar em { animation: amiBar 1.6s 1s ease-in-out both; }
+@keyframes amiHalo { 0% { opacity: 0; transform: scale(.6); } 40% { opacity: 1; } 100% { opacity: .85; transform: scale(1.05); } }
+@keyframes amiLogo { to { opacity: 1; transform: none; filter: none; } }
+@keyframes amiFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes amiBar { to { transform: scaleX(1); } }
+
+.ami-skip { position: absolute; left: 50%; bottom: calc(26px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+  padding: 9px 18px; border-radius: 999px; font-size: 13px; font-weight: 500; color: rgba(243,237,255,.78);
+  background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12); animation: amiFade .6s 1s both; }
+.ami.end .ami-skip { opacity: 0; transition: opacity .4s; }
+
+@media (min-height: 760px) { .ami-card { width: 252px; height: 322px; margin: -161px 0 0 -126px; } }
+@media (prefers-reduced-motion: reduce) { .ami *, .ami { animation-duration: .01s !important; animation-delay: 0s !important; transition: none !important; } }

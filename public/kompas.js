@@ -195,7 +195,7 @@ const Compass = (() => {
   const theme = (t) => THEMES[t];
   function Intro() {
     const going = st.step >= 0 && st.step < N;
-    return `${navbar(T("Kasb Kompasi"))}
+    return `${navbar(T("UniMatch"))}
     <div class="kp-intro">
       <img class="kp-art" src="img/hero-compass.webp" alt="" decoding="async">
       <h2>${T("Sizga qaysi kurs mos?")}</h2>
@@ -214,7 +214,7 @@ const Compass = (() => {
   // the answer is only kept on screen (green) until the student presses the green "next" button
   const nextBtn = (ready, i) => `<button class="btn-primary kp-next" ${ready ? "" : "disabled"} onclick="kpNext()">${i + 1 >= N ? T("Natijani ko'rish") : T("Keyingi savol")} ${ic("chev")}</button>`;
   function Question() {
-    const i = st.step, head = `${navbar(T("Kasb Kompasi"))}
+    const i = st.step, head = `${navbar(T("UniMatch"))}
       <div class="kp-top"><span>${i < ITEMS.length ? T("Qiziqishlar") : T("Kurs tanlash shartlari")}</span><em>${i + 1} / ${N}</em></div>
       <div class="progress kp-prog"><span style="width:${(i / N) * 100}%"></span></div>`;
     if (i < ITEMS.length) {
@@ -293,7 +293,7 @@ const Compass = (() => {
   function Result() {
     const done = store.get("kp_done", null);
     if (!done) { location.replace("#/kompas"); return ""; }
-    if (!catalog()) { const p = Kurslar.load(); if (p) p.then(() => { if (location.hash === "#/natija") render(); }); return `${navbar(T("Kasb Kompasi"))}${spinner()}`; }
+    if (!catalog()) { const p = Kurslar.load(); if (p) p.then(() => { if (location.hash === "#/natija") render(); }); return `${navbar(T("UniMatch"))}${spinner()}`; }
     const r = recommend({ a: done.a, f: done.f }, more);
     if (!r.picks.length && more) { more = 0; return Result(); }
     const [t1, t2, t3] = r.top, gap = (t1[1] - t2[1]) / 25 * 4;   // in the spec's 0-16 raw points
@@ -301,7 +301,7 @@ const Compass = (() => {
       : gap <= 2 ? T("Sizda bir nechta mos yo'nalish bor") : T("Yetakchi yo'nalishingiz: {t}", { t: T(THEMES[t1[0]].name) });
     const kinds = [T("Eng mos kurs"), T("Muqobil yo'nalish"), T("Bepul yoki oson boshlash")];
     const goalTxt = done.f.goal && GOALS[done.f.goal] ? T(GOALS[done.f.goal]) : "";
-    return `${navbar(T("Kasb Kompasi"))}
+    return `${navbar(T("UniMatch"))}
     <div class="kp-head">
       <span class="kp-head-i">${ic(THEMES[t1[0]].icon)}</span>
       <small>${T("Sizning natijangiz")}</small>

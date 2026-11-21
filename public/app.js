@@ -1,6 +1,6 @@
 const tg = window.Telegram && window.Telegram.WebApp;
 // the app name shown at the top, in the first-open intro and in the game; the bot that hosts the Mini App
-const APP_NAME = "Urganch maktab"; window.APP_NAME = APP_NAME;
+const APP_NAME = "Alumni Mentor"; window.APP_NAME = APP_NAME;
 const BOT = "urganchmaktab_bot";
 // share server for the best-moment picture (share-worker/); empty until it is deployed
 // this app's own server (share-worker, deployed with the new bot's token); see HANDOFF.md
@@ -12,6 +12,7 @@ const store = {
   get(k, d) { try { const v = localStorage.getItem("uz_" + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
   set(k, v) { try { localStorage.setItem("uz_" + k, JSON.stringify(v)); } catch {} },
 };
+window.amStore = store;
 
 const user = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) || { id: 0, first_name: "Aziz" };
 const startParam = tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param;
@@ -32,13 +33,16 @@ function toast(msg) {
 }
 
 /* ---------- theme ---------- */
-const THEMES = { blue: ["Ko'k", "#2748F5", "#6C95FF"], orange: ["To'q sariq", "#F2600C", "#FFB066"], green: ["Yashil", "#0B8F6A", "#5FD3AE"] };
+const THEMES = { purple: ["Binafsha", "#2E1065", "#6D28D9"], bordo: ["Bordo", "#650514", "#B51F3A"], blue: ["Ko'k", "#2748F5", "#6C95FF"], orange: ["To'q sariq", "#F2600C", "#FFB066"], green: ["Yashil", "#0B8F6A", "#5FD3AE"] };
 function applyTheme(name) {
   document.body.dataset.theme = name;
   store.set("theme", name);
-  try { tg.setHeaderColor("#F5F6FA"); tg.setBackgroundColor("#F5F6FA"); } catch {}
+  const bg = name === "purple" || name === "bordo" ? "#F7F3EE" : "#F5F6FA";
+  try { tg.setHeaderColor(bg); tg.setBackgroundColor(bg); } catch {}
 }
-applyTheme(store.get("theme", "blue"));
+// dark purple is the default; everyone moves to it once (the Alumni Mentor launch), after that their own choice stays
+if (!store.get("theme_am", false)) { store.set("theme_am", true); store.set("theme", "purple"); }
+applyTheme(THEMES[store.get("theme", "purple")] ? store.get("theme", "purple") : "purple");
 
 /* ---------- icons: one consistent outline set, 24x24, drawn with currentColor ---------- */
 const ICONS = {
@@ -119,6 +123,8 @@ const ICONS = {
   shield: '<path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V6L12 3z"/><path d="m8.8 12.2 2.2 2.2 4.4-4.6"/>',
   share: '<path d="M4 13v6a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-6"/><path d="M12 3v12"/><path d="M7.5 7.5 12 3l4.5 4.5"/>',
   tool: '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.1L3.6 17.1a1.9 1.9 0 0 0 2.7 2.7l5.7-5.7a4 4 0 0 0 5.1-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>',
+  ext: '<path d="M7 17 17 7M9 7h8v8"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
   hand: '<path d="M8 13V6.5a1.5 1.5 0 0 1 3 0V12M11 11V4.5a1.5 1.5 0 0 1 3 0V12M14 11.5V6a1.5 1.5 0 0 1 3 0v8a7 7 0 0 1-7 7c-2.5 0-4-1.3-5.4-3.4L3 14.5a1.5 1.5 0 0 1 2.5-1.6L8 16"/>',
 };
 const ic = (name, cls = "") => `<svg class="ic ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ""}</svg>`;
@@ -147,21 +153,21 @@ window.goBack = () => { if (document.getElementById("sheet")) return closeSheet(
 
 /* ---------- screens ---------- */
 function Home() {
-  const tiles = [["game", "O'yin", "#/oyin", "k1"], ["tools", "Foydali vositalar", "#/vositalar", "k4"]];
+  const tiles = [["gamepad", "O'yin", "#/oyin", "k1"], ["cap", "Universitetga ariza", "#/ariza", "k2 g"], ["grid", "Foydali vositalar", "#/vositalar", "k3"]];
   return `
-  <div class="topbar"><div class="brand">${esc(APP_NAME.toUpperCase())}</div></div>
-  <a class="hero2" href="#/kompas">
+  <div class="topbar"><div class="brand"><img class="brand-logo" src="img/logo-emblem-light.webp" alt="" decoding="async"><span class="brand-name"><b>ALUMNI</b><small>MENTOR</small></span></div><span class="school" role="img" aria-label="${T("Maktab")}"><img src="img/school.webp" alt="" decoding="async"></span></div>
+  <a class="hero2" href="#/unimatch">
     <img class="hero2-art" src="img/hero-compass.webp" alt="" decoding="async">
-    <span class="hero2-tag">5 daqiqa</span>
-    <h3>Kasb Kompasi</h3>
-    <p>O'zingizga mos kasb va kurslarni toping</p>
+    <span class="hero2-tag">Top 300</span>
+    <h3>UniMatch</h3>
+    <p>Ko'nikma va sertifikatlaringizga mos universitetni toping</p>
     <span class="btn-orange">Boshlash ${ic("chev")}</span>
   </a>
   <a class="banner" href="#/kurslar">
     <span class="bwheel ${store.get("bw_used", false) ? "" : "hint"}" id="bwheel" role="button" aria-label="${T("Omad g'ildiragi")}"><i class="bw-pin"></i><svg class="bw-ring" id="bw-ring" viewBox="0 0 100 100" aria-hidden="true">${bannerRing()}</svg><img src="img/ic-courses.webp" alt="" decoding="async"></span><span class="banner-sep"></span><b>Kurslar</b><span class="banner-go">${ic("chev")}</span>
     <svg class="banner-wave" viewBox="0 0 400 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 38 C70 18 130 52 210 34 S340 14 400 30 V60 H0Z" fill="rgba(255,255,255,.55)"/><path d="M0 48 C80 34 150 58 230 46 S350 32 400 42 V60 H0Z" fill="rgba(120,140,255,.18)"/></svg>
   </a>
-  <div class="grid4">${tiles.map(([i, l, h, k]) => `<a class="tile4 ${k}" href="${h}"><img src="img/ic-${i}.webp" alt="" decoding="async"><span>${l}</span>${i === "tools" ? `<i class="tile-nb" data-nb></i>` : ""}</a>`).join("")}</div>
+  <div class="grid4">${tiles.map(([i, l, h, k]) => `<a class="tile4 ${k}" href="${h}"><i class="tile-ic">${ic(i)}</i><span>${l}</span>${i === "grid" ? `<i class="tile-nb" data-nb></i>` : ""}</a>`).join("")}</div>
 `;
 }
 
@@ -170,7 +176,7 @@ function Home() {
 
 function Profil() {
   if (typeof loadColors === "function") setTimeout(loadColors, 0);
-  const theme = store.get("theme", "blue");
+  const theme = store.get("theme", "purple");
   const invited = store.get("invited", 1);
   const link = `https://t.me/${BOT}?start=ref_${user.id}`;
   return `${navbar("Profil")}
@@ -195,15 +201,16 @@ window.pickTheme = (k) => { applyTheme(k); haptic("medium"); render(); sendColor
 // how many people chose each colour: real counts kept by the share server, one vote per Telegram user
 const fmtN = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 let colorCounts = store.get("color_counts", null);
-function gotCounts(c) { if (c && typeof c.blue === "number") { const same = JSON.stringify(c) === JSON.stringify(colorCounts); colorCounts = c; store.set("color_counts", c); if (!same && location.hash === "#/profil") render(); } }
+function gotCounts(c) { if (c && typeof c.blue === "number") { c.purple = c.purple || 0; c.bordo = c.bordo || 0; }
+  if (c && typeof c.blue === "number") { const same = JSON.stringify(c) === JSON.stringify(colorCounts); colorCounts = c; store.set("color_counts", c); if (!same && location.hash === "#/profil") render(); } }
 function sendColor() {
-  const t = store.get("theme", "blue");
+  const t = store.get("theme", "purple");
   if (!tg || !tg.initData) return loadColors();
   fetch(SHARE_API + "/color?c=" + t, { method: "POST", headers: { "X-Init-Data": tg.initData } })
     .then((r) => r.ok ? r.json() : null).then((c) => { if (c) { store.set("color_sent", t); gotCounts(c); } }).catch(() => {});
 }
 function loadColors() { fetch(SHARE_API + "/colors").then((r) => r.json()).then(gotCounts).catch(() => {}); }
-setTimeout(() => { if (store.get("color_sent", "") !== store.get("theme", "blue")) sendColor(); else loadColors(); }, 1500);
+setTimeout(() => { if (store.get("color_sent", "") !== store.get("theme", "purple")) sendColor(); else loadColors(); }, 1500);
 window.invite = (link) => {
   const url = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(T("Ustoz AI: kasbingizni toping va bepul o'rganing"))}`;
   if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, "_blank");
@@ -264,9 +271,11 @@ function bindDuo() {
 
 /* ---------- router ---------- */
 const ROUTES = {
-  "#/": Home, "#/kompas": () => needScript("kompas.js", "Compass", "Screen", T("Kasb Kompasi")), "#/natija": () => needScript("kompas.js", "Compass", "Result", T("Kasb Kompasi")), "#/profil": Profil,
+  "#/": Home, "#/kompas": () => needScript("kompas.js", "Compass", "Screen", T("UniMatch")), "#/natija": () => needScript("kompas.js", "Compass", "Result", T("UniMatch")), "#/profil": Profil,
   "#/kurslar": () => Kurslar.List(), "#/kurs": () => Kurslar.Detail(location.hash.slice(7)), "#/oyin": () => "", "#/mutolaa": () => Soon("mutolaa"),
-  "#/duo": DuoScreen, "#/vositalar": () => needTools("Screen"), "#/cv": () => needTools("CV"), "#/dtm": () => needScript("study.js", "Study", "DTM", T("DTM ball kalkulyatori")), "#/ielts": () => needScript("study.js", "Study", "IELTS", T("IELTS ball kalkulyatori")), "#/unis": () => needScript("study.js", "Study", "Unis", T("Top 300 universitet va grantlar")), "#/admin": () => AdminScreen(), "#/kashf": () => Soon("kashf"),
+  "#/duo": DuoScreen, "#/vositalar": () => needTools("Screen"), "#/cv": () => needTools("CV"), "#/dtm": () => needScript("study.js", "Study", "DTM", T("DTM ball kalkulyatori")), "#/ielts": () => needScript("study.js", "Study", "IELTS", T("IELTS ball kalkulyatori")), "#/unis": () => needScript("study.js", "Study", "Unis", T("Top 300 universitet va grantlar")),
+  "#/unimatch": () => needScript("study.js", "Study", "UniMatch", "UniMatch"), "#/unimatch-natija": () => needScript("study.js", "Study", "UniMatchResult", "UniMatch"),
+  "#/ariza": () => needScript("ariza.js", "Ariza", "Screen", T("Universitetga ariza")), "#/admin": () => AdminScreen(), "#/kashf": () => Soon("kashf"),
 };
 let gameOn = false;
 // the 3D game is loaded on its own, after Home: it is not needed to open the app
@@ -344,18 +353,8 @@ if (tg) {
   try { tg.BackButton.onClick(goBack); } catch {}
   try { const top = tg.contentSafeAreaInset?.top + tg.safeAreaInset?.top; if (top) document.documentElement.style.setProperty("--tg-safe-top", top + "px"); } catch {}
 }
-// A short, calm intro the very first time someone opens the Mini App; never again after that.
-(function intro() {
-  if (store.get("intro_seen", false)) return;
-  store.set("intro_seen", true);
-  const el = document.createElement("div");
-  el.className = "intro";
-  el.innerHTML = `<div class="intro-in"><b>${esc(APP_NAME.toUpperCase())}</b><span>Kelajak kasbingizni toping</span><i><em></em></i></div>`;
-  document.body.appendChild(el);
-  const done = () => { if (el.classList.contains("out")) return; el.classList.add("out"); setTimeout(() => el.remove(), 600); };
-  el.onclick = done;
-  setTimeout(done, 1100);
-})();
+// The 3D intro (intro.js): on the first open only; "?intro=1" plays it again for testing.
+window.addEventListener("DOMContentLoaded", () => { try { playIntro(new URLSearchParams(location.search).has("intro")); } catch {} });
 if ("serviceWorker" in navigator) {
   // app files are always fetched fresh (network first), so a new version shows without any reload
   navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then((r) => r.update()).catch(() => {});
@@ -609,6 +608,20 @@ function glow(el) {
   setTimeout(() => el.classList.remove("shared-glow"), 2600);
   setTimeout(() => { tag.classList.add("out"); setTimeout(() => tag.remove(), 400); }, 6000);
 }
+
+// country names in Uzbek (the Top 300 table has them in English)
+const COUNTRY_UZ = { "United States": "AQSh", "United Kingdom": "Buyuk Britaniya", Germany: "Germaniya", China: "Xitoy", Australia: "Avstraliya", Canada: "Kanada", Netherlands: "Niderlandiya", "South Korea": "Janubiy Koreya", "Hong Kong": "Gonkong", Sweden: "Shvetsiya", Italy: "Italiya", Switzerland: "Shveytsariya", Japan: "Yaponiya", Belgium: "Belgiya", France: "Fransiya", Denmark: "Daniya", Austria: "Avstriya", Spain: "Ispaniya", Ireland: "Irlandiya", Finland: "Finlandiya", Norway: "Norvegiya", Malaysia: "Malayziya", Singapore: "Singapur", Qatar: "Qatar", Macao: "Makao", "Saudi Arabia": "Saudiya Arabistoni", Israel: "Isroil", "United Arab Emirates": "BAA", Taiwan: "Tayvan", Brazil: "Braziliya", "South Africa": "Janubiy Afrika", "New Zealand": "Yangi Zelandiya", Hungary: "Vengriya", Luxembourg: "Lyuksemburg", India: "Hindiston", Bahrain: "Bahrayn" };
+const cnUz = (c) => T(COUNTRY_UZ[c] || c);
+
+/* ---------- the student's applications (ariza.js shows them; UniMatch and the Top 300 sheet add to them) ---------- */
+// the platform a university is usually applied through, from its country
+window.guessPlat = (country) => country === "United States" ? "commonapp" : country === "United Kingdom" ? "ucas" : country === "Germany" ? "daad" : "direct";
+window.appsAdd = (a) => {
+  const l = store.get("apps", []);
+  if (l.some((x) => x.name === a.name)) { toast(T("Bu universitet arizalaringizda bor")); return false; }
+  l.unshift(Object.assign({ id: Date.now(), status: "plan", docs: {}, deadline: "", country: "", site: "", plat: guessPlat(a.country) }, a));
+  store.set("apps", l); haptic("medium"); toast(T("Arizalarimga qo'shildi")); return true;
+};
 
 /* ---------- a bottom sheet for small choices ---------- */
 function sheet(html) {

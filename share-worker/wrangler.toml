@@ -1,0 +1,29 @@
+name = "urganch-share"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+# The bot token is stored as a secret, never in this file:
+#   npx wrangler secret put BOT_TOKEN
+
+[[kv_namespaces]]
+binding = "COLORS"
+id = "PUT_NEW_KV_ID_HERE"   # npx wrangler kv namespace create COLORS
+
+# usage statistics and the user list for admin messages
+[[d1_databases]]
+binding = "DB"
+database_name = "urganch-stats"
+database_id = "PUT_NEW_D1_ID_HERE"   # npx wrangler d1 create urganch-stats
+
+[vars]
+# Telegram user ids that see the admin section and may use /admin/* (comma separated)
+ADMIN_IDS = "5199387523"
+CHANNEL = ""
+
+# Workers AI: translates the youth news into the reader's language
+[ai]
+binding = "AI"
+
+# rebuilds the youth news list (one language each time)
+[triggers]
+crons = ["*/5 * * * *"]

@@ -12,7 +12,9 @@ const Meet = (() => {
   };
   const ERR = () => ({ wrong: T("Parol noto'g'ri"), too_many: T("Juda ko'p urinish. 15 daqiqadan keyin qayta urinib ko'ring"), bound: T("Bu mentor hisobi boshqa Telegram akkauntga ulangan. Admin bilan bog'laning"),
     already_mentor: T("Siz allaqachon boshqa mentor hisobidasiz"), photo_required: T("Avval profil rasmingizni yuklang"), link: T("Havola Google Meet, Zoom, Telegram, Teams yoki Jitsi bo'lishi kerak"),
-    fields: T("Barcha maydonlarni to'g'ri to'ldiring"), weak: T("Parol kamida 12 belgi: katta va kichik harf, raqam va belgi bo'lsin"), photo_big: T("Rasm juda katta") });
+    fields: T("Barcha maydonlarni to'g'ri to'ldiring"),
+    google_reconnect: T("Google ulanishi eskirdi. Mentor panelida Google'ni qayta ulang"), google_failed: T("Google Meet havolasini yaratib bo'lmadi. Qo'lda kiriting"),
+    google_not_connected: T("Avval Google akkauntingizni ulang"), google_off: T("Google ulanishi hali yoqilmagan"), no_space: T("Bu uchrashuv avtomatik Google Meet bilan yaratilmagan"), weak: T("Parol kamida 12 belgi: katta va kichik harf, raqam va belgi bo'lsin"), photo_big: T("Rasm juda katta") });
   const fail = (e) => toast(ERR()[e.message] || T("Xatolik: {e}", { e: e.message }));
   function load() {
     if (busy || !tgInit()) return; busy = true;
@@ -58,6 +60,7 @@ const Meet = (() => {
         ${mine ? "" : `<button class="btn-ghost ${going ? "on" : ""}" onclick="mtGo(${m.id},${!going})">${ic(going ? "check" : "bell")} ${going ? T("Qatnashasiz") : T("Qatnashaman")}</button>`}
       </div>
       <div class="mt-row3"><button onclick="mtChat(${m.id})">${ic("chat")}<span>${T("Uchrashuv chati")}</span></button><button onclick="mtPoster(${m.id})">${ic("share")}<span>${T("Ulashish")}</span></button>
+        ${m.attend && Date.now() > m.starts ? `<button onclick="mtAttend(${m.id})">${ic("users")}<span>${T("Kim qatnashdi")}</span></button>` : ""}
         ${mine || S.me.admin ? `<button class="red" onclick="mtCancel(${m.id})">${ic("x")}<span>${T("Bekor qilish")}</span></button>` : ""}</div></div>`;
   }
   function MeetTab() {
@@ -100,6 +103,9 @@ const Meet = (() => {
     return `<div class="card mt-me">${photo(me, "lg")}<div><b>${esc(me.name)}</b><small>${esc(me.uni || "")}${me.field ? " · " + esc(me.field) : ""}</small>
         <button class="btn-ghost" onclick="mtProfile()">${ic("pen")} ${T("Profilni tahrirlash")}</button></div></div>
       ${me.photo ? "" : `<p class="um-warn">${ic("alert")}<span>${T("Uchrashuv e'lon qilish uchun profil rasmingizni yuklang.")}</span></p>`}
+      ${S.me.googleReady ? `<div class="card mt-g ${me.google ? "on" : ""}"><span class="mt-gl">G</span><div><b>${me.google ? T("Google Meet ulangan") : T("Google Meet'ni ulang")}</b>
+        <small class="notr">${me.google ? esc(me.google) : T("Ulasangiz, har bir uchrashuv uchun Meet havolasi avtomatik yaratiladi va kim qatnashganini ko'rasiz.")}</small></div>
+        ${me.google ? `<button class="btn-ghost" onclick="mtGoogleOff()">${T("Uzish")}</button>` : `<button class="btn-primary" onclick="mtGoogle()">${T("Ulash")}</button>`}</div>` : ""}
       <button class="btn-primary mt-new" onclick="mtNew()">${ic("plus")} ${T("Uchrashuv rejalashtirish")}</button>
       <div class="section-title">${T("Kelgan so'rovlar")}<small>${inbox.length}</small></div>
       ${inbox.map((q) => `<div class="card mt-req" id="rq-${q.id}"><div class="mt-who sm"><span class="mt-ph none">${esc((q.name || "?")[0])}</span><span><b>${esc(q.name || "")}${q.kind === "public" ? ` + ${q.votes - 1}` : ""}</b><small>${q.kind === "public" ? T("Ommaviy so'rov") : T("Shaxsiy so'rov")} · ${ST()[q.status]}</small></span></div>
@@ -188,18 +194,35 @@ const Meet = (() => {
   window.mtPassGo = () => api("/mentor/password", { old: document.getElementById("mp-old").value, pass: document.getElementById("mp-new").value }).then(() => { closeSheet(); toast(T("Parol o'zgartirildi")); }).catch(fail);
   window.mtLogout = () => { const go = (ok) => { if (ok) api("/mentor/logout").then(() => { tab = "meet"; load(); toast(T("Mentor rejimidan chiqdingiz")); }).catch(fail); }; try { tg.showConfirm(T("Mentor rejimidan chiqasizmi? Qayta kirish uchun parol kerak bo'ladi."), go); } catch { go(confirm(T("Mentor rejimidan chiqasizmi? Qayta kirish uchun parol kerak bo'ladi."))); } };
 
+  /* ---------- mentor: Google Meet ---------- */
+  // Google refuses sign-in inside app web views, so the sign-in page opens in the phone's browser; on return the panel refreshes
+  window.mtGoogle = () => api("/google/ticket").then((r) => { haptic("medium"); try { tg.openLink(r.url, { try_instant_view: false }); } catch { window.open(r.url, "_blank"); }
+    toast(T("Brauzerda Google bilan kiring, keyin shu yerga qayting")); }).catch(fail);
+  window.mtGoogleOff = () => { const go = (ok) => { if (ok) api("/google/disconnect").then(() => { toast(T("Google uzildi")); load(); }).catch(fail); }; try { tg.showConfirm(T("Google akkauntini uzasizmi?"), go); } catch { go(confirm(T("Google akkauntini uzasizmi?"))); } };
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && location.hash === "#/meet") load(); });
+  window.mtAttend = (id) => {
+    sheet(`<div class="ap-sheet mt-att"><h3>${T("Kim qatnashdi")}</h3><div class="busy-in"><div class="run-spin"></div></div></div>`);
+    api("/attendance", { id }).then((r) => { const box = document.querySelector(".mt-att"); if (!box) return;
+      box.innerHTML = `<h3>${T("Kim qatnashdi")}</h3><p class="mt-hint">${T("{n} kishi", { n: r.people.length })} · Google Meet</p>
+        ${r.people.map((p) => `<div class="mt-arow"><span class="mt-ph none">${esc(p.name[0] || "?")}</span><b class="notr">${esc(p.name)}</b><small>${T("{n} daqiqa", { n: p.mins })}</small></div>`).join("") || `<p class="note">${T("Hali hech kim qatnashmagan yoki ma'lumot tayyor emas. Uchrashuvdan keyin biroz kuting.")}</p>`}`;
+    }).catch((e) => { closeSheet(); fail(e); });
+  };
+
   /* ---------- mentor: schedule, accept, propose ---------- */
+  const autoOn = () => !!(S && S.me.googleReady && S.me.mentor && S.me.mentor.google);
   const timeFields = (pfx, title) => { const d = new Date(Date.now() + 864e5); const ds = d.toISOString().slice(0, 10);
     return `<div class="mt-2"><label>${T("Sana")}<input id="${pfx}-date" type="date" value="${ds}" min="${new Date().toISOString().slice(0, 10)}"></label><label>${T("Vaqt")}<input id="${pfx}-time" type="time" value="18:00"></label></div>
     <label>${T("Davomiyligi")}<select id="${pfx}-dur">${[30, 45, 60, 90, 120].map((n) => `<option value="${n}" ${n === 60 ? "selected" : ""}>${T("{n} daqiqa", { n })}</option>`).join("")}</select></label>
+    ${autoOn() ? `<label class="mt-auto"><input type="checkbox" id="${pfx}-auto" checked onchange="document.getElementById('${pfx}-manual').hidden=this.checked"><span><b>${T("Google Meet havolasi avtomatik yaratiladi")}</b><small class="notr">${esc(S.me.mentor.google)}</small></span></label>` : ""}
+    <div id="${pfx}-manual" ${autoOn() ? "hidden" : ""}>
     <div class="mt-mk"><b>${ic("video")} Google Meet</b>
       <small>${T("1. Tugmani bosing: Google Meet yangi uchrashuv ochadi. 2. Havolani nusxalang (meet.google.com/...). 3. Shu yerga qo'ying.")}</small>
       <button onclick="mtMakeMeet()">${ic("plus")} ${T("Google Meet havolasi yaratish")}</button></div>
-    <label>${T("Google Meet havolasi")}<input id="${pfx}-link" type="url" inputmode="url" placeholder="https://meet.google.com/abc-defg-hij" onblur="mtFixLink(this)"></label>`; };
+    <label>${T("Google Meet havolasi")}<input id="${pfx}-link" type="url" inputmode="url" placeholder="https://meet.google.com/abc-defg-hij" onblur="mtFixLink(this)"></label></div>`; };
   window.mtMakeMeet = () => { haptic("light"); try { if (tg && tg.openLink) return tg.openLink("https://meet.google.com/new", { try_instant_view: false }); } catch {} window.open("https://meet.google.com/new", "_blank"); };
   // "abc-defg-hij" or "meet.google.com/abc-defg-hij" become a full link
   window.mtFixLink = (el) => { let v = el.value.trim(); if (/^[a-z]{3}-[a-z]{4}-[a-z]{3}$/i.test(v)) v = "https://meet.google.com/" + v; else if (/^meet\.google\.com\//i.test(v)) v = "https://" + v; el.value = v; };
-  const readTime = (pfx) => { const d = document.getElementById(pfx + "-date").value, t = document.getElementById(pfx + "-time").value; return { starts: d && t ? new Date(d + "T" + t).getTime() : NaN, dur: +document.getElementById(pfx + "-dur").value, link: document.getElementById(pfx + "-link").value.trim() }; };
+  const readTime = (pfx) => { const d = document.getElementById(pfx + "-date").value, t = document.getElementById(pfx + "-time").value; return { starts: d && t ? new Date(d + "T" + t).getTime() : NaN, dur: +document.getElementById(pfx + "-dur").value, link: document.getElementById(pfx + "-link").value.trim(), auto: !!(document.getElementById(pfx + "-auto") || {}).checked }; };
   window.mtNew = () => {
     if (!S.me.mentor.photo) { toast(T("Avval profil rasmingizni yuklang")); return mtProfile(); }
     sheet(`<div class="ap-sheet mt-form"><h3>${T("Uchrashuv rejalashtirish")}</h3>

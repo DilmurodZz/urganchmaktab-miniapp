@@ -1365,3 +1365,23 @@ Object.assign(I18N.en, {
 "Google Meet havolasi": "Google Meet link",
 "Uchrashuvlar Google Meet'da o'tadi: video, ekranni ulashish va chat. Telefoningizga Google Meet ilovasini o'rnatib qo'ying, \"Qo'shilish\" bosilganda u o'zi ochiladi.": "Meetings run on Google Meet: video, screen sharing and chat. Install the Google Meet app and it opens by itself when you tap \"Join\".",
 });
+// --- Google Meet integration
+Object.assign(I18N.en, {
+"Google ulanishi eskirdi. Mentor panelida Google'ni qayta ulang": "Your Google connection expired. Reconnect Google in the mentor panel",
+"Google Meet havolasini yaratib bo'lmadi. Qo'lda kiriting": "Couldn't create the Google Meet link. Enter it by hand",
+"Avval Google akkauntingizni ulang": "Connect your Google account first",
+"Google ulanishi hali yoqilmagan": "Google connection isn't switched on yet",
+"Bu uchrashuv avtomatik Google Meet bilan yaratilmagan": "This meeting wasn't created with automatic Google Meet",
+"Kim qatnashdi": "Who attended",
+"Google Meet ulangan": "Google Meet connected",
+"Google Meet'ni ulang": "Connect Google Meet",
+"Ulasangiz, har bir uchrashuv uchun Meet havolasi avtomatik yaratiladi va kim qatnashganini ko'rasiz.": "Once connected, every meeting gets its Meet link automatically and you can see who attended.",
+"Uzish": "Disconnect",
+"Ulash": "Connect",
+"Brauzerda Google bilan kiring, keyin shu yerga qayting": "Sign in with Google in the browser, then come back here",
+"Google uzildi": "Google disconnected",
+"Google akkauntini uzasizmi?": "Disconnect your Google account?",
+"Hali hech kim qatnashmagan yoki ma'lumot tayyor emas. Uchrashuvdan keyin biroz kuting.": "Nobody has joined yet, or the data isn't ready. Wait a little after the meeting.",
+"Google Meet havolasi avtomatik yaratiladi": "The Google Meet link is created automatically",
+"{n} kishi": "{n} people",
+});

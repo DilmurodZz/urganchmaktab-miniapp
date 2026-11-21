@@ -1365,3 +1365,23 @@ Object.assign(I18N.ru, {
 "Google Meet havolasi": "Ссылка Google Meet",
 "Uchrashuvlar Google Meet'da o'tadi: video, ekranni ulashish va chat. Telefoningizga Google Meet ilovasini o'rnatib qo'ying, \"Qo'shilish\" bosilganda u o'zi ochiladi.": "Встречи проходят в Google Meet: видео, демонстрация экрана и чат. Установите приложение Google Meet, и по кнопке «Присоединиться» оно откроется само.",
 });
+// --- Google Meet integration
+Object.assign(I18N.ru, {
+"Google ulanishi eskirdi. Mentor panelida Google'ni qayta ulang": "Подключение Google устарело. Переподключите Google в панели ментора",
+"Google Meet havolasini yaratib bo'lmadi. Qo'lda kiriting": "Не удалось создать ссылку Google Meet. Введите её вручную",
+"Avval Google akkauntingizni ulang": "Сначала подключите аккаунт Google",
+"Google ulanishi hali yoqilmagan": "Подключение Google ещё не включено",
+"Bu uchrashuv avtomatik Google Meet bilan yaratilmagan": "Эта встреча создана не через автоматический Google Meet",
+"Kim qatnashdi": "Кто участвовал",
+"Google Meet ulangan": "Google Meet подключён",
+"Google Meet'ni ulang": "Подключите Google Meet",
+"Ulasangiz, har bir uchrashuv uchun Meet havolasi avtomatik yaratiladi va kim qatnashganini ko'rasiz.": "После подключения ссылка Meet создаётся автоматически для каждой встречи, и вы видите, кто участвовал.",
+"Uzish": "Отключить",
+"Ulash": "Подключить",
+"Brauzerda Google bilan kiring, keyin shu yerga qayting": "Войдите через Google в браузере и вернитесь сюда",
+"Google uzildi": "Google отключён",
+"Google akkauntini uzasizmi?": "Отключить аккаунт Google?",
+"Hali hech kim qatnashmagan yoki ma'lumot tayyor emas. Uchrashuvdan keyin biroz kuting.": "Пока никто не участвовал или данные ещё не готовы. Подождите немного после встречи.",
+"Google Meet havolasi avtomatik yaratiladi": "Ссылка Google Meet создастся автоматически",
+"{n} kishi": "{n} чел.",
+});

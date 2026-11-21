@@ -6,6 +6,7 @@
 
 import { ChatRoom } from "./chat.js";
 import { meet, meetCron } from "./meet.js";
+import { googleRoutes } from "./google.js";
 export { ChatRoom };
 
 const ALLOWED_ORIGIN = "https://dilmurodzz.github.io";
@@ -59,6 +60,7 @@ export default {
     if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors(origin) });
     const url = new URL(req.url);
     // the students' chat: images are public by id; the live connection needs Telegram's signed initData
+    if (url.pathname.startsWith("/google/") && req.method === "GET") return googleRoutes(req, env, url);
     if (url.pathname.startsWith("/meet/")) return meet(req, env, url, origin, { json, verifyInitData, tg, APP_URL });
     if (url.pathname.startsWith("/chat/")) {
       // rooms: "main" (everyone) and "m_<id>" (one meeting); pictures are /chat/img/<id> (main) or /chat/img/<room>/<id>

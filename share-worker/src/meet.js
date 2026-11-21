@@ -6,6 +6,7 @@
 // - The mentor can accept a request, propose another time ("tomorrow, not today") or decline; the student confirms.
 // - Every notification goes into the outbox; the cron (every minute) sends up to 40 and adds the 1 hour and
 //   "starting now" reminders for people who said they are coming.
+import { googleReady, createSpace, attendance } from "./google.js";
 const enc = new TextEncoder();
 const b64 = (u8) => btoa(String.fromCharCode(...u8));
 const unb64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
@@ -58,11 +59,16 @@ export async function meet(req, env, url, origin, { json, verifyInitData, tg, AP
     await run("INSERT INTO outbox (chat, text, btn, created) SELECT id, ?1, ?2, ?3 FROM users WHERE blocked = 0", text, btn("m_" + m.id, "Uchrashuvni ochish"), now);
   }
   async function createMeeting(o, mentor) {
-    const r = await one(`INSERT INTO meetings (mentor_id, kind, topic, about, starts, dur, link, for_uid, request_id, created) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10) RETURNING *`,
-      mentor.id, o.kind, o.topic, o.about || "", o.starts, o.dur, o.link, o.forUid || null, o.requestId || null, now);
+    const r = await one(`INSERT INTO meetings (mentor_id, kind, topic, about, starts, dur, link, for_uid, request_id, g_space, created) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11) RETURNING *`,
+      mentor.id, o.kind, o.topic, o.about || "", o.starts, o.dur, o.link, o.forUid || null, o.requestId || null, o.space || null, now);
     if (r.kind === "public") await publishAll(r, mentor);
     else if (r.for_uid) await notify(r.for_uid, `Shaxsiy uchrashuvingiz tasdiqlandi!\n\nMentor: ${mentor.name}\nMavzu: ${r.topic}\nVaqt: ${when(r.starts)}`, "m_" + r.id, "Uchrashuvni ochish");
     return r;
+  }
+  // the Meet link: made by Google for the mentor (body.auto) or pasted by hand
+  async function meetLink(body) {
+    if (body.auto && googleReady(env) && meMentor && meMentor.g_token) return createSpace(env, meMentor);
+    return { link: clip(body.link, 300), space: null };
   }
   const checkTime = (s, d) => Number.isFinite(s) && s > now - 3600e3 && s < now + 120 * 864e5 && [30, 45, 60, 90, 120].includes(d);
 
@@ -76,7 +82,9 @@ export async function meet(req, env, url, origin, { json, verifyInitData, tg, AP
       EXISTS (SELECT 1 FROM request_votes v WHERE v.request_id = q.id AND v.uid = ?1) voted FROM requests q
       WHERE (q.uid = ?1 AND q.created > ?3) OR (q.kind = 'public' AND q.status IN ('open', 'ready', 'proposed')) OR (q.mentor_id = ?2 AND q.status IN ('open', 'ready', 'proposed') AND (q.kind = 'individual' OR q.status != 'open'))
       ORDER BY q.created DESC LIMIT 80`, uid, meMentor ? meMentor.id : -1, now - 30 * 864e5);
-    return ok({ me: { uid, admin: isAdmin, mentor: meMentor ? pubMentor(meMentor) : null }, mentors, meetings, going, requests: reqs, need: VOTES_NEEDED });
+    const me = { uid, admin: isAdmin, mentor: meMentor ? { ...pubMentor(meMentor), google: meMentor.g_token ? meMentor.g_email || "Google" : null } : null, googleReady: googleReady(env) };
+    meetings.forEach((m) => { m.attend = !!m.g_space && meMentor && m.mentor_id === meMentor.id; delete m.g_space; });
+    return ok({ me, mentors, meetings, going, requests: reqs, need: VOTES_NEEDED });
   }
 
   /* ---------- mentor sign-in and profile ---------- */
@@ -117,14 +125,30 @@ export async function meet(req, env, url, origin, { json, verifyInitData, tg, AP
     await run("UPDATE mentors SET pass_hash = ?1, pass_salt = ?2 WHERE id = ?3", await hashPass(body.pass, salt), b64(salt), meMentor.id);
     return ok();
   }
+  /* ---------- Google Meet: connect, disconnect, attendance ---------- */
+  if (path === "/google/ticket") {
+    if (!meMentor) return bad("not_mentor", 403);
+    if (!googleReady(env)) return bad("google_off");
+    const t = b64(crypto.getRandomValues(new Uint8Array(18))).replace(/[+/=]/g, "");
+    await env.COLORS.put("gticket:" + t, String(meMentor.id), { expirationTtl: 300 });
+    return ok({ url: url.origin + "/google/start?t=" + t });
+  }
+  if (path === "/google/disconnect") { if (meMentor) await run("UPDATE mentors SET g_token = NULL, g_email = NULL WHERE id = ?1", meMentor.id); return ok(); }
+  if (path === "/attendance") {
+    const m = await one("SELECT * FROM meetings WHERE id = ?1", Number(body.id));
+    if (!m || !meMentor || m.mentor_id !== meMentor.id) return bad("forbidden", 403);
+    if (!m.g_space) return bad("no_space");
+    try { return ok(await attendance(env, meMentor, m.g_space)); } catch (e) { return bad(e.message); }
+  }
   if (path === "/mentor/logout") { if (meMentor) await run("UPDATE mentors SET tg_id = NULL WHERE id = ?1", meMentor.id); return ok(); }
 
   /* ---------- meetings ---------- */
   if (path === "/create") {
     if (!meMentor) return bad("not_mentor", 403);
     if (!meMentor.photo) return bad("photo_required");
-    const o = { kind: "public", topic: clip(body.topic, 120), about: clip(body.about, 800), starts: Number(body.starts), dur: Number(body.dur), link: clip(body.link, 300) };
+    const o = { kind: "public", topic: clip(body.topic, 120), about: clip(body.about, 800), starts: Number(body.starts), dur: Number(body.dur) };
     if (!o.topic || !checkTime(o.starts, o.dur)) return bad("fields");
+    try { Object.assign(o, await meetLink(body)); } catch (e) { return bad(e.message); }
     if (!LINK_OK.test(o.link)) return bad("link");
     return ok({ meeting: await createMeeting(o, meMentor) });
   }
@@ -177,17 +201,20 @@ export async function meet(req, env, url, origin, { json, verifyInitData, tg, AP
       for (const u of askers) await notify(u, `Mentor ${meMentor.name} hozircha "${q.topic}" uchrashuvini o'tkaza olmaydi.${body.note ? "\nIzoh: " + clip(body.note, 300) : ""}`);
       return ok();
     }
-    const s = Number(body.starts), d = Number(body.dur) || 60, link = clip(body.link, 300);
-    if (!checkTime(s, d) || !LINK_OK.test(link)) return bad(LINK_OK.test(link) ? "fields" : "link");
+    const s = Number(body.starts), d = Number(body.dur) || 60;
+    if (!checkTime(s, d)) return bad("fields");
+    let made; try { made = await meetLink(body); } catch (e) { return bad(e.message); }
+    const link = made.link; if (!LINK_OK.test(link)) return bad("link");
     if (!meMentor.photo) return bad("photo_required");
     if (body.action === "accept") {
-      const m = await createMeeting({ kind: q.kind, topic: q.topic, about: q.note, starts: s, dur: d, link, forUid: q.kind === "individual" ? q.uid : null, requestId: q.id }, meMentor);
+      const m = await createMeeting({ kind: q.kind, topic: q.topic, about: q.note, starts: s, dur: d, link, space: made.space, forUid: q.kind === "individual" ? q.uid : null, requestId: q.id }, meMentor);
       await run("UPDATE requests SET status = 'accepted', meeting_id = ?1 WHERE id = ?2", m.id, q.id);
       if (q.kind === "public") for (const u of askers) await run("INSERT OR IGNORE INTO rsvps (meeting_id, uid, created) VALUES (?1, ?2, ?3)", m.id, u, now);
       return ok({ meeting: m });
     }
     if (body.action === "propose") {
       await run("UPDATE requests SET status = 'proposed', p_starts = ?1, p_dur = ?2, p_link = ?3, p_note = ?4 WHERE id = ?5", s, d, link, clip(body.note, 300), q.id);
+      if (made.space) await env.COLORS.put("pspace:" + q.id, made.space, { expirationTtl: 120 * 86400 });
       await notify(q.uid, `Mentor ${meMentor.name} boshqa vaqt taklif qildi\n\nMavzu: ${q.topic}\nTaklif: ${when(s)}${body.note ? "\nIzoh: " + clip(body.note, 300) : ""}\n\nIlovada tasdiqlang yoki rad eting.`, "r_" + q.id, "Javob berish");
       return ok();
     }
@@ -197,7 +224,8 @@ export async function meet(req, env, url, origin, { json, verifyInitData, tg, AP
     const q = await one("SELECT * FROM requests WHERE id = ?1 AND uid = ?2 AND status = 'proposed'", Number(body.id), uid); if (!q) return bad("none", 404);
     const mentor = await one("SELECT * FROM mentors WHERE id = ?1", q.mentor_id);
     if (body.ok) {
-      const m = await createMeeting({ kind: q.kind, topic: q.topic, about: q.note, starts: q.p_starts, dur: q.p_dur || 60, link: q.p_link, forUid: q.kind === "individual" ? q.uid : null, requestId: q.id }, mentor);
+      const space = await env.COLORS.get("pspace:" + q.id);
+      const m = await createMeeting({ kind: q.kind, topic: q.topic, about: q.note, starts: q.p_starts, dur: q.p_dur || 60, link: q.p_link, space, forUid: q.kind === "individual" ? q.uid : null, requestId: q.id }, mentor);
       await run("UPDATE requests SET status = 'accepted', meeting_id = ?1 WHERE id = ?2", m.id, q.id);
       if (q.kind === "public") await run("INSERT OR IGNORE INTO rsvps (meeting_id, uid, created) SELECT ?1, uid, ?2 FROM request_votes WHERE request_id = ?3", m.id, now, q.id);
       if (mentor.tg_id) await notify(mentor.tg_id, `${name} taklifingizni tasdiqladi: ${q.topic}, ${when(q.p_starts)}.`, "m_" + m.id, "Uchrashuvni ochish");

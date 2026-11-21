@@ -163,7 +163,6 @@ function Home() {
     <img class="hero2-art" src="img/hero-compass.webp" alt="" decoding="async">
     <span class="hero2-tag">Top 300</span>
     <h3>UniMatch</h3>
-    <p>Sertifikatlaringiz va istaklaringizga mos universitetni toping</p>
     <span class="btn-orange">Boshlash ${ic("chev")}</span>
   </a>
   <a class="banner studio-bn" href="#/ariza">
@@ -280,7 +279,8 @@ const ROUTES = {
   "#/unimatch": () => needScript("study.js", "Study", "UniMatch", "UniMatch"), "#/unimatch-natija": () => needScript("study.js", "Study", "UniMatchResult", "UniMatch"),
   "#/ariza": () => needScript("ariza.js", "Ariza", "Screen", "Application Studio"),
   "#/chat": () => needScript("chat.js", "Chat", "Screen", "Chat"), "#/mchat": () => needScript("chat.js", "Chat", "Screen", "Chat"),
-  "#/meet": () => Meet.Screen(), "#/admin": () => AdminScreen(), "#/kashf": () => Soon("kashf"),
+  "#/meet": () => Meet.Screen(),
+  "#/orzu": () => needScript("letter.js", "Letter", "Screen", T("Orzu xati")), "#/admin": () => AdminScreen(), "#/kashf": () => Soon("kashf"),
 };
 let gameOn = false;
 // the 3D game is loaded on its own, after Home: it is not needed to open the app

@@ -300,6 +300,7 @@ const Ariza = (() => {
     return `${navbar("Application Studio")}
     <div class="ap-me st-head"><div class="um-ring st-ring"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" class="bg"/><circle cx="60" cy="60" r="52" class="fg" style="stroke-dasharray:${(r / 100 * 326.7).toFixed(1)} 326.7"/></svg><div><b>${r}%</b></div></div>
       <div><small>${T("Tayyorlik darajasi")}</small><b class="notr">${name || "Alumni Mentor"}</b><em>${ic("shield")} ${T("Telegram hisobingiz orqali kirdingiz, parol kerak emas")}</em></div></div>
+    <a class="card lt-entry" href="#/orzu"><span class="lt-ic">${ic("send")}</span><span><b>${T("Orzu xati")}</b><small>${T("Orzuingizdagi universitet uchun shaxsiy motivatsion xat")}</small></span>${ic("chev")}</a>
     <div class="st-tabs">${TABS().map(([k, t, i]) => `<button class="${tab === k ? "on" : ""}" onclick="stTab('${k}')">${ic(i)}<span>${t}</span></button>`).join("")}</div>
     <div class="st-body">${body()}</div>`;
   }

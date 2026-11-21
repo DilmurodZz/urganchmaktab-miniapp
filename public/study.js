@@ -470,6 +470,7 @@ const Study = (() => {
         <span class="sd-rank">${esc(x.r[0])}</span><span class="notr"><b>${esc(x.r[1])}</b><small>${esc(cn(x.r[2]))}${x.short ? ` · <em>${T("IELTS {n} kerak", { n: x.need.toFixed(1) })}</em>` : ""}</small>${perks(x.r) ? `<span class="um-perks">${perks(x.r)}</span>` : ""}</span>
         <span class="um-pct"><b>${x.pct}%</b><i>${tag[x.cat]}</i></span></button>`).join("") || `<div class="card um-empty">${chip("search", "lg")}<p>${T("Hozircha mos universitet topilmadi. Davlatlar tanlovini kengaytiring yoki ingliz tili natijangizni yangilang.")}</p></div>`}</div>
     ${rows.length > umF.more ? `<button class="btn-ghost" onclick="umMore()">${T("Yana ko'rsatish ({n})", { n: rows.length - umF.more })}</button>` : ""}
+    <button class="btn-ghost um-apply" onclick="location.hash='#/orzu'">${ic("send")} ${T("Orzu xatimni yaratish")}</button>
     <button class="btn-primary um-apply" onclick="location.hash='#/ariza'">${ic("send")} ${T("Ariza topshirishga tayyorlanish")}</button>`;
   }
   const umRefresh = () => { const y = scrollY; render(); scrollTo(0, y); };

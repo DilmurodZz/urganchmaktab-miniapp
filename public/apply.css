@@ -255,3 +255,34 @@
 .sto-ph i .ic { width: 13px; height: 13px; } .sto-ph i.k-story { background: #B07C1E; } .sto-ph i.k-fact { background: #165936; } .sto-ph i.k-res { background: #1565C0; }
 .sto-hero { margin: -4px 0 4px; } .sto-hero img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 16px; display: block; background: #ddd; }
 .sto-hero figcaption { margin-top: 4px; font-size: 10.5px; color: var(--muted); } .sto-hero a { color: var(--muted); text-decoration: underline; }
+
+/* ---------- Orzu xati (letter.js) ---------- */
+.lt-entry { display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin: 12px 0 0; }
+.lt-entry > span:nth-child(2) { flex: 1; min-width: 0; } .lt-entry b { display: block; font-size: 15px; } .lt-entry small { display: block; font-size: 12.5px; color: var(--muted); }
+.lt-entry > .ic { width: 18px; height: 18px; color: var(--muted); }
+.lt-ic { width: 44px; height: 44px; flex: none; border-radius: 14px; display: grid; place-items: center; color: #fff; background: linear-gradient(160deg, #E3B866, #B07C1E); }
+.lt-ic .ic { width: 22px; height: 22px; }
+.lt-wrap { position: relative; margin-bottom: 14px; }
+.lt-paper { border-radius: 10px; overflow: hidden; background: #FFFDF7; min-height: 300px; display: grid; place-items: center; transform: rotate(-1.2deg);
+  box-shadow: 0 2px 4px rgba(0,0,0,.08), 0 24px 40px -18px rgba(60,10,20,.55); transition: box-shadow .4s, transform .4s; }
+.lt-paper img { display: block; width: 100%; }
+.lt-paper.glow { transform: rotate(0) scale(1.02); box-shadow: 0 0 0 4px #E3B866, 0 30px 60px -20px rgba(139,9,32,.7); }
+.lt-plane { position: absolute; right: -6px; top: -14px; width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; color: #fff;
+  background: linear-gradient(160deg, #B51F3A, #650514); box-shadow: 0 10px 22px -8px rgba(101,5,20,.8), inset 0 0 0 3px rgba(255,255,255,.25); animation: ltbob 2.4s ease-in-out infinite; }
+.lt-plane .ic { width: 28px; height: 28px; transform: rotate(-8deg); }
+@keyframes ltbob { 50% { transform: translateY(-6px) rotate(6deg); } }
+.lt-plane.fly { animation: ltfly 1.6s cubic-bezier(.5,0,.3,1) forwards; }
+@keyframes ltfly { 0% { transform: none; } 30% { transform: translate(-40px, 30px) rotate(-20deg) scale(1.1); } 100% { transform: translate(-60vw, -70vh) rotate(-35deg) scale(.4); opacity: 0; } }
+.lt-form { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.lt-form label { display: flex; flex-direction: column; gap: 5px; font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.lt-form input, .lt-form select { height: 46px; border: 1px solid var(--line); border-radius: 12px; padding: 0 12px; font: inherit; font-size: 15px; color: var(--text); background: #fff; }
+.lt-share { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; } .lt-share .btn-primary, .lt-share .btn-ghost { margin: 0; }
+.lt-share[hidden] { display: none; }
+.lt-confetti { position: fixed; inset: 0; z-index: 300; pointer-events: none; overflow: hidden; }
+.lt-confetti i { position: absolute; top: 55%; width: 10px; height: 16px; background: var(--c); animation: ltconf var(--d) cubic-bezier(.15,.7,.3,1) forwards; }
+@keyframes ltconf { 0% { transform: translate(0, 0) rotate(0); opacity: 1; } 70% { opacity: 1; } 100% { transform: translate(var(--x), calc(var(--y) + 90vh)) rotate(var(--r)); opacity: 0; } }
+.lt-congrats { position: fixed; left: 50%; top: 38%; z-index: 301; transform: translate(-50%, -50%); padding: 22px 28px; border-radius: 24px; text-align: center; color: #fff; pointer-events: none;
+  background: linear-gradient(160deg, #8B0920, #650514); box-shadow: 0 30px 60px -20px rgba(101,5,20,.9), inset 0 0 0 2px rgba(227,184,102,.6); animation: ltpop .5s cubic-bezier(.2,1.5,.4,1); }
+.lt-congrats b { display: block; font: 700 30px Cinzel, Georgia, serif; color: #F6DCA0; } .lt-congrats span { font-size: 15px; }
+.lt-congrats.out { opacity: 0; transition: opacity .5s; }
+@keyframes ltpop { from { transform: translate(-50%, -50%) scale(.3); opacity: 0; } }

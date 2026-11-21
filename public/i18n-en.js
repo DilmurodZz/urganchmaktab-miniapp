@@ -1385,3 +1385,25 @@ Object.assign(I18N.en, {
 "Google Meet havolasi avtomatik yaratiladi": "The Google Meet link is created automatically",
 "{n} kishi": "{n} people",
 });
+// --- Orzu xati
+Object.assign(I18N.en, {
+"Orzu xati": "Dream letter",
+"Orzu xatimni yaratish": "Create my dream letter",
+"Orzuingizdagi universitet uchun shaxsiy motivatsion xat": "A personal motivational letter for your dream university",
+"orzuingizdagi universitet": "your dream university",
+"Hurmatli": "Dear",
+"Tabriklaymiz! Bugun siz {u} sari birinchi qadamni qo'ydingiz. Har bir dars, har bir insho va har bir urinish sizni shu eshikka yaqinlashtiradi.": "Congratulations! Today you took your first step towards {u}. Every lesson, every essay and every attempt brings you closer to that door.",
+"{y}-yil kuzida sizni {u} auditoriyalarida ko'rishga ishonamiz.": "We believe we will see you in the lecture halls of {u} in the autumn of {y}.",
+"Orzuingiz sizni kutmoqda.": "Your dream is waiting for you.",
+"Alumni Mentor jamoasi": "The Alumni Mentor team",
+"Urganch 1-IMI": "Urganch School No. 1",
+"Motivatsion karta · rasmiy hujjat emas · @{b}": "Motivational card · not an official document · @{b}",
+"Orzuingizdagi universitet": "Your dream university",
+"Qaysi yili o'qishni boshlaysiz?": "Which year will you start?",
+"Ismingiz Application Studio'dagi \"Shaxsiy ma'lumotlar\"dan olinadi, to'ldirilmagan bo'lsa Telegram ismingizdan.": "Your name comes from \"Personal details\" in Application Studio, or from Telegram if those are empty.",
+"PNG sifatida ulashish": "Share as PNG",
+"Rasmni saqlash": "Save image",
+"Tabriklaymiz!": "Congratulations!",
+"Orzuingiz sari yo'l boshlandi": "Your journey to your dream has begun",
+"Mening orzu xatim · Alumni Mentor": "My dream letter · Alumni Mentor",
+});

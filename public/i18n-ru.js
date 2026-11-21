@@ -1385,3 +1385,25 @@ Object.assign(I18N.ru, {
 "Google Meet havolasi avtomatik yaratiladi": "Ссылка Google Meet создастся автоматически",
 "{n} kishi": "{n} чел.",
 });
+// --- Orzu xati
+Object.assign(I18N.ru, {
+"Orzu xati": "Письмо мечты",
+"Orzu xatimni yaratish": "Создать моё письмо мечты",
+"Orzuingizdagi universitet uchun shaxsiy motivatsion xat": "Личное мотивационное письмо для университета мечты",
+"orzuingizdagi universitet": "университет вашей мечты",
+"Hurmatli": "Дорогой(ая)",
+"Tabriklaymiz! Bugun siz {u} sari birinchi qadamni qo'ydingiz. Har bir dars, har bir insho va har bir urinish sizni shu eshikka yaqinlashtiradi.": "Поздравляем! Сегодня вы сделали первый шаг к {u}. Каждый урок, каждое эссе и каждая попытка приближают вас к этой двери.",
+"{y}-yil kuzida sizni {u} auditoriyalarida ko'rishga ishonamiz.": "Мы верим, что осенью {y} года увидим вас в аудиториях {u}.",
+"Orzuingiz sizni kutmoqda.": "Ваша мечта ждёт вас.",
+"Alumni Mentor jamoasi": "Команда Alumni Mentor",
+"Urganch 1-IMI": "Ургенчская школа №1",
+"Motivatsion karta · rasmiy hujjat emas · @{b}": "Мотивационная карточка · не официальный документ · @{b}",
+"Orzuingizdagi universitet": "Университет мечты",
+"Qaysi yili o'qishni boshlaysiz?": "В каком году начнёте учёбу?",
+"Ismingiz Application Studio'dagi \"Shaxsiy ma'lumotlar\"dan olinadi, to'ldirilmagan bo'lsa Telegram ismingizdan.": "Имя берётся из «Личных данных» в Application Studio, а если они не заполнены, из Telegram.",
+"PNG sifatida ulashish": "Поделиться как PNG",
+"Rasmni saqlash": "Сохранить изображение",
+"Tabriklaymiz!": "Поздравляем!",
+"Orzuingiz sari yo'l boshlandi": "Путь к мечте начался",
+"Mening orzu xatim · Alumni Mentor": "Моё письмо мечты · Alumni Mentor",
+});

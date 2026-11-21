@@ -101,3 +101,25 @@ body.fit .studio-bn .sbn-ic { width: clamp(56px, 9vh, 76px); height: clamp(56px,
 .hero2-letter svg { width: 15px; height: 15px; stroke: #8B0920; fill: none; stroke-width: 2; animation: hl-fly 2.8s ease-in-out infinite; }
 .hero2-letter:active { transform: scale(.96); }
 @keyframes hl-fly { 0%, 100% { transform: translate(0, 0) rotate(0); } 50% { transform: translate(2px, -2px) rotate(-6deg); } }
+
+/* Feature colour system: each card stays warm ivory; only its icon square and bottom edge carry its colour */
+:is([data-theme="purple"], [data-theme="bordo"]) .tile4 { --fc: #8B0920; --fc2: #A8142F; background: #F7F3EE !important; border-bottom-color: var(--fc) !important;
+  box-shadow: 0 10px 20px -16px rgba(37,37,37,.4); }
+:is([data-theme="purple"], [data-theme="bordo"]) .tile4.k1 { --fc: #315A7D; --fc2: #3F6E96; }
+:is([data-theme="purple"], [data-theme="bordo"]) .tile4.k2 { --fc: #E9A317; --fc2: #F2B83A; }
+:is([data-theme="purple"], [data-theme="bordo"]) .tile4.k3 { --fc: #199447; --fc2: #22A853; }
+:is([data-theme="purple"], [data-theme="bordo"]) .tile4 .tile-ic { color: #FFFFFF; background: linear-gradient(160deg, var(--fc2), var(--fc));
+  box-shadow: 0 10px 18px -10px var(--fc), inset 0 1px 0 rgba(255,255,255,.3); }
+:is([data-theme="purple"], [data-theme="bordo"]) .tile4 span { color: #252525; }
+
+/* Application Studio: burgundy icon with a crimson ring, burgundy heading and arrow, ivory card */
+:is([data-theme="purple"], [data-theme="bordo"]) .banner.studio-bn { background: #F7F3EE; }
+:is([data-theme="purple"], [data-theme="bordo"]) .studio-bn .sbn-ic { background: #8B0920; box-shadow: 0 0 0 3px #B51F3A, 0 10px 20px -10px #8B0920; }
+:is([data-theme="purple"], [data-theme="bordo"]) .studio-bn .sbn-t b { color: #8B0920; }
+:is([data-theme="purple"], [data-theme="bordo"]) .studio-bn .banner-sep { background: #B51F3A; opacity: .45; }
+:is([data-theme="purple"], [data-theme="bordo"]) .studio-bn .banner-go { background: #8B0920; box-shadow: 0 8px 16px -8px #8B0920; }
+:is([data-theme="purple"], [data-theme="bordo"]) .studio-bn .banner-go .ic { color: #FFFFFF; }
+
+/* top right: the 1-IMI monogram emblem (transparent, no photo frame) */
+.school.emblem { width: 50px; height: 50px; padding: 0; background: none; box-shadow: none; border-radius: 0; }
+.school.emblem img { border: 0; border-radius: 0; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(37,37,37,.25)); }

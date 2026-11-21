@@ -158,7 +158,7 @@ window.goBack = () => { if (document.getElementById("sheet")) return closeSheet(
 function Home() {
   const tiles = [["video", "Online meeting", "#/meet", "k1"], ["clock", "Muddatlar", "#/muddatlar", "k2"], ["grid", "Foydali vositalar", "#/vositalar", "k3 g"]];
   return `
-  <div class="topbar"><div class="brand"><img class="brand-logo" src="img/logo-emblem-light.webp" alt="" decoding="async"><span class="brand-name"><b>ALUMNI</b><small>MENTOR</small></span></div><span class="school" role="img" aria-label="${T("Maktab")}"><img src="img/school.webp" alt="" decoding="async"></span></div>
+  <div class="topbar"><div class="brand"><img class="brand-logo" src="img/logo-emblem-light.webp" alt="" decoding="async"><span class="brand-name"><b>ALUMNI</b><small>MENTOR</small></span></div><span class="school emblem" role="img" aria-label="Urganch 1-IMI"><img src="img/emblem-1imi.svg" alt="" decoding="async"></span></div>
   <a class="hero2" href="#/unimatch">
     <img class="hero2-art" src="img/hero-compass.webp" alt="" decoding="async">
     <span class="hero2-tag">Top 300</span>

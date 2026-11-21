@@ -69,6 +69,17 @@ export default {
       if (!/^(main|m_\d{1,9})$/.test(roomName)) return new Response("bad room", { status: 400 });
       const room = env.CHAT.get(env.CHAT.idFromName(roomName));
       if (url.pathname.startsWith("/chat/img/")) return room.fetch(new Request(new URL("/chat/img/" + parts[parts.length - 1], url), req));
+      // the latest messages over plain HTTP, so the chat shows its history at once (before the live connection is up)
+      if (url.pathname === "/chat/recent" && req.method === "GET") {
+        const user = await verifyInitData(req.headers.get("X-Init-Data"), env.BOT_TOKEN, 7 * 86400);
+        if (!user) return json({ error: "unauthorised" }, 401, origin);
+        if (roomName !== "main") {
+          const m = await env.DB.prepare("SELECT id FROM meetings WHERE id = ?1").bind(Number(roomName.slice(2))).first();
+          if (!m) return json({ error: "no meeting" }, 404, origin);
+        }
+        const r = await room.fetch(new Request(new URL("/chat/recent", url)));
+        return new Response(r.body, { status: r.status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store", ...cors(origin) } });
+      }
       if (url.pathname === "/chat/ws") {
         if (origin && origin !== ALLOWED_ORIGIN && !/^http:\/\/localhost(:\d+)?$/.test(origin)) return new Response("forbidden", { status: 403 });
         const user = await verifyInitData(url.searchParams.get("init"), env.BOT_TOKEN, 7 * 86400);

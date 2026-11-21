@@ -27,6 +27,7 @@ export class ChatRoom extends DurableObject {
       if (!row) return new Response("not found", { status: 404 });
       return new Response(row.data, { headers: { "Content-Type": row.type || "image/jpeg", "Cache-Control": "public, max-age=31536000, immutable" } });
     }
+    if (url.pathname === "/chat/recent") return Response.json({ msgs: this.page(), pin: this.pinned() });
     if (req.headers.get("Upgrade") !== "websocket") return new Response("expected websocket", { status: 426 });
     const user = JSON.parse(req.headers.get("X-User") || "null");
     if (!user || !user.id) return new Response("unauthorized", { status: 401 });

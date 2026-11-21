@@ -158,7 +158,7 @@ window.goBack = () => { if (document.getElementById("sheet")) return closeSheet(
 function Home() {
   const tiles = [["video", "Online meeting", "#/meet", "k1"], ["clock", "Muddatlar", "#/muddatlar", "k2"], ["grid", "Foydali vositalar", "#/vositalar", "k3 g"]];
   return `
-  <div class="topbar"><div class="brand"><img class="brand-logo" src="img/logo-emblem-light.webp" alt="" decoding="async"><span class="brand-name"><b>ALUMNI</b><small>MENTOR</small></span></div><span class="school emblem" role="img" aria-label="Urganch 1-IMI"><img src="img/emblem-1imi.svg" alt="" decoding="async"></span></div>
+  <div class="topbar"><div class="brand"><img class="brand-logo" src="img/logo-emblem-light.webp" alt="" decoding="async"><span class="brand-name"><b>ALUMNI</b><small>MENTOR</small></span></div><span class="school" role="img" aria-label="Urganch 1-IMI"><img src="img/school.webp" alt="" decoding="async"></span></div>
   <a class="hero2" href="#/unimatch">
     <img class="hero2-art" src="img/hero-compass.webp" alt="" decoding="async">
     <span class="hero2-tag">Top 300</span>
@@ -381,6 +381,8 @@ window.addEventListener("DOMContentLoaded", () => {
   // course data is fetched quietly in the background, so the Kurslar page opens complete in one go
   // course data and the CV maker come when the phone is idle (or at once when their page opens)
   const idle = (f, ms) => setTimeout(() => (window.requestIdleCallback || setTimeout)(f), ms);
+  // the screens students open most come in the background right after start, so they open at once without a spinner
+  idle(() => loadScripts(["chat.js", "study.js", "ariza.js"]).then(() => { try { Chat.warm(); } catch {} }).catch(() => {}), 900);
   idle(() => { try { Kurslar.load(); } catch {} }, 1500);
   idle(() => loadTools().catch(() => {}), 7000);
   // the game files come last, when the phone is idle
@@ -642,7 +644,7 @@ window.appsAdd = (a) => {
 function sheet(html) {
   closeSheet();
   const el = document.createElement("div"); el.className = "sheet-wrap"; el.id = "sheet";
-  el.innerHTML = `<div class="sheet" onclick="event.stopPropagation()"><i class="sheet-grip"></i>${html}</div>`;
+  el.innerHTML = `<div class="sheet" onclick="event.stopPropagation()"><button class="sheet-x" onclick="closeSheet()" aria-label="${T("Yopish")}">${ic("x")}</button><i class="sheet-grip"></i>${html}</div>`;
   el.onclick = closeSheet; document.body.appendChild(el);
   requestAnimationFrame(() => el.classList.add("on"));
   try { tg.BackButton.show(); } catch {}   // back closes this panel first

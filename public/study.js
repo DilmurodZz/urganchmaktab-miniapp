@@ -199,10 +199,24 @@ const Study = (() => {
       <div class="sd-bars">${CRIT().map(bar).join("")}</div>
       <div class="sd-stats">${r[15] != null ? `<span class="acc"><b>${r[15]}%</b><small>${T("qabul darajasi")}${r[16] ? ` (${r[16]})` : ""}</small></span>` : `<span class="acc"><b>${T("yo'q")}</b><small>${T("qabul darajasi")}</small></span>`}${stat(r[9], T("talaba"))}${stat(r[10], T("1 o'qituvchiga talaba"))}${stat(r[11], T("xorijiy talabalar"))}${stat(r[12], T("ayollar : erkaklar"))}</div>
       ${r[14] ? `<button class="btn-primary sd-site" onclick="openExt('${encodeURIComponent(r[14])}')">${ic("globe")} ${T("Rasmiy sayt")}: ${esc(r[14].replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, ""))}</button>` : ""}
-      <button class="btn-primary sd-addapp" onclick="appsAdd({ name: uniName(${i}), country: uniCountry(${i}), site: uniSite(${i}) }) && closeSheet()">${ic("plus")} ${T("Arizalarimga qo'shish")}</button>
+      ${addBtn(i, (store.get("apps", []) || []).some((x) => x.name === r[1]))}
       <button class="btn-ghost sd-share wide" onclick="shareSec('u_${i}', '${esc(r[1]).replace(/'/g, "")}')">${ic("send")} ${T("Do'stga ulashish")}</button>
       <button class="btn-ghost sd-thebtn" onclick="openExt('${encodeURIComponent("https://www.timeshighereducation.com" + r[13])}')">${ic("chart")} ${T("THE saytida ko'rish")}</button>
       <p class="note">${T("Qabul darajasi: arizachilarning necha foizi qabul qilingani (Wikidata ma'lumoti, oxirgi mavjud yil).")}</p></div>`);
+  };
+  // "add to my applications": turns into a green "saved" state in place, so the student sees it worked
+  const addBtn = (i, saved) => saved
+    ? `<div class="sd-saved" id="sd-add">${ic("check")}<span><b>${T("Saqlangan universitetlaringizga qo'shildi")}</b><small onclick="closeSheet();location.hash='#/ariza'">${T("Arizalarimni ochish")} ${ic("chev")}</small></span></div>`
+    : `<button class="btn-primary sd-addapp" id="sd-add" onclick="uniAdd(${i})">${ic("plus")} ${T("Arizalarimga qo'shish")}</button>`;
+  window.uniAdd = (i) => {
+    const r = uni && uni.rows[i]; if (!r) return;
+    const l = store.get("apps", []);
+    if (!l.some((x) => x.name === r[1])) {
+      l.unshift({ id: Date.now(), status: "plan", docs: {}, deadline: "", name: r[1], country: r[2], site: r[14] || "", plat: guessPlat(r[2]) });
+      store.set("apps", l);
+    }
+    try { tg.HapticFeedback.notificationOccurred("success"); } catch {}
+    const el = document.getElementById("sd-add"); if (el) el.outerHTML = addBtn(i, true);
   };
   document.addEventListener("input", (e) => {
     const id = e.target && e.target.id;

@@ -331,34 +331,72 @@ const Ariza = (() => {
   /* ---------- Muddatlar: the student's own deadlines and the main yearly ones ---------- */
   // fixed yearly dates get a countdown to their next occurrence; dates that move every year are shown as months only
   const KEY_DATES = () => [
-    { m: 10, d: 15, t: T("UCAS: Oksford, Kembrij, tibbiyot va stomatologiya"), p: "ucas" },
-    { m: 11, d: 1, t: T("Common App: erta muddat (Early Decision, Early Action)"), p: "commonapp" },
-    { m: 1, d: 1, t: T("Common App: asosiy muddat (Regular Decision), ko'p universitetlarda"), p: "commonapp" },
-    { m: 1, d: 15, t: T("Germaniya: yozgi semestrga ariza"), p: "daad" },
-    { m: 7, d: 15, t: T("Germaniya: qishki semestrga ariza"), p: "daad" },
-    { when: T("Yanvar"), t: T("UCAS: boshqa kurslar uchun asosiy muddat"), p: "ucas" },
-    { when: T("Aprel va noyabr"), t: T("El-yurt umidi jamg'armasi tanlovlari") },
-    { when: T("Mart, may, iyun, avgust, oktabr, noyabr, dekabr"), t: T("SAT xalqaro sanalari") },
-    { when: T("Iyun-iyul"), t: T("DTM: OTMlarga hujjat topshirish") },
+    { m: 10, d: 15, t: T("UCAS: Oksford, Kembrij, tibbiyot va stomatologiya"), p: "ucas",
+      i: T("Oksford va Kembrij, shuningdek tibbiyot, stomatologiya va veterinariya kurslariga UCAS orqali ariza shu kungacha yuboriladi. Ko'pincha qo'shimcha kirish testi va suhbat ham bo'ladi, shuning uchun tayyorgarlikni yozdan boshlang.") },
+    { m: 11, d: 1, t: T("Common App: erta muddat (Early Decision, Early Action)"), p: "commonapp",
+      i: T("Ko'p AQSh universitetlari erta topshirganlarga javobni dekabrda beradi. Early Decision majburiy: qabul qilinsangiz, o'sha universitetga borishingiz kerak. Early Action esa majburiy emas va boshqa universitetlarga ham topshiraverasiz.") },
+    { m: 1, d: 1, t: T("Common App: asosiy muddat (Regular Decision), ko'p universitetlarda"), p: "commonapp",
+      i: T("AQShning ko'p universitetlarida asosiy muddat. Insho, tavsiyanomalar, test natijalari va moliyaviy yordam hujjatlari shu kungacha tayyor bo'lishi kerak. Javoblar odatda mart oxirida keladi.") },
+    { m: 1, d: 15, t: T("Germaniya: yozgi semestrga ariza"), p: "daad",
+      i: T("Germaniyada yozgi semestr (aprel) uchun ko'p universitetlarga ariza 15-yanvargacha, ko'pincha uni-assist orqali topshiriladi. Aniq muddat va talablarni har bir universitet sahifasidan tekshiring.") },
+    { m: 7, d: 15, t: T("Germaniya: qishki semestrga ariza"), p: "daad",
+      i: T("Germaniyada qishki semestr (oktabr) uchun asosiy muddat 15-iyul. Xalqaro talabalar ko'pincha uni-assist orqali topshiradi. Tayyorlov kursi (Studienkolleg) kerak bo'lishi mumkin, buni oldindan bilib oling.") },
+    { when: T("Yanvar"), t: T("UCAS: boshqa kurslar uchun asosiy muddat"), p: "ucas",
+      i: T("Oksford, Kembrij va tibbiyotdan tashqari ko'pchilik kurslar uchun UCAS asosiy muddati yanvar oxirida. Bitta arizada 5 tagacha kurs tanlanadi va bitta shaxsiy bayonot yoziladi.") },
+    { when: T("Aprel va noyabr"), t: T("El-yurt umidi jamg'armasi tanlovlari"), lg: ["EL-YURT", "UMIDI"], lc: "ey",
+      i: T("El-yurt umidi jamg'armasi xorijdagi nufuzli universitetlarda o'qish uchun grantlar beradi. Tanlovlar odatda bahor va kuzda e'lon qilinadi. Shartlar va hujjatlar ro'yxatini jamg'armaning rasmiy saytidan kuzatib boring.") },
+    { when: T("Mart, may, iyun, avgust, oktabr, noyabr, dekabr"), t: T("SAT xalqaro sanalari"), img: "img/sat-logo.webp",
+      i: T("SAT yiliga bir necha marta xalqaro sanalarda topshiriladi. Ro'yxatdan o'tish imtihondan taxminan bir oy oldin yopiladi. Natijani universitet muddatidan oldin yuborish uchun imtihonni erta rejalashtiring.") },
+    { when: T("Iyun-iyul"), t: T("DTM: OTMlarga hujjat topshirish"), lg: ["DTM"], lc: "dt",
+      i: T("O'zbekiston OTMlariga hujjatlar odatda iyun-iyul oylarida rasmiy portal orqali topshiriladi, test esa yozda o'tkaziladi. Aniq sanalar har yili alohida e'lon qilinadi.") },
   ];
   const nextDate = (m, d) => { const now = new Date(), y = now.getFullYear(); let x = new Date(y, m - 1, d, 23, 59); if (x < now) x = new Date(y + 1, m - 1, d, 23, 59); return x; };
   const fmtDate = (x) => fmtDay(x);
+  const keyRows = () => KEY_DATES().map((k, n) => ({ ...k, n })).map((k) => k.m ? { ...k, date: nextDate(k.m, k.d) } : k).map((k) => k.date ? { ...k, left: Math.ceil((k.date - Date.now()) / 864e5) } : k);
+  const host = (u) => { try { return new URL(/^https?:/.test(u) ? u : "https://" + u).hostname; } catch { return ""; } };
+  // a logo for each row: the platform's mark, the SAT logo, or the university's own site icon (its initial if that fails)
+  const keyLogo = (k) => k.img ? `<span class="ap-logo dl-img"><img src="${k.img}" alt=""></span>` : k.p ? logo(PLAT()[k.p]) : `<span class="ap-logo ${k.lc}">${k.lg.map((t) => `<b>${t}</b>`).join("")}</span>`;
+  const uniLogo = (a) => { const h = host(a.site || ""), ini = esc((a.name || "?").trim()[0] || "?");
+    return h ? `<span class="ap-logo dl-img"><img src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(h)}&sz=64" alt="" loading="lazy" onerror="this.parentNode.innerHTML='<b>${ini}</b>'"></span>` : `<span class="ap-logo di"><b>${ini}</b></span>`; };
+  const daysTxt = (left) => left < 0 ? T("Muddat o'tgan") : left === 0 ? T("Bugun oxirgi kun") : T("{n} kun qoldi", { n: left });
   function Deadlines() {
     const mine = list().filter((a) => a.deadline).map((a) => ({ a, left: daysLeft(a.deadline) })).sort((x, y) => x.left - y.left);
-    const keys = KEY_DATES().map((k) => k.m ? { ...k, date: nextDate(k.m, k.d) } : k).map((k) => k.date ? { ...k, left: Math.ceil((k.date - Date.now()) / 864e5) } : k)
-      .sort((x, y) => (x.left ?? 9999) - (y.left ?? 9999));
+    const keys = keyRows().sort((x, y) => (x.left ?? 9999) - (y.left ?? 9999));
     const badge = (left) => `<span class="dl-left ${left < 0 ? "late" : left <= 14 ? "soon" : ""}"><b>${left < 0 ? "!" : left}</b><small>${left < 0 ? T("o'tgan") : T("kun")}</small></span>`;
+    // ending soon: everything still open within 60 days (the nearest one at least), most urgent first
+    const soon = mine.filter((x) => x.left >= 0).map((x) => ({ t: x.a.name, logo: uniLogo(x.a), left: x.left, go: `dlMine(${x.a.id})` }))
+      .concat(keys.filter((k) => k.left != null).map((k) => ({ t: k.t, logo: keyLogo(k), left: k.left, go: `dlKey(${k.n})` }))).sort((x, y) => x.left - y.left);
+    const hot = soon.filter((x) => x.left <= 60); const top = (hot.length ? hot : soon.slice(0, 1)).slice(0, 4);
     return `${navbar(T("Muddatlar"))}
+    ${top.length ? `<div class="section-title">${T("Muddati yakunlanayotganlar")}<small>${hot.length}</small></div>
+    <div class="dl-hot">${top.map((x) => `<button class="dl-hc ${x.left <= 14 ? "red" : ""}" onclick="${x.go}">${x.logo}<span class="dl-hn"><b>${x.left}</b><small>${T("kun qoldi")}</small></span><span class="dl-ht notr">${esc(x.t)}</span></button>`).join("")}</div>` : ""}
     <div class="section-title">${T("Mening muddatlarim")}<small>${mine.length}</small></div>
-    ${mine.length ? `<div class="dl-list">${mine.map(({ a, left }) => `<button class="card dl-row" onclick="store.set('studio_tab','apps');location.hash='#/ariza'">${badge(left)}
-      <span class="notr"><b>${esc(a.name)}</b><small>${esc((PLAT()[a.plat] || PLAT().direct).name)} · ${esc(fmtDate(new Date(a.deadline + "T12:00:00")))}</small></span>${ic("chev")}</button>`).join("")}</div>`
+    ${mine.length ? `<div class="dl-list">${mine.map(({ a, left }) => `<button class="card dl-row" onclick="dlMine(${a.id})">${uniLogo(a)}
+      <span class="notr"><b>${esc(a.name)}</b><small>${esc((PLAT()[a.plat] || PLAT().direct).name)} · ${esc(fmtDate(new Date(a.deadline + "T12:00:00")))}</small></span>${badge(left)}</button>`).join("")}</div>`
       : `<div class="card ap-empty">${chip("clock", "lg")}<p>${T("Application Studio'da universitet qo'shib, topshirish muddatini kiriting: u shu yerda ko'rinadi.")}</p>
         <button class="btn-ghost" onclick="store.set('studio_tab','apps');location.hash='#/ariza'">${ic("plus")} ${T("Universitet qo'shish")}</button></div>`}
     <div class="section-title">${T("Asosiy muddatlar")}</div>
-    <div class="dl-list">${keys.map((k) => `<div class="card dl-row ${k.left == null ? "nodate" : ""}">${k.left != null ? badge(k.left) : `<span class="dl-left mo">${ic("clock")}</span>`}
-      <span><b>${k.t}</b><small>${k.date ? esc(fmtDate(k.date)) : k.when}</small></span></div>`).join("")}</div>
+    <div class="dl-list">${keys.map((k) => `<button class="card dl-row ${k.left == null ? "nodate" : ""}" onclick="dlKey(${k.n})">${keyLogo(k)}
+      <span><b>${k.t}</b><small>${k.date ? esc(fmtDate(k.date)) : k.when}</small></span>${k.left != null ? badge(k.left) : `<span class="dl-left mo">${ic("clock")}</span>`}</button>`).join("")}</div>
     <p class="note">${T("Har bir universitetning aniq muddatini uning rasmiy saytidan tekshiring.")}</p>`;
   }
+  // tap a deadline: a short explanation (50 words at most) in a bottom panel
+  window.dlKey = (n) => {
+    const k = keyRows().find((x) => x.n === n); if (!k) return; haptic("light");
+    const p = k.p && PLAT()[k.p];
+    sheet(`<div class="dl-sheet">${keyLogo(k)}<h3>${k.t}</h3>
+      <p class="dl-when">${k.date ? `<b>${esc(fmtDate(k.date))}</b> · ${daysTxt(k.left)}` : `<b>${k.when}</b>`}</p>
+      <p>${k.i}</p>
+      ${p && p.url ? `<button class="btn-primary" onclick="openExt('${encodeURIComponent(p.url)}')">${ic("globe")} ${esc(p.name)}</button>` : ""}</div>`);
+  };
+  window.dlMine = (id) => {
+    const a = list().find((x) => x.id === id); if (!a) return; haptic("light");
+    const left = daysLeft(a.deadline), pl = PLAT()[a.plat] || PLAT().direct;
+    sheet(`<div class="dl-sheet">${uniLogo(a)}<h3 class="notr">${esc(a.name)}</h3>
+      <p class="dl-when"><b>${esc(fmtDate(new Date(a.deadline + "T12:00:00")))}</b> · ${daysTxt(left)}</p>
+      <p>${T("Arizani {p} orqali topshirasiz. Insho, tavsiyanomalar va hujjatlarni muddatdan kamida bir hafta oldin tayyorlab qo'ying: oxirgi kunlarda saytlar sekinlashadi.", { p: esc(pl.name) })}</p>
+      <button class="btn-primary" onclick="closeSheet();store.set('studio_tab','apps');location.hash='#/ariza'">${ic("cap")} ${T("Application Studio'da ochish")}</button></div>`);
+  };
   return { Screen, Deadlines };
 })();
 window.Ariza = Ariza;

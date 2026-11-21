@@ -72,3 +72,10 @@ body.chat-on #app { padding: 0; max-width: none; height: 100dvh; }
 .ch-ed-send { display: flex; gap: 8px; padding: 8px 8px calc(10px + env(safe-area-inset-bottom)); }
 .ch-ed-send input { flex: 1; min-width: 0; height: 44px; border: 0; border-radius: 22px; padding: 0 16px; font: inherit; font-size: 15px; background: rgba(255,255,255,.12); color: #fff; }
 .ch-ed-send input::placeholder { color: rgba(255,255,255,.55); }
+
+/* while the very first messages arrive: soft placeholder bubbles instead of an empty room */
+.ch-skel { display: flex; flex-direction: column; gap: 10px; padding: 14px 12px; }
+.ch-skel i { display: block; width: 62%; height: 44px; border-radius: 16px 16px 16px 4px; background: linear-gradient(90deg, rgba(0,0,0,.05), rgba(0,0,0,.09), rgba(0,0,0,.05)); background-size: 200% 100%; animation: chsk 1.2s linear infinite; }
+.ch-skel i.me { align-self: flex-end; border-radius: 16px 16px 4px 16px; width: 48%; }
+.ch-skel i.s { height: 30px; width: 40%; }
+@keyframes chsk { to { background-position: -200% 0; } }

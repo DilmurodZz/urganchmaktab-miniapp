@@ -7,7 +7,21 @@ const Chat = (() => {
   const STICKERS = ["😀", "😂", "🥰", "😎", "🤩", "🥳", "😮", "😢", "😡", "🤔", "🙏", "👍", "👏", "💪", "🔥", "❤️", "🎓", "📚", "🏆", "✅", "🚀", "⭐", "☕", "🎉"];
   const COLORS = ["#8B0920", "#165936", "#1565C0", "#B07C1E", "#6D28D9", "#0E7490", "#BE185D", "#4D7C0F"];
   let ws = null, me = null, msgs = [], byId = {}, pin = null, online = 0, typing = {}, reply = null, editing = null, alive = false, retry = 0, retryT = null, noMore = false, loadingOld = false;
-  let lastTypingSent = 0, pingT = null, tmpN = 0;
+  let lastTypingSent = 0, pingT = null, tmpN = 0, ready = false, live = false, saveT = null;
+  // the latest messages of each room are kept on the phone, so the chat opens with them at once; the server then refreshes them
+  const CK = (r) => "chat_c_" + (r || room);
+  const saveCache = () => { clearTimeout(saveT); saveT = setTimeout(() => { try { store.set(CK(), { msgs: msgs.filter((m) => !m.tmp).slice(-60), pin }); } catch {} }, 600); };
+  const take = (d) => { msgs = d.msgs || []; byId = {}; msgs.forEach((m) => { byId[m.id] = m; }); pin = d.pin || null; noMore = msgs.length < 60; ready = true; };
+  // history over plain HTTP (faster than waiting for the live connection), for first-time visitors too
+  function fetchRecent(r, paint) {
+    if (!initData()) return;
+    fetch(SHARE_API + "/chat/recent?room=" + r, { headers: { "X-Init-Data": initData() } }).then((x) => x.ok ? x.json() : null).then((d) => {
+      if (!d) return;
+      try { store.set(CK(r), { msgs: d.msgs, pin: d.pin }); } catch {}
+      if (paint && !live && room === r && $("ch-msgs")) { take(d); paintAll(); paintPin(); chatBottom(); }
+    }).catch(() => {});
+  }
+  function warm() { if (initData() && !store.get(CK("main"), null)) fetchRecent("main", false); }
   const initData = () => tgInit();
   // which room: "main" for the students' chat, "m_<id>" for one meeting's chat (#/mchat)
   let room = "main", wsRoom = null;
@@ -46,7 +60,11 @@ const Chat = (() => {
   function mount() {
     if (!initData()) return;
     room = roomNow();
-    if (wsRoom !== room) { try { ws && ws.close(); } catch {} ws = null; msgs = []; byId = {}; pin = null; reply = null; editing = null; noMore = false; }
+    if (wsRoom !== room) { try { ws && ws.close(); } catch {} ws = null; msgs = []; byId = {}; pin = null; reply = null; editing = null; noMore = false; ready = false; }
+    live = false;
+    if (!me) { try { const u = tg.initDataUnsafe && tg.initDataUnsafe.user; if (u) me = { id: u.id, admin: false }; } catch {} }
+    if (!msgs.length) { const c = store.get(CK(), null); if (c && c.msgs) take(c); }
+    fetchRecent(room, true);
     paintAll(); paintPin(); paintStatus(); paintCtx();
     const inp = $("ch-in");
     inp.addEventListener("input", () => { inp.style.height = "auto"; inp.style.height = Math.min(inp.scrollHeight, 120) + "px"; if (Date.now() - lastTypingSent > 3000 && inp.value.trim()) { lastTypingSent = Date.now(); send({ t: "typing" }); } });
@@ -73,18 +91,18 @@ const Chat = (() => {
   }
   const send = (o) => { if (ws && ws.readyState === 1) { ws.send(JSON.stringify(o)); return true; } return false; };
   function onData(d) {
-    if (d.t === "hello") { me = d.me; online = d.online; pin = d.pin; msgs = d.msgs; byId = {}; msgs.forEach((m) => { byId[m.id] = m; }); noMore = d.msgs.length < 60; paintAll(); paintPin(); paintStatus(); chatBottom(); return; }
+    if (d.t === "hello") { me = d.me; online = d.online; live = true; take(d); paintAll(); paintPin(); paintStatus(); chatBottom(); saveCache(); return; }
     if (d.t === "msg") {
-      if (d.tmp) { msgs = msgs.filter((x) => x.tmp !== d.tmp); if (!byId[d.m.id]) { msgs.push(d.m); byId[d.m.id] = d.m; } paintAll(); chatBottom(); return; }
+      if (d.tmp) { msgs = msgs.filter((x) => x.tmp !== d.tmp); if (!byId[d.m.id]) { msgs.push(d.m); byId[d.m.id] = d.m; } paintAll(); chatBottom(); saveCache(); return; }
       if (byId[d.m.id]) return;
       const list = $("ch-list"), near = list && list.scrollHeight - list.scrollTop - list.clientHeight < 160;
       msgs.push(d.m); byId[d.m.id] = d.m; append(d.m);
       if (d.m.uid === (me && me.id) || near) chatBottom(true); else { const n = $("ch-new"); if (n) n.textContent = String((+n.textContent || 0) + 1); }
       if (d.m.uid !== (me && me.id)) haptic("light");
-      return;
+      saveCache(); return;
     }
     if (d.t === "upd" && d.m.deleted) {   // a deleted message disappears for everyone, as in Telegram
-      delete byId[d.m.id]; msgs = msgs.filter((x) => x.id !== d.m.id); paintAll();
+      delete byId[d.m.id]; msgs = msgs.filter((x) => x.id !== d.m.id); paintAll(); saveCache();
       if (pin && pin.id === d.m.id) { pin = null; paintPin(); } return;
     }
     if (d.t === "upd") { byId[d.m.id] = d.m; const i = msgs.findIndex((x) => x.id === d.m.id); if (i >= 0) msgs[i] = d.m; const el = document.querySelector(`.cm[data-id="${d.m.id}"]`); if (el) el.outerHTML = msgHTML(d.m, i); if (pin && pin.id === d.m.id) { pin = d.m.deleted ? null : d.m; paintPin(); } return; }
@@ -109,7 +127,7 @@ const Chat = (() => {
       <div class="cb" onclick="chatMenu(${m.id || 0})">${!mine && !cont ? `<b class="cn" style="color:${COLORS[m.uid % COLORS.length]}">${esc(m.name)}</b>` : ""}${body}
         <span class="cmeta">${m.edited ? T("tahrirlangan") + " · " : ""}${tm(m.ts)}${mine ? ` ${ic(m.tmp ? "clock" : "check")}` : ""}</span></div></div>`;
   }
-  function paintAll() { const box = $("ch-msgs"); if (!box) return; box.innerHTML = msgs.length ? msgs.map(msgHTML).join("") : `<div class="ch-empty">${chip("chat", "lg")}<p>${T("Hali xabar yo'q. Birinchi bo'lib salom bering!")}</p></div>`; const o = $("ch-older"); if (o) o.innerHTML = noMore && msgs.length ? `<small>${T("Chat boshi")}</small>` : ""; }
+  function paintAll() { const box = $("ch-msgs"); if (!box) return; box.innerHTML = msgs.length ? msgs.map(msgHTML).join("") : !ready ? `<div class="ch-skel"><i></i><i class="me"></i><i></i><i class="me s"></i><i class="s"></i></div>` : `<div class="ch-empty">${chip("chat", "lg")}<p>${T("Hali xabar yo'q. Birinchi bo'lib salom bering!")}</p></div>`; const o = $("ch-older"); if (o) o.innerHTML = noMore && msgs.length ? `<small>${T("Chat boshi")}</small>` : ""; }
   function append(m) { const box = $("ch-msgs"); if (!box) return; if (box.querySelector(".ch-empty")) box.innerHTML = ""; box.insertAdjacentHTML("beforeend", msgHTML(m, msgs.indexOf(m))); }
   function paintPin() { const el = $("ch-pin"); if (!el) return; el.innerHTML = pin ? `<button class="ch-pinbar" onclick="chatJump(${pin.id})">${ic("pin")}<span><b>${T("Qadalgan xabar")}</b><small>${esc(pin.text || (pin.img ? T("Rasm") : T("Stiker")))}</small></span>${me && me.admin ? `<i onclick="event.stopPropagation();chatPin(${pin.id},true)">${ic("x")}</i>` : ""}</button>` : ""; }
   function paintStatus(off) {
@@ -225,6 +243,6 @@ const Chat = (() => {
     vvOff = () => { vv.removeEventListener("resize", fit); vv.removeEventListener("scroll", fit); try { tg.offEvent("viewportChanged", fit); } catch {} vvOff = null; };
     fit();
   }
-  return { Screen, mount, unmount };
+  return { Screen, mount, unmount, warm };
 })();
 window.Chat = Chat;

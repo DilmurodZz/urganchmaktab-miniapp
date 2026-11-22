@@ -1448,4 +1448,9 @@ Object.assign(I18N.ru, {
 "Rad etish va xabar berish": "Отклонить и сообщить",
 "sizga javob": "ответ вам",
 "{n} ga javob": "Ответ {n}",
+// --- v17: essay and recommendation tips
+"Insho va tavsiyanoma maslahatlari": "Советы по эссе и рекомендациям",
+"Qabul komissiyasi xodimlari va top universitetlarga qabul qilingan talabalar eng ko'p beradigan maslahatlar.": "Советы, которые чаще всего дают сотрудники приёмных комиссий и студенты, поступившие в топовые университеты.",
+"Har bir universitetning aniq talablarini uning rasmiy saytidan tekshiring.": "Точные требования каждого университета проверяйте на его официальном сайте.",
+"Common App inshosi, qo'shimcha insholar, tavsiyanomalar va sun'iy intellekt haqida": "Эссе Common App, дополнительные эссе, рекомендации и про ИИ",
 });

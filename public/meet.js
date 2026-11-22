@@ -187,7 +187,6 @@ const Meet = (() => {
       <label class="mt-photo">${photo(me, "xl")}<span>${ic("camera")} ${me.photo ? T("Rasmni almashtirish") : T("Rasm yuklash (majburiy)")}</span><input type="file" accept="image/*" onchange="mtPhoto(this)" hidden></label>
       <label>${T("Ism va familiya")}<input id="mp-name" maxlength="60" value="${esc(me.name)}"></label>
       <label>${T("Universitet")}<input id="mp-uni" maxlength="80" value="${esc(me.uni || "")}" placeholder="Stanford University"></label>
-      <label>${T("Yo'nalish va bitirgan yil")}<input id="mp-field" maxlength="80" value="${esc(me.field || "")}" placeholder="Computer Science, 2024"></label>
       <label>${T("O'zingiz haqingizda")}<textarea id="mp-bio" rows="4" maxlength="600">${esc(me.bio || "")}</textarea></label>
       <button class="btn-primary" onclick="mtSaveProfile()">${ic("check")} ${T("Saqlash")}</button></div>`);
   };
@@ -204,7 +203,7 @@ const Meet = (() => {
   window.mtSaveProfile = () => {
     const v = (id) => document.getElementById(id).value;
     if (!newPhoto && !S.me.mentor.photo) return toast(T("Avval profil rasmingizni yuklang"));
-    api("/mentor/profile", { name: v("mp-name"), uni: v("mp-uni"), field: v("mp-field"), bio: v("mp-bio"), photo: newPhoto }).then((r) => { S.me.mentor = r.mentor; closeSheet(); toast(T("Saqlandi")); load(true); keep(); }).catch(fail);
+    api("/mentor/profile", { name: v("mp-name"), uni: v("mp-uni"), field: "", bio: v("mp-bio"), photo: newPhoto }).then((r) => { S.me.mentor = r.mentor; closeSheet(); toast(T("Saqlandi")); load(true); keep(); }).catch(fail);
   };
   window.mtPass = () => sheet(`<div class="ap-sheet mt-form"><h3>${T("Parolni o'zgartirish")}</h3>
     <label>${T("Hozirgi parol")}<input id="mp-old" type="password" autocomplete="current-password"></label>

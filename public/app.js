@@ -39,7 +39,7 @@ const THEMES = { bordo: ["Bordo", "#650514", "#B51F3A"], purple: ["Binafsha", "#
 function applyTheme(name) {
   document.body.dataset.theme = name;
   store.set("theme", name);
-  const bg = name === "purple" || name === "bordo" ? "#F7F3EE" : "#F5F6FA";
+  const bg = "#F7F3EE";
   try { tg.setHeaderColor(bg); tg.setBackgroundColor(bg); } catch {}
 }
 // dark purple is the default; everyone moves to it once (the Alumni Mentor launch), after that their own choice stays
@@ -162,19 +162,20 @@ window.goBack = () => { if (document.getElementById("sheet")) return closeSheet(
 
 /* ---------- screens ---------- */
 function Home() {
-  const tiles = [["video", "Online meeting", "#/meet", "k1"], ["clock", "Muddatlar", "#/muddatlar", "k2"], ["grid", "Foydali vositalar", "#/vositalar", "k3 g"]];
+  // Alumni Mentor is about meeting the mentors, so Online meeting has the big card; Application Studio is a tile
+  const tiles = [["cap", "Application Studio", "#/ariza", "k0"], ["clock", "Muddatlar", "#/muddatlar", "k2"], ["grid", "Foydali vositalar", "#/vositalar", "k3 g"]];
   return `
   <div class="topbar"><div class="brand"><img class="brand-logo" src="img/logo-emblem-light.webp" alt="" decoding="async"><span class="brand-name"><b>ALUMNI</b><small>MENTOR</small></span></div><span class="school" role="img" aria-label="Urganch 1-IMI"><img src="img/school.webp" alt="" decoding="async"></span></div>
   <a class="hero2 um-card" href="#/unimatch">
-    <img class="um-art" src="img/unimatch-letter.webp" alt="" decoding="async">
+    <img class="um-art" src="img/unimatch-letter.webp" alt="" decoding="async"><img class="um-art um-paper" src="img/unimatch-paper.webp" alt="" decoding="async">
     <span class="um-l"><span class="hero2-tag">Top 300</span>
     <h3>UniMatch</h3>
     <span class="um-go">Boshlash ${ic("chev")}</span></span>
   </a>
-  <a class="banner studio-bn" href="#/ariza">
-    <span class="sbn-ic">${ic("cap")}</span><span class="banner-sep"></span><span class="sbn-t"><b>Application Studio</b><small>${T("Profil, insholar, tavsiyalar va topshirish")}</small></span><span class="banner-go">${ic("chev")}</span>
+  <a class="banner studio-bn meet-bn" href="#/meet">
+    <span class="sbn-ic">${ic("video")}<i class="tile-nb" data-mb></i></span><span class="banner-sep"></span><span class="sbn-t"><b>Online meeting</b><small>${T("Top universitet bitiruvchilari bilan jonli uchrashuvlar")}</small></span><span class="banner-go">${ic("chev")}</span>
   </a>
-  <div class="grid4">${tiles.map(([i, l, h, k]) => `<a class="tile4 ${k}" href="${h}"><i class="tile-ic">${ic(i)}</i><span>${l}</span>${i === "grid" ? `<i class="tile-nb" data-nb></i>` : i === "video" ? `<i class="tile-nb" data-mb></i>` : ""}</a>`).join("")}</div>
+  <div class="grid4">${tiles.map(([i, l, h, k]) => `<a class="tile4 ${k}" href="${h}"><i class="tile-ic">${ic(i)}</i><span>${l}</span>${i === "grid" ? `<i class="tile-nb" data-nb></i>` : ""}</a>`).join("")}</div>
 `;
 }
 
@@ -281,7 +282,7 @@ const ROUTES = {
   "#/": Home, "#/kompas": () => needScript("kompas.js", "Compass", "Screen", T("UniMatch")), "#/natija": () => needScript("kompas.js", "Compass", "Result", T("UniMatch")), "#/profil": Profil,
   "#/kurslar": () => Kurslar.List(), "#/kurs": () => Kurslar.Detail(location.hash.slice(7)), "#/oyin": () => "", "#/mutolaa": () => Soon("mutolaa"),
   "#/duo": DuoScreen, "#/vositalar": () => needTools("Screen"), "#/cv": () => needTools("CV"), "#/dtm": () => needScript("study.js", "Study", "DTM", T("DTM ball kalkulyatori")), "#/ielts": () => needScript("study.js", "Study", "IELTS", T("IELTS ball kalkulyatori")), "#/unis": () => needScript("study.js", "Study", "Unis", T("Grant va sertifikatlar")),
-  "#/muddatlar": () => needScript("ariza.js", "Ariza", "Deadlines", T("Muddatlar")), "#/workshop": () => needScript("workshop.js", "Workshop", "Screen", "Harvard Admission tips"),
+  "#/muddatlar": () => needScript("ariza.js", "Ariza", "Deadlines", T("Muddatlar")), "#/workshop": () => needScript("workshop.js", "Workshop", "Screen", "Admission tips from Harvard"), "#/tips": () => needScript("tips.js", "Tips", "Screen", T("Insho va tavsiyanoma maslahatlari")),
   "#/unimatch": () => needScript("study.js", "Study", "UniMatch", "UniMatch"), "#/unimatch-natija": () => needScript("study.js", "Study", "UniMatchResult", "UniMatch"),
   "#/ariza": () => needScript("ariza.js", "Ariza", "Screen", "Application Studio"),
   "#/chat": () => needScript("chat.js", "Chat", "Screen", "Chat"), "#/mchat": () => needScript("chat.js", "Chat", "Screen", "Chat"),

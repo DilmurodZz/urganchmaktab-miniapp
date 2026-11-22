@@ -27,9 +27,9 @@ window.Workshop = (() => {
       <span class="wb-folio">${n} / ${N() - 1}</span></div></div>`;
   }
   function Screen() {
-    if (!window.WB_PAGES) { loadScripts(["workshop-data.js"]).then(() => { if (location.hash === "#/workshop") render(); }); return `${navbar("Harvard Admission tips")}${spinner()}`; }
+    if (!window.WB_PAGES) { loadScripts(["workshop-data.js"]).then(() => { if (location.hash === "#/workshop") render(); }); return `${navbar("Admission tips from Harvard")}${spinner()}`; }
     i = Math.min(i, N() - 1);
-    return `${navbar("Harvard Admission tips")}
+    return `${navbar("Admission tips from Harvard")}
     <div class="wb" oncontextmenu="return false">
       <div class="seg wb-lang"><button class="${lang === "uz" ? "on" : ""}" onclick="wbLang('uz')">O'zbekcha</button><button class="${lang === "en" ? "on" : ""}" onclick="wbLang('en')">English</button></div>
       <div class="wb-book" id="wb-book">${pageHTML(i)}</div>

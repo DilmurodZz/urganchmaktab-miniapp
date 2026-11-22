@@ -149,7 +149,6 @@ function mentorAdminCard() {
     ${(mentorList || []).map((m) => `<div class="adm-link"><span><b>${esc(m.name)}${m.active ? "" : " · " + T("o'chirilgan")}</b><small>${esc(m.uni || "")} · ${m.bound ? T("kirgan") : T("hali kirmagan")}${m.photo ? "" : " · " + T("rasm yo'q")}</small></span>
       <button class="icon-btn" onclick="admMentorReset(${m.id})" aria-label="reset">${ic("refresh")}</button>${m.active ? `<button class="icon-btn" onclick="admMentorDel(${m.id})" aria-label="x">${ic("x")}</button>` : ""}</div>`).join("") || `<p class="st-note">${mentorList ? T("Hali mentor yo'q.") : T("Yuklanmoqda…")}</p>`}
     <div class="adm-row"><input id="am-name" maxlength="60" placeholder="${T("Ism va familiya")}"><input id="am-uni" maxlength="80" placeholder="${T("Universitet")}"></div>
-    <input id="am-field" maxlength="80" placeholder="${T("Yo'nalish va bitirgan yil")}">
     <button class="btn-primary" onclick="admMentorAdd()">${ic("plus")} ${T("Mentor qo'shish va parol yaratish")}</button>
   </div>`;
 }
@@ -161,7 +160,7 @@ window.admCopyPass = () => { try { navigator.clipboard.writeText(window._admPass
 window.admMentorAdd = () => {
   const v = (id) => document.getElementById(id).value.trim(), name = v("am-name");
   if (!name) return toast(T("Mentor ismini yozing"));
-  meetAdmin("add", { name, uni: v("am-uni"), field: v("am-field") }).then((j) => { window._admPass = j.password; mentorList = null; render(); showPass(name, j.password); }).catch((e) => toast(T("Xatolik: {e}", { e: e.message })));
+  meetAdmin("add", { name, uni: v("am-uni") }).then((j) => { window._admPass = j.password; mentorList = null; render(); showPass(name, j.password); }).catch((e) => toast(T("Xatolik: {e}", { e: e.message })));
 };
 window.admMentorReset = (id) => {
   const m = (mentorList || []).find((x) => x.id === id);

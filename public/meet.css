@@ -73,7 +73,7 @@
 .mt-poster .btn-primary, .mt-poster .btn-ghost { margin: 0; }
 .tool-icn { flex: 0 0 56px; display: grid; place-items: center; width: 56px !important; height: 56px !important; max-width: 56px; border-radius: 16px; color: #fff; background: linear-gradient(160deg, var(--c-sec, var(--p3)), var(--c-main, var(--p1))); }
 .tool-icn .ic { width: 28px; height: 28px; }
-:is([data-theme="purple"], [data-theme="bordo"]) .grid4 { grid-template-columns: repeat(3, 1fr); }
+body[data-theme] .grid4 { grid-template-columns: repeat(3, 1fr); }
 
 .mt-mk > b { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--p-text); } .mt-mk > b .ic { width: 18px; height: 18px; }
 

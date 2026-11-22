@@ -1448,4 +1448,9 @@ Object.assign(I18N.en, {
 "Rad etish va xabar berish": "Decline and let them know",
 "sizga javob": "reply to you",
 "{n} ga javob": "Reply to {n}",
+// --- v17: essay and recommendation tips
+"Insho va tavsiyanoma maslahatlari": "Essay and recommendation tips",
+"Qabul komissiyasi xodimlari va top universitetlarga qabul qilingan talabalar eng ko'p beradigan maslahatlar.": "The advice admissions officers and students admitted to top universities give most often.",
+"Har bir universitetning aniq talablarini uning rasmiy saytidan tekshiring.": "Check each university's exact requirements on its official site.",
+"Common App inshosi, qo'shimcha insholar, tavsiyanomalar va sun'iy intellekt haqida": "The Common App essay, supplements, recommendations and a word on AI",
 });

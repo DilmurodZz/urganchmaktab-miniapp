@@ -49,7 +49,7 @@ export async function meet(req, env, url, origin, { json, verifyInitData, tg, AP
   const run = (sql, ...a) => DB.prepare(sql).bind(...a).run();
   const meMentor = await one("SELECT * FROM mentors WHERE tg_id = ?1 AND active = 1", uid);
   const ok = (x = {}) => json({ ok: true, ...x }, 200, origin), bad = (e, s = 400) => json({ error: e }, s, origin);
-  const pubMentor = (m) => m && { id: m.id, name: m.name, uni: m.uni, field: m.field, bio: m.bio, photo: m.photo, bound: !!m.tg_id };
+  const pubMentor = (m) => m && { id: m.id, name: m.name, uni: m.uni, field: "", bio: m.bio, photo: m.photo, bound: !!m.tg_id };
   const btn = (key, t) => JSON.stringify({ text: t, web_app: { url: APP_URL + "?shared=" + key } });
   const notify = (chat, text, key, t = "Ochish") => run("INSERT INTO outbox (chat, text, btn, created) VALUES (?1, ?2, ?3, ?4)", chat, text, key ? btn(key, t) : null, now);
   const when = (ms) => new Date(ms + 5 * 3600e3).toISOString().replace("T", " ").slice(0, 16) + " (Toshkent)";

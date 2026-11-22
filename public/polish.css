@@ -5,11 +5,11 @@ a, button, label, summary, [onclick], [role="link"] { touch-action: manipulation
 button:active, a:active, [role="link"]:active { transition-duration: .06s; }
 
 /* the main action buttons (Boshlash, Davom etish, Saqlash, Mentor sifatida kirish ...) are emerald green with white bold text */
-:is([data-theme="purple"], [data-theme="bordo"]) .btn-primary:not(.zk-red) { background: linear-gradient(180deg, #22A853, #199447); color: #FFFFFF; font-weight: 800;
+body[data-theme] .btn-primary:not(.zk-red) { background: linear-gradient(180deg, #22A853, #199447); color: #FFFFFF; font-weight: 800;
   box-shadow: 0 10px 22px -10px rgba(25,148,71,.8), inset 0 1px 0 rgba(255,255,255,.25); }
-:is([data-theme="purple"], [data-theme="bordo"]) .btn-primary:disabled { background: #D1D5DB; box-shadow: none; }
-:is([data-theme="purple"], [data-theme="bordo"]) .st-cur .btn-primary { background: #FFFFFF; color: #199447; box-shadow: none; }
-:is([data-theme="purple"], [data-theme="bordo"]) .btn-ghost.mt-login { background: linear-gradient(180deg, #22A853, #199447); color: #FFFFFF; font-weight: 800; border-color: transparent;
+body[data-theme] .btn-primary:disabled { background: #D1D5DB; box-shadow: none; }
+body[data-theme] .st-cur .btn-primary { background: #FFFFFF; color: #199447; box-shadow: none; }
+body[data-theme] .btn-ghost.mt-login { background: linear-gradient(180deg, #22A853, #199447); color: #FFFFFF; font-weight: 800; border-color: transparent;
   box-shadow: 0 10px 22px -10px rgba(25,148,71,.8); }
 .btn-ghost.mt-login .ic { color: #FFFFFF; }
 
@@ -56,7 +56,7 @@ button:active, a:active, [role="link"]:active { transition-duration: .06s; }
 .dl-sheet .btn-primary { margin-top: 4px; }
 
 /* links to an official site are orange, so they never look like the green main action next to them */
-:is([data-theme="purple"], [data-theme="bordo"]) .btn-primary.sd-site { background: linear-gradient(180deg, #F59E0B, #E07A06); box-shadow: 0 10px 22px -10px rgba(224,122,6,.8), inset 0 1px 0 rgba(255,255,255,.25); }
+body[data-theme] .btn-primary.sd-site { background: linear-gradient(180deg, #F59E0B, #E07A06); box-shadow: 0 10px 22px -10px rgba(224,122,6,.8), inset 0 1px 0 rgba(255,255,255,.25); }
 
 /* Online meeting, Requests tab: the two ways to ask a mentor, side by side */
 .mt-ways { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 2px 0 6px; }
@@ -132,22 +132,32 @@ button:active, a:active, [role="link"]:active { transition-duration: .06s; }
 @media (orientation: landscape) { .wb-zoom img { width: 96vw; transform: translate(-50%, -50%); } }
 .wb-zoom button { position: absolute; top: 14px; right: 14px; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,.15); color: #FFF; display: grid; place-items: center; }
 
-/* ---------- v16: UniMatch card with the Harvard letter ---------- */
-.hero2.um-card { display: flex; align-items: center; min-height: 206px; padding: 22px 0 22px 20px; border-radius: 30px; isolation: isolate;
-  background: radial-gradient(130% 120% at 78% 35%, #7C031F 0%, #720019 42%, #48000F 100%) !important;
-  box-shadow: 0 22px 40px -22px rgba(72,0,15,.9), inset 0 1px 0 rgba(255,255,255,.08) !important; }
+/* ---------- UniMatch card with the Harvard letter (v17: the same design in every colour) ----------
+   the card, envelope, ribbon and stand take the chosen colour (hue turned per theme); the letter paper on top stays as it is */
+body[data-theme] { --um1: color-mix(in srgb, var(--c-main) 82%, #000); --um2: color-mix(in srgb, var(--c-dark) 70%, #000); }
+body[data-theme="bordo"] { --um1: #720019; --um2: #48000F; }
+.hero2.um-card { display: flex; align-items: center; min-height: 200px; padding: 22px 0 22px 20px; border-radius: 30px; isolation: isolate;
+  background: radial-gradient(130% 120% at 78% 35%, color-mix(in srgb, var(--um1) 88%, #fff) 0%, var(--um1) 42%, var(--um2) 100%) !important;
+  box-shadow: 0 22px 40px -22px var(--um2), inset 0 1px 0 rgba(255,255,255,.08) !important; }
 .hero2.um-card::before, .hero2.um-card::after { display: none !important; }
-.um-art { position: absolute; right: 0; top: 0; height: 100%; width: auto; width: 66%; object-fit: cover; object-position: 70% center; pointer-events: none; z-index: 0;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 16%); mask-image: linear-gradient(90deg, transparent 0, #000 16%); }
+.um-art { position: absolute; right: 0; top: 0; height: 100%; width: auto; max-width: none; pointer-events: none; z-index: 0; filter: hue-rotate(var(--um-hue, 0deg));
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 20%); mask-image: linear-gradient(90deg, transparent 0, #000 20%); }
+.um-art.um-paper { filter: none; }
 .um-l { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: flex-start; width: 46%; }
 .um-card .hero2-tag { padding: 6px 14px; background: rgba(255,255,255,.16) !important; border: 1px solid rgba(255,255,255,.14); color: #FFFFFF !important; font-weight: 600; }
-.hero2.um-card h3 { max-width: none; margin: 12px 0 24px; font-size: clamp(25px, 7.6vw, 34px); font-weight: 800; letter-spacing: -.8px; color: #FFFFFF; text-shadow: 0 2px 10px rgba(0,0,0,.25); }
-.um-go { display: inline-flex; align-items: center; gap: 4px; padding: 11px 15px 11px 20px; border-radius: 999px; background: #FFFFFF; color: #F15A24; font-size: 16px; font-weight: 800;
+.hero2.um-card h3 { max-width: none; margin: 12px 0 22px; font-size: clamp(25px, 7.4vw, 34px); font-weight: 800; letter-spacing: -.8px; color: #FFFFFF; text-shadow: 0 2px 10px rgba(0,0,0,.3); }
+.hero2.um-card .um-go { display: inline-flex; flex: none; width: auto; align-self: flex-start; align-items: center; gap: 2px; padding: 10px 12px 10px 18px; border-radius: 999px;
+  background: #FFFFFF !important; color: #F15A24 !important; font-size: 16px; font-weight: 800; white-space: nowrap;
   box-shadow: 0 12px 20px -10px rgba(0,0,0,.55); transition: transform .2s, box-shadow .2s; }
-.um-go .ic { width: 18px; height: 18px; stroke: #F15A24; stroke-width: 2.6; }
+.hero2.um-card .um-go .ic { width: 18px; height: 18px; stroke: #F15A24; color: #F15A24; stroke-width: 2.6; }
 .um-card:hover .um-go { transform: translateY(-1px); box-shadow: 0 16px 24px -10px rgba(0,0,0,.6); }
 .um-card:active .um-go { transform: scale(.97); }
 body.fit .hero2.um-card { flex-direction: row; align-items: center; justify-content: flex-start; max-height: 226px; }
+
+/* Online meeting in the big card; Application Studio as a tile in the chosen colour */
+.meet-bn .sbn-ic { position: relative; }
+.meet-bn .sbn-ic .tile-nb { position: absolute; top: -2px; right: -2px; }
+body[data-theme] .tile4.k0 { --fc: var(--c-main); --fc2: var(--c-sec); }
 
 /* ---------- v16: red unread number on the Chat tab ---------- */
 .tabbar a .tb-unread { position: absolute; top: 0; left: calc(50% + 6px); min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; display: grid; place-items: center;
@@ -179,3 +189,23 @@ body.fit .hero2.um-card { flex-direction: row; align-items: center; justify-cont
 
 /* ---------- v16: the Harvard shield on the book cover ---------- */
 .wb-shield { display: block; width: 86px; height: auto; margin: 0 0 2px; filter: drop-shadow(0 6px 12px rgba(0,0,0,.18)); }
+
+/* ---------- v17: essay and recommendation tips ---------- */
+.tp-lead { margin: 2px 4px 12px; font-size: 14px; line-height: 1.45; color: var(--muted); }
+.tp-sec { padding: 0 !important; margin-bottom: 10px; overflow: hidden; }
+.tp-sec summary { display: flex; align-items: center; gap: 12px; padding: 14px; list-style: none; cursor: pointer; }
+.tp-sec summary::-webkit-details-marker { display: none; }
+.tp-sec summary b { flex: 1; font-size: 15.5px; line-height: 1.25; }
+.tp-sec summary small { min-width: 24px; height: 24px; padding: 0 7px; border-radius: 99px; display: grid; place-items: center; background: var(--c-soft, #EEE); color: var(--c-ink, #333); font-size: 12px; font-weight: 800; }
+.tp-ic { flex: none; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; color: #FFFFFF; background: linear-gradient(160deg, var(--c-sec), var(--c-main)); }
+.tp-ic .ic { width: 21px; height: 21px; }
+.tp-chev { width: 18px; height: 18px; transform: rotate(90deg); transition: transform .2s; color: var(--muted); }
+.tp-sec[open] .tp-chev { transform: rotate(-90deg); }
+.tp-sec.hot { border: 1.5px solid #F2B83A !important; }
+.tp-sec.hot .tp-ic { background: linear-gradient(160deg, #F2B83A, #E9A317); }
+.tp-list { margin: 0; padding: 0 14px 14px 36px; display: flex; flex-direction: column; gap: 12px; }
+.tp-list li::marker { font-weight: 800; color: var(--c-main); }
+.tp-list b { display: block; font-size: 14.5px; margin-bottom: 3px; }
+.tp-list p { margin: 0; font-size: 14px; line-height: 1.5; color: #333333; }
+.meet-bn .sbn-t b { white-space: nowrap !important; font-size: clamp(18px, 5.6vw, 21px) !important; }
+.meet-bn .sbn-t small { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }

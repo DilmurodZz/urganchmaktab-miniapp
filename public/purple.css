@@ -8,8 +8,12 @@
      text #111111 · green #165936 selected icons and accents · muted #777777 captions and footers
    "purple" (Binafsha) is the default; "bordo" is the brief's own colours. */
 body[data-theme="purple"] { --c-main: #4C1D95; --c-dark: #2E1065; --c-sec: #6D28D9; --c-ink: #3B0F7A; --c-soft: #EEE6F7; --art-tint: hue-rotate(38deg) saturate(1.05); }
+body[data-theme="blue"]   { --c-main: #2748F5; --c-dark: #1733B8; --c-sec: #4F74FA; --c-ink: #1B2F99; --c-soft: #E3EAFE; --um-hue: 235deg; }
+body[data-theme="orange"] { --c-main: #E8590C; --c-dark: #B3420A; --c-sec: #F57C2B; --c-ink: #9A3A08; --c-soft: #FDE9DC; --um-hue: 32deg; }
+body[data-theme="green"]  { --c-main: #0B8F6A; --c-dark: #076A4E; --c-sec: #19AE85; --c-ink: #075E46; --c-soft: #DDF3EB; --um-hue: 168deg; }
+body[data-theme="purple"] { --um-hue: 280deg; }
 body[data-theme="bordo"]  { --c-main: #8B0920; --c-dark: #650514; --c-sec: #B51F3A; --c-ink: #720D20; --c-soft: #F6E3E1; --art-tint: hue-rotate(130deg) saturate(1.1); }
-body:is([data-theme="purple"], [data-theme="bordo"]) {
+body[data-theme] {
   --c-green: #165936;
   --p1: var(--c-main); --p3: var(--c-sec); --p2: var(--c-sec);
   --p-soft: var(--c-soft); --p-text: var(--c-ink);
@@ -22,7 +26,7 @@ body:is([data-theme="purple"], [data-theme="bordo"]) {
   --grad: linear-gradient(135deg, var(--c-main) 0%, var(--c-dark) 100%);
   background: #F7F3EE; background-image: none;
 }
-:is([data-theme="purple"], [data-theme="bordo"]) .card { border: 1px solid #FFFFFF; }
+body[data-theme] .card { border: 1px solid #FFFFFF; }
 
 /* header: Alumni Mentor on the left, the school badge on the right */
 .topbar { justify-content: space-between; }
@@ -35,31 +39,31 @@ body:is([data-theme="purple"], [data-theme="bordo"]) {
 .school img { display: block; width: 100%; height: 100%; border-radius: 50%; border: 2px solid #FFFFFF; box-sizing: border-box; object-fit: cover; }
 
 /* Home: hero banner */
-:is([data-theme="purple"], [data-theme="bordo"]) .hero2 { background: linear-gradient(135deg, var(--c-main) 0%, var(--c-main) 45%, var(--c-dark) 100%);
+body[data-theme] .hero2 { background: linear-gradient(135deg, var(--c-main) 0%, var(--c-main) 45%, var(--c-dark) 100%);
   box-shadow: 0 18px 34px -20px var(--c-dark); }
-:is([data-theme="purple"], [data-theme="bordo"]) .hero2::after { content: ""; position: absolute; right: -10px; bottom: -14px; width: 150px; height: 150px; pointer-events: none; opacity: .12;
+body[data-theme] .hero2::after { content: ""; position: absolute; right: -10px; bottom: -14px; width: 150px; height: 150px; pointer-events: none; opacity: .12;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%23fff'%3E%3Cpath d='M50 96C30 80 18 60 20 30c8 14 14 30 30 66z'/%3E%3Cellipse cx='24' cy='36' rx='5' ry='11' transform='rotate(-25 24 36)'/%3E%3Cellipse cx='22' cy='54' rx='5' ry='11' transform='rotate(-45 22 54)'/%3E%3Cellipse cx='27' cy='70' rx='5' ry='11' transform='rotate(-60 27 70)'/%3E%3Cellipse cx='36' cy='83' rx='5' ry='11' transform='rotate(-75 36 83)'/%3E%3Cellipse cx='38' cy='26' rx='4' ry='10' transform='rotate(20 38 26)'/%3E%3Cellipse cx='40' cy='45' rx='4' ry='10' transform='rotate(10 40 45)'/%3E%3Cellipse cx='44' cy='62' rx='4' ry='10' transform='rotate(-5 44 62)'/%3E%3C/svg%3E") no-repeat center / contain; }
-:is([data-theme="purple"], [data-theme="bordo"]) .hero2-tag { background: rgba(255,255,255,.18); color: #FFFFFF; }
-:is([data-theme="purple"], [data-theme="bordo"]) .btn-orange { color: #FFFFFF; font-weight: 800; background: linear-gradient(180deg, #22A853, #199447);
+body[data-theme] .hero2-tag { background: rgba(255,255,255,.18); color: #FFFFFF; }
+body[data-theme] .btn-orange { color: #FFFFFF; font-weight: 800; background: linear-gradient(180deg, #22A853, #199447);
   box-shadow: 0 8px 22px -6px rgba(25,148,71,.75), 0 0 0 3px rgba(25,148,71,.18), inset 0 1px 0 rgba(255,255,255,.3); }
 
 /* Home: the Kurslar card */
-:is([data-theme="purple"], [data-theme="bordo"]) .banner { background: #F5EDE4; border: 2px solid #FFFFFF; box-shadow: 0 12px 24px -16px rgba(17,17,17,.35); }
-:is([data-theme="purple"], [data-theme="bordo"]) .banner b { font-family: Georgia, "Times New Roman", serif; font-size: 30px; font-weight: 700; letter-spacing: -.3px; color: var(--c-ink); }
-:is([data-theme="purple"], [data-theme="bordo"]) .banner-sep { background: var(--c-sec); opacity: .6; }
-:is([data-theme="purple"], [data-theme="bordo"]) .banner-go { background: var(--c-main); box-shadow: 0 8px 16px -8px var(--c-dark); }
-:is([data-theme="purple"], [data-theme="bordo"]) .banner-go .ic { color: #FFFFFF; }
-:is([data-theme="purple"], [data-theme="bordo"]) .banner-wave path:first-child { fill: rgba(255,255,255,.55); }
-:is([data-theme="purple"], [data-theme="bordo"]) .banner-wave path:last-child { fill: color-mix(in srgb, var(--c-main) 8%, transparent); }
+body[data-theme] .banner { background: #F5EDE4; border: 2px solid #FFFFFF; box-shadow: 0 12px 24px -16px rgba(17,17,17,.35); }
+body[data-theme] .banner b { font-family: Georgia, "Times New Roman", serif; font-size: 30px; font-weight: 700; letter-spacing: -.3px; color: var(--c-ink); }
+body[data-theme] .banner-sep { background: var(--c-sec); opacity: .6; }
+body[data-theme] .banner-go { background: var(--c-main); box-shadow: 0 8px 16px -8px var(--c-dark); }
+body[data-theme] .banner-go .ic { color: #FFFFFF; }
+body[data-theme] .banner-wave path:first-child { fill: rgba(255,255,255,.55); }
+body[data-theme] .banner-wave path:last-child { fill: color-mix(in srgb, var(--c-main) 8%, transparent); }
 /* the two travelling dots stay on the Application Studio card, above its content */
 .studio-bn .bn-orbit { z-index: 2; }
 
 /* Home: tiles on the card colour, main or academic green bottom edge, the icon in the same colour */
-:is([data-theme="purple"], [data-theme="bordo"]) .grid4 { grid-template-columns: repeat(3, 1fr); gap: 10px; }
-:is([data-theme="purple"], [data-theme="bordo"]) .tile4 { background: #F5EDE4 !important; border: 1.5px solid #FFFFFF; border-bottom: 6px solid var(--c-main);
+body[data-theme] .grid4 { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+body[data-theme] .tile4 { background: #F5EDE4 !important; border: 1.5px solid #FFFFFF; border-bottom: 6px solid var(--c-main);
   box-shadow: 0 12px 22px -16px rgba(17,17,17,.4); }
-:is([data-theme="purple"], [data-theme="bordo"]) .tile4.g { border-bottom-color: var(--c-green); }
-:is([data-theme="purple"], [data-theme="bordo"]) .tile4 span { color: #111111; font-size: 13px; }
+body[data-theme] .tile4.g { border-bottom-color: var(--c-green); }
+body[data-theme] .tile4 span { color: #111111; font-size: 13px; }
 .tile4 .tile-ic { width: 64px; height: 64px; border-radius: 18px; display: grid; place-items: center; color: #FFFFFF;
   background: linear-gradient(160deg, var(--c-sec, var(--p3)), var(--c-main, var(--p1))); box-shadow: 0 10px 18px -10px var(--c-dark, var(--p1)), inset 0 1px 0 rgba(255,255,255,.3); }
 .tile4.g .tile-ic { background: linear-gradient(160deg, #1F7A4B, var(--c-green, #165936)); box-shadow: 0 10px 18px -10px #0D3A22, inset 0 1px 0 rgba(255,255,255,.3); }
@@ -67,25 +71,25 @@ body:is([data-theme="purple"], [data-theme="bordo"]) {
 body.fit .tile4 .tile-ic { width: clamp(46px, 7.5vh, 64px); height: clamp(46px, 7.5vh, 64px); }
 
 /* tab bar: main colour, deeper at the bottom; the active tab in a white rounded square */
-:is([data-theme="purple"], [data-theme="bordo"]) .tabbar { background: linear-gradient(180deg, var(--c-main), var(--c-dark)); box-shadow: 0 16px 30px -14px var(--c-dark); }
-:is([data-theme="purple"], [data-theme="bordo"]) .tabbar a { color: #FFFFFF; }
-:is([data-theme="purple"], [data-theme="bordo"]) .tabbar a.on .ic { background: #FFFFFF; color: var(--c-main); }
+body[data-theme] .tabbar { background: linear-gradient(180deg, var(--c-main), var(--c-dark)); box-shadow: 0 16px 30px -14px var(--c-dark); }
+body[data-theme] .tabbar a { color: #FFFFFF; }
+body[data-theme] .tabbar a.on .ic { background: #FFFFFF; color: var(--c-main); }
 
 /* across the pages: headings in text colour, captions in the muted grey, green for done or selected */
-:is([data-theme="purple"], [data-theme="bordo"]) .section-title { color: #111111; }
-:is([data-theme="purple"], [data-theme="bordo"]) .note { color: #777777; }
-:is([data-theme="purple"], [data-theme="bordo"]) .seg { background: #EDE3D7; }
-:is([data-theme="purple"], [data-theme="bordo"]) .seg button.on { background: #FFFFFF; color: var(--c-ink); }
-:is([data-theme="purple"], [data-theme="bordo"]) .btn-ghost { color: var(--c-ink); }
-:is([data-theme="purple"], [data-theme="bordo"]) .ap-docs button.on .ic { background: var(--c-green); border-color: var(--c-green); }
-:is([data-theme="purple"], [data-theme="bordo"]) .um-chips button.on { background: var(--c-soft); border-color: var(--c-main); color: var(--c-ink); }
-:is([data-theme="purple"], [data-theme="bordo"]) .um-sum .safe, :is([data-theme="purple"], [data-theme="bordo"]) .um-uni.safe { border-color: var(--c-green); }
-:is([data-theme="purple"], [data-theme="bordo"]) :is(.um-res, .um-hero, .ap-me) { background: linear-gradient(135deg, var(--c-main), var(--c-dark)); }
-:is([data-theme="purple"], [data-theme="bordo"]) .um-ring .fg { stroke: #FFFFFF; }
-:is([data-theme="purple"], [data-theme="bordo"]) .ap-me > img, :is([data-theme="purple"], [data-theme="bordo"]) .ap-me > span { border-color: #FFFFFF; }
+body[data-theme] .section-title { color: #111111; }
+body[data-theme] .note { color: #777777; }
+body[data-theme] .seg { background: #EDE3D7; }
+body[data-theme] .seg button.on { background: #FFFFFF; color: var(--c-ink); }
+body[data-theme] .btn-ghost { color: var(--c-ink); }
+body[data-theme] .ap-docs button.on .ic { background: var(--c-green); border-color: var(--c-green); }
+body[data-theme] .um-chips button.on { background: var(--c-soft); border-color: var(--c-main); color: var(--c-ink); }
+body[data-theme] .um-sum .safe, body[data-theme] .um-uni.safe { border-color: var(--c-green); }
+body[data-theme] :is(.um-res, .um-hero, .ap-me) { background: linear-gradient(135deg, var(--c-main), var(--c-dark)); }
+body[data-theme] .um-ring .fg { stroke: #FFFFFF; }
+body[data-theme] .ap-me > img, body[data-theme] .ap-me > span { border-color: #FFFFFF; }
 
 /* Home: the Application Studio banner and two tiles */
-:is([data-theme="purple"], [data-theme="bordo"]) .grid4 { grid-template-columns: repeat(2, 1fr); }
+body[data-theme] .grid4 { grid-template-columns: repeat(2, 1fr); }
 .studio-bn .sbn-ic { width: 76px; height: 76px; flex: none; border-radius: 50%; display: grid; place-items: center; color: #fff; position: relative; z-index: 1;
   background: linear-gradient(160deg, var(--c-sec, var(--p3)), var(--c-main, var(--p1))); box-shadow: 0 10px 20px -10px var(--c-dark, var(--p1)), inset 0 0 0 4px rgba(255,255,255,.25); }
 .studio-bn .sbn-ic .ic { width: 38px; height: 38px; stroke-width: 1.6; }
@@ -103,22 +107,22 @@ body.fit .studio-bn .sbn-ic { width: clamp(56px, 9vh, 76px); height: clamp(56px,
 @keyframes hl-fly { 0%, 100% { transform: translate(0, 0) rotate(0); } 50% { transform: translate(2px, -2px) rotate(-6deg); } }
 
 /* Feature colour system: each card stays warm ivory; only its icon square and bottom edge carry its colour */
-:is([data-theme="purple"], [data-theme="bordo"]) .tile4 { --fc: #8B0920; --fc2: #A8142F; background: #F7F3EE !important; border-bottom-color: var(--fc) !important;
+body[data-theme] .tile4 { --fc: var(--c-main); --fc2: var(--c-sec); background: #F7F3EE !important; border-bottom-color: var(--fc) !important;
   box-shadow: 0 10px 20px -16px rgba(37,37,37,.4); }
-:is([data-theme="purple"], [data-theme="bordo"]) .tile4.k1 { --fc: #315A7D; --fc2: #3F6E96; }
-:is([data-theme="purple"], [data-theme="bordo"]) .tile4.k2 { --fc: #E9A317; --fc2: #F2B83A; }
-:is([data-theme="purple"], [data-theme="bordo"]) .tile4.k3 { --fc: #199447; --fc2: #22A853; }
-:is([data-theme="purple"], [data-theme="bordo"]) .tile4 .tile-ic { color: #FFFFFF; background: linear-gradient(160deg, var(--fc2), var(--fc));
+body[data-theme] .tile4.k1 { --fc: #315A7D; --fc2: #3F6E96; }
+body[data-theme] .tile4.k2 { --fc: #E9A317; --fc2: #F2B83A; }
+body[data-theme] .tile4.k3 { --fc: #199447; --fc2: #22A853; }
+body[data-theme] .tile4 .tile-ic { color: #FFFFFF; background: linear-gradient(160deg, var(--fc2), var(--fc));
   box-shadow: 0 10px 18px -10px var(--fc), inset 0 1px 0 rgba(255,255,255,.3); }
-:is([data-theme="purple"], [data-theme="bordo"]) .tile4 span { color: #252525; }
+body[data-theme] .tile4 span { color: #252525; }
 
 /* Application Studio: burgundy icon with a crimson ring, burgundy heading and arrow, ivory card */
-:is([data-theme="purple"], [data-theme="bordo"]) .banner.studio-bn { background: #F7F3EE; }
-:is([data-theme="purple"], [data-theme="bordo"]) .studio-bn .sbn-ic { background: #8B0920; box-shadow: 0 0 0 3px #B51F3A, 0 10px 20px -10px #8B0920; }
-:is([data-theme="purple"], [data-theme="bordo"]) .studio-bn .sbn-t b { color: #8B0920; }
-:is([data-theme="purple"], [data-theme="bordo"]) .studio-bn .banner-sep { background: #B51F3A; opacity: .45; }
-:is([data-theme="purple"], [data-theme="bordo"]) .studio-bn .banner-go { background: #8B0920; box-shadow: 0 8px 16px -8px #8B0920; }
-:is([data-theme="purple"], [data-theme="bordo"]) .studio-bn .banner-go .ic { color: #FFFFFF; }
+body[data-theme] .banner.studio-bn { background: #F7F3EE; }
+body[data-theme] .studio-bn .sbn-ic { background: var(--c-main); box-shadow: 0 0 0 3px var(--c-sec), 0 10px 20px -10px var(--c-main); }
+body[data-theme] .studio-bn .sbn-t b { color: var(--c-main); }
+body[data-theme] .studio-bn .banner-sep { background: var(--c-sec); opacity: .45; }
+body[data-theme] .studio-bn .banner-go { background: var(--c-main); box-shadow: 0 8px 16px -8px var(--c-main); }
+body[data-theme] .studio-bn .banner-go .ic { color: #FFFFFF; }
 
 /* top right: the 1-IMI monogram emblem (transparent, no photo frame) */
 .school.emblem { width: 50px; height: 50px; padding: 0; background: none; box-shadow: none; border-radius: 0; }

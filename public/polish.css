@@ -157,7 +157,7 @@ body.fit .hero2.um-card { flex-direction: row; align-items: center; justify-cont
 /* Online meeting in the big card; Application Studio as a tile in the chosen colour */
 .meet-bn .sbn-ic { position: relative; }
 .meet-bn .sbn-ic .tile-nb { position: absolute; top: -2px; right: -2px; }
-body[data-theme] .tile4.k0 { --fc: var(--c-main); --fc2: var(--c-sec); }
+body[data-theme] .tile4.k0 { --fc: #0B55D9; --fc2: #2F7BFF; }   /* Application Studio: blue in every colour theme */
 
 /* ---------- v16: red unread number on the Chat tab ---------- */
 .tabbar a .tb-unread { position: absolute; top: 0; left: calc(50% + 6px); min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; display: grid; place-items: center;

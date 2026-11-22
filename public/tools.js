@@ -200,7 +200,7 @@ const Tools = (() => {
     const items = [
       { go: "location.hash='#/unis'", img: "img/tool-uni.webp", t: T("Grant va sertifikatlar"), d: T("Mahalliy grantlar, stipendiyalar, milliy va xalqaro sertifikatlar") },
       { go: "location.hash='#/workshop'", img: "img/hgse/harvard.webp", t: "Admission tips from Harvard", d: T("Garvard (HGSE) qabul bo'limidan Stanislav Rivkinning seminari: kitob shaklida, o'zbek va ingliz tilida") },
-      { go: "location.hash='#/tips'", icon: "pen", t: T("Insho va tavsiyanoma maslahatlari"), d: T("Common App inshosi, qo'shimcha insholar, tavsiyanomalar va sun'iy intellekt haqida") },
+      { go: "location.hash='#/tips'", img: "img/tool-tips.webp", t: T("Insho va tavsiyanoma maslahatlari"), d: T("Common App inshosi, qo'shimcha insholar, tavsiyanomalar va sun'iy intellekt haqida") },
       { go: "location.hash='#/dtm'", img: "img/tool-dtm.webp", t: T("DTM ball kalkulyatori"), d: T("Ballingizni hisoblang va qaysi OTMda grant yoki shartnomaga yetishini ko'ring") },
       { go: "location.hash='#/ielts'", img: "img/tool-ielts.webp?v=2", t: T("IELTS ball kalkulyatori"), d: T("To'g'ri javoblaringizdan har bir ko'nikma va umumiy bandni hisoblang") },
       { go: "location.hash='#/kurslar'", img: "img/ic-courses.webp", round: true, t: T("Kurslar"), d: T("Eng talabgir kurslar, mehnat bozori tahlili va omad g'ildiragi") },

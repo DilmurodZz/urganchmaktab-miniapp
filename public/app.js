@@ -516,6 +516,13 @@ function bannerOrbit() {
     ${flash(i, 0)}${flash(h - i, -T / 2)}
   </svg>`;
   card.insertAdjacentHTML("beforeend", svg);
+  // redraw when the card changes size later (for example when "Hozir jonli" appears and the card grows)
+  if (!card._bnRO && window.ResizeObserver) {
+    let last = w + "x" + h, t;
+    card._bnRO = new ResizeObserver(() => { const s = card.clientWidth + "x" + card.clientHeight; if (s === last) return; last = s;
+      clearTimeout(t); t = setTimeout(() => { if (card.isConnected) bannerOrbit(); }, 60); });
+    card._bnRO.observe(card);
+  }
 }
 let bnResize; window.addEventListener("resize", () => { clearTimeout(bnResize); bnResize = setTimeout(() => { if ((location.hash || "#/") === "#/") bannerOrbit(); }, 200); });
 

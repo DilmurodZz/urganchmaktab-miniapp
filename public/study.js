@@ -346,7 +346,7 @@ const Study = (() => {
   if (um.sat && !um.satM) { um.satM = Math.round(um.sat / 20) * 10; um.satE = um.sat - um.satM; }
   um.ach = um.ach.filter((k) => ACH().some((a) => a[0] === k)); um.pri = um.pri.filter((k) => PRI().some((a) => a[0] === k)).slice(0, PRI_MAX);
   const saveUm = () => store.set("um", um);
-  const umF = { cat: "all", more: 30 };
+  const umF = { cat: "fit", more: 30 };   // the results open on "Mos" (the best match)
   const rankNum = (r) => parseInt(String(r[0]).replace(/\D+/g, " ").trim(), 10) || 300;
   const engEq = (p = um) => (p.eng === "none" ? 0 : (ENG[p.eng] || ENG.ielts).eq(p.engv));
   const satTotal = (p = um) => (p.satM && p.satE ? p.satM + p.satE : 0);
@@ -456,6 +456,7 @@ const Study = (() => {
     const S = strength(), all = matchList(), shown = all.filter((x) => x.cat !== "hard");
     const n = (c) => all.filter((x) => x.cat === c).length;
     const order = { fit: 0, reach: 1, safe: 2 };
+    if (umF.cat === "fit" && !n("fit") && !umF.picked) umF.cat = "all";   // no "Mos" results: show everything instead of an empty list
     let rows = shown.filter((x) => umF.cat === "all" || x.cat === umF.cat);
     rows.sort(um.pri.includes("easy") && um.pri.length === 1 ? (a, b) => b.pct - a.pct
       : (a, b) => (umF.cat === "all" ? order[a.cat] - order[b.cat] : 0) || (prefScore(b.r) - prefScore(a.r)) || rankNum(a.r) - rankNum(b.r));
@@ -502,8 +503,8 @@ const Study = (() => {
     um[key] = a.includes(k) ? a.filter((x) => x !== k) : a.concat(k); saveUm(); haptic("light");
     const open = document.querySelector(".um-more")?.open; umRefresh(); if (open) { const d = document.querySelector(".um-more"); if (d) d.open = true; }
   };
-  window.umRun = () => { haptic("medium"); umF.cat = "all"; umF.more = 30; location.hash = "#/unimatch-natija"; };
-  window.umCat = (k) => { umF.cat = k; umF.more = 30; haptic("light"); umRefresh(); };
+  window.umRun = () => { haptic("medium"); umF.cat = "fit"; umF.picked = false; umF.more = 30; location.hash = "#/unimatch-natija"; };
+  window.umCat = (k) => { umF.cat = k; umF.picked = true; umF.more = 30; haptic("light"); umRefresh(); };
   window.umMore = () => { umF.more += 30; umRefresh(); };
 
   // the Top 300 list on its own (shown inside Application Studio)

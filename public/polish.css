@@ -217,3 +217,40 @@ body[data-theme] .tile4.k0 { --fc: var(--c-main); --fc2: var(--c-sec); }
 .st-note ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 7px; }
 .st-note li { position: relative; padding-left: 16px; font-size: 13.5px; line-height: 1.5; }
 .st-note li::before { content: ""; position: absolute; left: 2px; top: .62em; width: 6px; height: 6px; border-radius: 50%; background: var(--c-sec, var(--p3)); opacity: .7; }
+
+/* ---------- v21: copied tick, Google Meet connected tick ---------- */
+button.copied, .btn-primary.copied, .btn-ghost.copied { background: linear-gradient(180deg, #22A853, #199447) !important; color: #FFFFFF !important; border-color: transparent !important; }
+button.copied .ic { animation: cpPop .35s ease-out; stroke: currentColor; }
+.icon-btn.copied { background: #E3F5EA !important; color: #199447 !important; }
+@keyframes cpPop { 0% { transform: scale(.3); } 70% { transform: scale(1.2); } 100% { transform: scale(1); } }
+.mt-ok { display: inline-grid; place-items: center; width: 18px; height: 18px; margin-left: 6px; vertical-align: -3px; border-radius: 50%; background: #22A853; color: #FFFFFF; box-shadow: 0 2px 6px -2px rgba(25,148,71,.8); }
+.mt-ok .ic { width: 12px; height: 12px; stroke-width: 3; }
+
+/* ---------- v21: Common App prompts as clear cards ---------- */
+.st-pick-h { margin: 4px 0 8px; font-size: 14px; font-weight: 700; color: #111111; }
+.st-pick-h small { margin-left: 6px; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.st-prompts { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.st-pr { display: flex; align-items: flex-start; gap: 12px; width: 100%; padding: 11px 12px; text-align: left; border-radius: 14px; background: #FFFFFF; border: 1.5px solid #EDE3D7; color: #111111; transition: border-color .2s, background .2s; }
+.st-pr > i { flex: none; width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; background: var(--c-soft, #F3ECE4); color: var(--c-main, var(--p1)); }
+.st-pr > i .ic { width: 19px; height: 19px; }
+.st-pr span { flex: 1; min-width: 0; }
+.st-pr b { display: block; font-size: 14px; line-height: 1.3; }
+.st-pr small { display: block; margin-top: 2px; font-size: 12px; color: var(--muted); }
+.st-pr em { display: block; margin-top: 8px; padding-top: 8px; border-top: 1px dashed #E5D9CB; font-style: italic; font-size: 13px; line-height: 1.5; color: #3A3A3A; }
+.st-pr s { flex: none; text-decoration: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 800; background: #F3ECE4; color: var(--muted); }
+.st-pr.on { border-color: var(--c-main, var(--p1)); background: color-mix(in srgb, var(--c-soft, #F6E3E1) 55%, #FFFFFF); }
+.st-pr.on > i { background: linear-gradient(160deg, var(--c-sec, var(--p3)), var(--c-main, var(--p1))); color: #FFFFFF; }
+.st-pr.on s { background: var(--c-main, var(--p1)); color: #FFFFFF; }
+
+/* ---------- v21: admin tools as dropdowns in Profil ---------- */
+.adm-dd { padding: 0 !important; margin-bottom: 10px; overflow: hidden; }
+.adm-dd summary { display: flex; align-items: center; gap: 12px; padding: 14px; list-style: none; cursor: pointer; }
+.adm-dd summary::-webkit-details-marker { display: none; }
+.adm-dd summary span { flex: 1; min-width: 0; } .adm-dd summary b { display: block; font-size: 15px; } .adm-dd summary small { display: block; font-size: 12.5px; color: var(--muted); }
+.adm-chev { width: 18px; height: 18px; color: var(--muted); transform: rotate(90deg); transition: transform .2s; }
+.adm-dd[open] .adm-chev { transform: rotate(-90deg); }
+.adm-body { padding: 0 14px 14px; }
+.adm-body > .card { margin: 0 !important; padding: 0 !important; border: 0 !important; box-shadow: none !important; background: transparent !important; }
+.adm-body > .card > h4 { display: none; }
+.adm-ic { flex: none; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; color: #FFFFFF; background: linear-gradient(160deg, var(--c-sec, var(--p3)), var(--c-main, var(--p1))); }
+.adm-ic .ic { width: 20px; height: 20px; }

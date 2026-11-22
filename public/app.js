@@ -158,6 +158,13 @@ setInterval(() => { if (!document.hidden && window.Chat && !/^#\/(m?chat)$/.test
 document.addEventListener("visibilitychange", () => { if (!document.hidden && window.Chat) { try { Chat.poll(); } catch {} } });
 
 const navbar = (title) => `<div class="navbar"><button class="icon-btn" onclick="goBack()">${ic("back")}</button><h1>${title}</h1><span></span></div>`;
+// copying: the button that was pressed shows a green tick for a moment, so the student sees it worked
+window.evBtn = () => { const e = window.event; return (e && e.target && e.target.closest && e.target.closest("button")) || null; };
+window.copyTick = (b) => {
+  if (!b || b._ct) return; b._ct = 1; const old = b.innerHTML, icon = b.classList.contains("icon-btn");
+  b.classList.add("copied"); b.innerHTML = icon ? ic("check") : `${ic("check")} ${T("Nusxa olindi")}`; haptic("medium");
+  setTimeout(() => { b.innerHTML = old; b.classList.remove("copied"); b._ct = 0; }, 1600);
+};
 window.goBack = () => { if (document.getElementById("sheet")) return closeSheet(); if (typeof Game !== "undefined" && gameOn && Game.onBack()) return; history.length > 1 ? history.back() : (location.hash = "#/"); };
 
 /* ---------- screens ---------- */
@@ -294,13 +301,14 @@ let gameOn = false;
 // parts of the app that load only when they are first needed, so Home opens fast
 const APP_V = (document.currentScript && document.currentScript.src.split("?v=")[1]) || "";
 const loading = {};
-function loadScripts(files) {
-  const key = files.join();
-  if (!loading[key]) loading[key] = files.reduce((p, f) => p.then(() => new Promise((ok, no) => {
+// each file is loaded once, even when two places ask for it at the same time (a second copy would fail on its "const")
+function loadOne(f) {
+  if (!loading[f]) loading[f] = new Promise((ok, no) => {
     const s = document.createElement("script"); s.src = f + "?v=" + APP_V; s.onload = ok; s.onerror = no; document.body.appendChild(s);
-  })), Promise.resolve()).catch((e) => { delete loading[key]; throw e; });
-  return loading[key];
+  }).catch((e) => { delete loading[f]; throw e; });
+  return loading[f];
 }
+function loadScripts(files) { return files.reduce((p, f) => p.then(() => loadOne(f)), Promise.resolve()); }
 const loadGame = () => typeof Game !== "undefined" ? Promise.resolve() : loadScripts(["run-audio.js", "run-world.js", "game.js"]);
 const loadTools = () => typeof Tools !== "undefined" ? Promise.resolve() : loadScripts(["tools.js"]);
 // a screen whose code is in its own file: show a spinner, load the file, then draw the screen

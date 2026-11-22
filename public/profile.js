@@ -64,7 +64,22 @@ function langCard() {
   </div>`;
 }
 
-const adminCard = () => isAdmin() ? `<a class="card list-item admin-entry" href="#/admin">${chip("shield", "sm admin-ic")}<span><b>${T("Admin bo'limi")}</b><small>${T("Xabar yuborish va havolalar")}</small></span>${ic("chev", "chev")}</a>` : "";
+// admins: the admin tools open right here in Profil as dropdowns (no separate admin page, one step less)
+let admOpen = "";
+const adminCard = () => {
+  if (!isAdmin()) return "";
+  const secs = adminSections();
+  return `<div class="section-title">${T("Admin bo'limi")}</div>
+  ${secs.map(([k, icn, title, sub, html]) => `<details class="card adm-dd" ${admOpen === k ? "open" : ""} ontoggle="admToggle('${k}', this.open)">
+    <summary><i class="adm-ic">${ic(icn)}</i><span><b>${title}</b><small>${sub}</small></span>${ic("chev", "adm-chev")}</summary>
+    <div class="adm-body">${admOpen === k ? html() : ""}</div></details>`).join("")}`;
+};
+// a section's content is built when it opens, so its data loads only then
+window.admToggle = (k, on) => {
+  if (on) { admOpen = k; document.querySelectorAll(".adm-dd[open]").forEach((d) => { if (!d.getAttribute("ontoggle").includes(`'${k}'`)) d.open = false; });
+    const sec = adminSections().find((x) => x[0] === k), el = document.querySelector(`.adm-dd[open] .adm-body`); if (sec && el && !el.innerHTML) el.innerHTML = sec[4](); }
+  else if (admOpen === k) admOpen = "";
+};
 
 /* ---------- admin screen ---------- */
 let adminInfo = null, adminInfo_busy = false;
@@ -72,14 +87,15 @@ const adminFetch = (path, body) => fetch(SHARE_API + "/admin/" + path, body ? { 
   .then(async (r) => { const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || r.status); return j; });
 const confirmAsk = (text) => new Promise((res) => { try { tg.showConfirm(text, res); } catch { res(window.confirm(text)); } });
 
-function AdminScreen() {
-  if (!isAdmin()) { location.replace("#/profil"); return ""; }
-  if (!adminInfo && !adminInfo_busy) {
+const admHere = () => location.hash === "#/admin" || location.hash === "#/profil";
+const admRefresh = () => { if (admHere()) { const y = scrollY; render(); scrollTo(0, y); } };
+// the old #/admin address opens Profil, where the admin tools now live
+function AdminScreen() { location.replace("#/profil"); return ""; }
+function adminSections() {
+  if (!adminInfo && !adminInfo_busy && admOpen === "bc") {
     adminInfo_busy = true;
-    adminFetch("info").then((j) => { adminInfo = j; if (location.hash === "#/admin") render(); }).catch((e) => toast(T("Xatolik: {e}", { e: e.message }))).finally(() => { setTimeout(() => { adminInfo_busy = false; }, 5000); });
+    adminFetch("info").then((j) => { adminInfo = j; }).catch((e) => toast(T("Xatolik: {e}", { e: e.message }))).finally(() => { setTimeout(() => { adminInfo_busy = false; }, 5000); });
   }
-  loadStats();
-  const courses = (Kurslar.data() && Kurslar.data().courses) || [];
   const box = (id, title, sub, extra) => `<div class="card box adm">
     <h4>${ic(id === "bc" ? "users" : "megaphone")} ${title}</h4><p>${sub}</p>
     ${extra || ""}
@@ -89,16 +105,16 @@ function AdminScreen() {
     <button class="btn-primary" onclick="admSend('${id}', '${id === "bc" ? "broadcast" : "channel"}')">${ic("send")} ${id === "bc" ? T("Hammaga yuborish") : T("Kanalga yuborish")}</button></div>
     <div class="adm-st" id="${id}-st"></div>
   </div>`;
-  return `${navbar(T("Admin bo'limi"))}
-  ${mentorAdminCard()}
-  ${box("bc", T("Barcha foydalanuvchilarga xabar"), T("Xabar bot orqali har bir foydalanuvchining shaxsiy chatiga boradi."))}
-  <div class="card box">
-    <h4>${ic("send")} ${T("Havolalar")}</h4><p>${T("Nusxa olish yoki do'stlarga ulashish")}</p>
+  return [
+    ["mentors", "video", T("Mentorlar (Online meeting)"), T("Mentor qo'shish, parol va ro'yxat"), mentorAdminCard],
+    ["bc", "users", T("Barcha foydalanuvchilarga xabar"), T("Bot orqali hammaga xabar yuborish"), () => box("bc", T("Barcha foydalanuvchilarga xabar"), T("Xabar bot orqali har bir foydalanuvchining shaxsiy chatiga boradi."))],
+    ["links", "send", T("Havolalar"), T("Nusxa olish yoki do'stlarga ulashish"), () => `<div class="card box">
     ${[[T("Mini ilova"), APP_LINK], [T("Ustoz AI ilovasi (Android)"), PLAY_URL], [T("Ustoz AI ilovasi (iPhone)"), STORE_URL], [T("Ustoz AI kanali"), "https://t.me/ustozai"]]
       .map(([l, u]) => `<div class="adm-link"><span><b>${l}</b><small>${u}</small></span><button class="icon-btn" onclick="admCopy('${u}')" aria-label="copy">${ic("file")}</button><button class="icon-btn" onclick="admShare('${u}')" aria-label="share">${ic("send")}</button></div>`).join("")}
-  </div>`;
+  </div>`],
+  ];
 }
-window.admCopy = (u) => { try { navigator.clipboard.writeText(u); toast(T("Nusxa olindi")); } catch { toast(u); } };
+window.admCopy = (u) => { const b = evBtn(); navigator.clipboard.writeText(u).then(() => copyTick(b)).catch(() => toast(u)); };
 window.admShare = (u) => { const url = `https://t.me/share/url?url=${encodeURIComponent(u)}`; if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, "_blank"); };
 window.admTpl = (k, id) => {
   const $ = (x) => document.getElementById(x);
@@ -143,7 +159,7 @@ let mentorList = null;
 const meetAdmin = (path, body) => fetch(SHARE_API + "/meet/admin/" + path, { method: "POST", headers: { "X-Init-Data": tgInit(), "Content-Type": "application/json" }, body: JSON.stringify(body || {}) })
   .then(async (r) => { const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || r.status); return j; });
 function mentorAdminCard() {
-  if (!mentorList) meetAdmin("mentors").then((j) => { mentorList = j.mentors; if (location.hash === "#/admin") { const y = scrollY; render(); scrollTo(0, y); } }).catch(() => { mentorList = []; });
+  if (!mentorList) meetAdmin("mentors").then((j) => { mentorList = j.mentors; admRefresh(); }).catch(() => { mentorList = []; admRefresh(); });
   return `<div class="card box adm">
     <h4>${ic("video")} ${T("Mentorlar (Online meeting)")}</h4><p>${T("Mentor qo'shing: tizim kuchli parol yaratadi. Parolni mentorga shaxsan yuboring, u faqat bir marta ko'rinadi.")}</p>
     ${(mentorList || []).map((m) => `<div class="adm-link"><span><b>${esc(m.name)}${m.active ? "" : " · " + T("o'chirilgan")}</b><small>${esc(m.uni || "")} · ${m.bound ? T("kirgan") : T("hali kirmagan")}${m.photo ? "" : " · " + T("rasm yo'q")}</small></span>
@@ -156,15 +172,15 @@ const showPass = (name, pass) => sheet(`<div class="ap-sheet mt-form"><span clas
   <div class="mt-passbox notr">${esc(pass)}</div>
   <button class="btn-primary" onclick="admCopyPass()">${ic("file")} ${T("Nusxa olish")}</button>
   <p class="mt-hint">${T("Bu parol faqat hozir ko'rinadi. Uni mentorga shaxsiy xabarda yuboring: Online meeting, Mentorlar, \"Mentor sifatida kirish\". Kirgandan keyin mentor parolni o'zgartirishi mumkin.")}</p></div>`) || (window._admPass = pass);
-window.admCopyPass = () => { try { navigator.clipboard.writeText(window._admPass); toast(T("Nusxa olindi")); } catch { toast(T("Nusxa olib bo'lmadi")); } };
+window.admCopyPass = () => { const b = evBtn(); navigator.clipboard.writeText(window._admPass).then(() => copyTick(b)).catch(() => toast(T("Nusxa olib bo'lmadi"))); };
 window.admMentorAdd = () => {
   const v = (id) => document.getElementById(id).value.trim(), name = v("am-name");
   if (!name) return toast(T("Mentor ismini yozing"));
-  meetAdmin("add", { name, uni: v("am-uni") }).then((j) => { window._admPass = j.password; mentorList = null; render(); showPass(name, j.password); }).catch((e) => toast(T("Xatolik: {e}", { e: e.message })));
+  meetAdmin("add", { name, uni: v("am-uni") }).then((j) => { window._admPass = j.password; mentorList = null; admRefresh(); showPass(name, j.password); }).catch((e) => toast(T("Xatolik: {e}", { e: e.message })));
 };
 window.admMentorReset = (id) => {
   const m = (mentorList || []).find((x) => x.id === id);
   confirmAsk(T("{n} uchun yangi parol yaratilsinmi? Eski parol ishlamay qoladi va mentor qayta kirishi kerak.", { n: m ? m.name : "" })).then((ok) => { if (!ok) return;
-    meetAdmin("reset", { id }).then((j) => { window._admPass = j.password; mentorList = null; render(); showPass(m ? m.name : "", j.password); }).catch((e) => toast(T("Xatolik: {e}", { e: e.message }))); });
+    meetAdmin("reset", { id }).then((j) => { window._admPass = j.password; mentorList = null; admRefresh(); showPass(m ? m.name : "", j.password); }).catch((e) => toast(T("Xatolik: {e}", { e: e.message }))); });
 };
-window.admMentorDel = (id) => confirmAsk(T("Mentorni o'chirasizmi? U endi uchrashuv e'lon qila olmaydi.")).then((ok) => { if (ok) meetAdmin("remove", { id }).then(() => { mentorList = null; render(); }).catch((e) => toast(T("Xatolik: {e}", { e: e.message }))); });
+window.admMentorDel = (id) => confirmAsk(T("Mentorni o'chirasizmi? U endi uchrashuv e'lon qila olmaydi.")).then((ok) => { if (ok) meetAdmin("remove", { id }).then(() => { mentorList = null; admRefresh(); }).catch((e) => toast(T("Xatolik: {e}", { e: e.message }))); });

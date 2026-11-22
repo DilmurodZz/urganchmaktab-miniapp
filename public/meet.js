@@ -116,7 +116,7 @@ const Meet = (() => {
     return `<div class="card mt-me">${photo(me, "lg")}<div><b>${esc(me.name)}</b><small>${esc(me.uni || "")}${me.field ? " · " + esc(me.field) : ""}</small>
         <button class="btn-ghost" onclick="mtProfile()">${ic("pen")} ${T("Profilni tahrirlash")}</button></div></div>
       ${me.photo ? "" : `<p class="um-warn">${ic("alert")}<span>${T("Uchrashuv e'lon qilish uchun profil rasmingizni yuklang.")}</span></p>`}
-      ${S.me.googleReady ? `<div class="card mt-g ${me.google ? "on" : ""}"><span class="mt-gl">G</span><div><b>${me.google ? T("Google Meet ulangan") : T("Google Meet'ni ulang")}</b>
+      ${S.me.googleReady ? `<div class="card mt-g ${me.google ? "on" : ""}"><span class="mt-gl">G</span><div><b>${me.google ? `${T("Google Meet ulangan")}<i class="mt-ok" aria-label="ok">${ic("check")}</i>` : T("Google Meet'ni ulang")}</b>
         <small class="notr">${me.google ? esc(me.google) : T("Ulasangiz, har bir uchrashuv uchun Meet havolasi avtomatik yaratiladi va kim qatnashganini ko'rasiz.")}</small></div>
         ${me.google ? `<button class="btn-ghost" onclick="mtGoogleOff()">${T("Uzish")}</button>` : `<button class="btn-primary" onclick="mtGoogle()">${T("Ulash")}</button>`}</div>` : ""}
       <button class="btn-primary mt-new" onclick="mtNew()">${ic("plus")} ${T("Uchrashuv rejalashtirish")}</button>
@@ -270,22 +270,6 @@ const Meet = (() => {
       <button class="btn-primary zk-red" onclick="mtDeclineGo(${id})">${ic("x")} ${T("Rad etish va xabar berish")}</button></div>`); };
   window.mtDeclineGo = (id) => { const note = document.getElementById("md-note").value.trim(); api("/respond", { id, action: "decline", note }).then(() => { closeSheet(); toast(T("So'rov rad etildi")); load(true); }).catch(fail); };
 
-  /* ---------- the poster: mentor, photo, topic, day, time, link, over a campus at dusk ---------- */
-  const SKY = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1350"><defs>
-    <linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A0208"/><stop offset=".55" stop-color="#6E0A1C"/><stop offset="1" stop-color="#B8862F"/></linearGradient>
-    <radialGradient id="g" cx=".5" cy=".78" r=".6"><stop offset="0" stop-color="#FFD98A" stop-opacity=".55"/><stop offset="1" stop-color="#FFD98A" stop-opacity="0"/></radialGradient>
-    <linearGradient id="b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3A0610"/><stop offset="1" stop-color="#1A0206"/></linearGradient></defs>
-    <rect width="1080" height="1350" fill="url(#s)"/><rect width="1080" height="1350" fill="url(#g)"/>
-    <g fill="#fff" opacity=".55"><circle cx="120" cy="90" r="2"/><circle cx="300" cy="160" r="1.5"/><circle cx="520" cy="70" r="2"/><circle cx="760" cy="130" r="1.6"/><circle cx="960" cy="80" r="2.2"/><circle cx="880" cy="260" r="1.4"/><circle cx="200" cy="300" r="1.4"/><circle cx="640" cy="230" r="1.2"/></g>
-    <g transform="translate(0 120)"><g fill="url(#b)" stroke="#E3B866" stroke-opacity=".35" stroke-width="2">
-      <path d="M0 1350V1110h60v-60h20v-90l30-50 30 50v90h20v60h70v240z"/>
-      <path d="M220 1350V1060h40v-40h-14l44-70 44 70h-14v40h40v290z"/>
-      <path d="M360 1350V1090h40v-30c0-80 60-140 140-150v-40h10v-30h10v30h10v40c80 10 140 70 140 150v30h40v260z"/>
-      <path d="M760 1350V1040h30v-120l-12-6 37-90 37 90-12 6v120h30v310z"/>
-      <path d="M890 1350V1100h50v-70h30v-40h30v40h30v70h50v250z"/></g>
-    <g fill="#E3B866" opacity=".35">${[0, 1, 2, 3, 4, 5].map((i) => `<rect x="${410 + i * 48}" y="1120" width="16" height="230"/>`).join("")}</g>
-    <g fill="#FFD98A" opacity=".75"><rect x="245" y="1110" width="14" height="22" rx="7"/><rect x="281" y="1110" width="14" height="22" rx="7"/><rect x="790" y="1090" width="12" height="20" rx="6"/><rect x="822" y="1090" width="12" height="20" rx="6"/><rect x="930" y="1150" width="14" height="22" rx="7"/><rect x="1010" y="1150" width="14" height="22" rx="7"/><rect x="95" y="1150" width="12" height="20" rx="6"/></g></g>
-  </svg>`;
   const loadImg = (src, cors) => new Promise((ok) => { const i = new Image(); if (cors) i.crossOrigin = "anonymous"; i.onload = () => ok(i); i.onerror = () => ok(null); i.src = src; });
   function wrap(c, text, x, y, maxW, lh, maxLines) {
     const words = text.split(/\s+/), lines = []; let line = "";
@@ -294,37 +278,124 @@ const Meet = (() => {
     const out = lines.slice(0, maxLines); if (lines.length > maxLines) out[maxLines - 1] = out[maxLines - 1].replace(/\s*\S*$/, "…");
     out.forEach((l, i) => c.fillText(l, x, y + i * lh)); return out.length;
   }
+  /* ---------- the poster: a premium invitation in burgundy and gold (logo, label, large photo, name, university,
+     topic, day and time, the meeting link, how to join, a campus at dusk along the bottom) ---------- */
+  const GOLD = (c, x0, y0, x1, y1) => { const g = c.createLinearGradient(x0, y0, x1, y1); g.addColorStop(0, "#FBE3A6"); g.addColorStop(.45, "#E0B25A"); g.addColorStop(.75, "#F6D58E"); g.addColorStop(1, "#C08A32"); return g; };
+  function swoosh(c, flip) {
+    c.save(); if (flip) { c.translate(1080, 1350); c.rotate(Math.PI); }
+    c.shadowColor = "rgba(255,210,130,.75)"; c.shadowBlur = 18; c.lineCap = "round";
+    [[0, 7], [26, 2.5], [50, 1.2]].forEach(([o, w]) => { c.strokeStyle = GOLD(c, 0, 400, 420, 0); c.lineWidth = w; c.globalAlpha = w > 2 ? .95 : .6;
+      c.beginPath(); c.moveTo(-30, 300 + o); c.bezierCurveTo(70 + o, 170 + o * .4, 190 + o, 70, 360 + o, -30); c.stroke(); });
+    c.restore();
+  }
+  function campus(c) {
+    // a calm silhouette of a university at dusk: a domed hall with columns and towered wings
+    const glow = c.createRadialGradient(540, 1330, 20, 540, 1330, 560); glow.addColorStop(0, "rgba(255,180,120,.45)"); glow.addColorStop(1, "rgba(255,180,120,0)");
+    c.fillStyle = glow; c.fillRect(0, 1000, 1080, 350);
+    const fill = c.createLinearGradient(0, 1170, 0, 1350); fill.addColorStop(0, "rgba(120,30,40,.85)"); fill.addColorStop(1, "rgba(40,4,12,.98)");
+    c.fillStyle = fill; c.beginPath();
+    c.moveTo(0, 1350); c.lineTo(0, 1250); c.lineTo(40, 1250); c.lineTo(40, 1205); c.lineTo(70, 1205); c.lineTo(70, 1175); c.lineTo(85, 1150); c.lineTo(100, 1175); c.lineTo(100, 1205);
+    c.lineTo(160, 1205); c.lineTo(160, 1235); c.lineTo(330, 1235); c.lineTo(330, 1215); c.lineTo(380, 1215); c.lineTo(380, 1250); c.lineTo(420, 1250); c.lineTo(420, 1236);
+    c.lineTo(460, 1236); c.quadraticCurveTo(470, 1170, 540, 1160); c.quadraticCurveTo(610, 1170, 620, 1236); c.lineTo(660, 1236); c.lineTo(660, 1250); c.lineTo(700, 1250);
+    c.lineTo(700, 1215); c.lineTo(750, 1215); c.lineTo(750, 1235); c.lineTo(920, 1235); c.lineTo(920, 1205); c.lineTo(980, 1205); c.lineTo(980, 1175); c.lineTo(995, 1150);
+    c.lineTo(1010, 1175); c.lineTo(1010, 1205); c.lineTo(1040, 1205); c.lineTo(1040, 1250); c.lineTo(1080, 1250); c.lineTo(1080, 1350); c.closePath(); c.fill();
+    c.fillStyle = "rgba(160,50,60,.7)"; c.fillRect(536, 1140, 8, 22);   // the dome's spire
+    c.fillStyle = "rgba(255,205,140,.55)";
+    for (let i = 0; i < 7; i++) c.fillRect(448 + i * 28, 1262, 10, 88);                 // columns
+    [[60, 1270], [110, 1270], [190, 1258], [240, 1258], [290, 1258], [790, 1258], [840, 1258], [890, 1258], [960, 1270], [1010, 1270]]
+      .forEach(([x, y]) => { c.fillRect(x, y, 14, 22); c.fillRect(x, y + 40, 14, 22); });
+    const fade = c.createLinearGradient(0, 1100, 0, 1350); fade.addColorStop(0, "rgba(58,4,14,0)"); fade.addColorStop(1, "rgba(30,2,8,.55)");
+    c.fillStyle = fade; c.fillRect(0, 1100, 1080, 250);
+  }
+  const rr = (c, x, y, w, h, r) => { c.beginPath(); c.roundRect(x, y, w, h, r); };
+  function iconCal(c, x, y, s) {
+    c.save(); c.strokeStyle = GOLD(c, x, y, x + s, y + s); c.fillStyle = c.strokeStyle; c.lineWidth = s * .09;
+    rr(c, x, y + s * .14, s, s * .86, s * .16); c.stroke(); c.fillRect(x, y + s * .14, s, s * .24);
+    c.fillRect(x + s * .2, y, s * .1, s * .26); c.fillRect(x + s * .7, y, s * .1, s * .26);
+    for (let r = 0; r < 2; r++) for (let k = 0; k < 3; k++) c.fillRect(x + s * (.2 + k * .23), y + s * (.52 + r * .2), s * .14, s * .12);
+    c.restore();
+  }
+  function iconClock(c, x, y, s) {
+    c.save(); c.strokeStyle = GOLD(c, x, y, x + s, y + s); c.lineWidth = s * .1; c.lineCap = "round";
+    c.beginPath(); c.arc(x + s / 2, y + s / 2, s * .44, 0, Math.PI * 2); c.stroke();
+    c.beginPath(); c.moveTo(x + s / 2, y + s * .24); c.lineTo(x + s / 2, y + s / 2); c.lineTo(x + s * .7, y + s * .62); c.stroke(); c.restore();
+  }
+  function iconVideo(c, x, y, s, col) {
+    c.save(); c.fillStyle = col; rr(c, x, y + s * .18, s * .66, s * .64, s * .14); c.fill();
+    c.beginPath(); c.moveTo(x + s * .7, y + s * .42); c.lineTo(x + s, y + s * .22); c.lineTo(x + s, y + s * .78); c.lineTo(x + s * .7, y + s * .58); c.closePath(); c.fill(); c.restore();
+  }
+  function iconMeet(c, x, y, s) {   // a small Google Meet style camera in the four Google colours
+    c.save(); rr(c, x, y + s * .14, s * .7, s * .72, s * .12); c.clip();
+    c.fillStyle = "#00832D"; c.fillRect(x, y, s, s); c.fillStyle = "#0066DA"; c.fillRect(x, y, s * .24, s);
+    c.fillStyle = "#FFBA00"; c.fillRect(x + s * .24, y, s, s * .38); c.fillStyle = "#EA4335"; c.fillRect(x, y, s * .24, s * .38);
+    c.fillStyle = "#00AC47"; c.fillRect(x + s * .24, y + s * .62, s, s); c.restore();
+    c.save(); c.fillStyle = "#00832D"; c.beginPath(); c.moveTo(x + s * .72, y + s * .38); c.lineTo(x + s, y + s * .2); c.lineTo(x + s, y + s * .8); c.lineTo(x + s * .72, y + s * .62); c.closePath(); c.fill(); c.restore();
+  }
+  function iconPlane(c, x, y, s) {
+    c.save(); c.fillStyle = GOLD(c, x, y, x + s, y + s); c.beginPath(); c.moveTo(x, y + s * .45); c.lineTo(x + s, y); c.lineTo(x + s * .72, y + s); c.lineTo(x + s * .45, y + s * .62); c.closePath(); c.fill();
+    c.fillStyle = "rgba(60,8,18,.5)"; c.beginPath(); c.moveTo(x + s * .45, y + s * .62); c.lineTo(x + s, y); c.lineTo(x + s * .38, y + s * .56); c.closePath(); c.fill(); c.restore();
+  }
+  const fitFont = (c, text, weight, family, max, min, w) => { let f = max; for (; f > min; f -= 2) { c.font = `${weight} ${f}px ${family}`; if (c.measureText(text).width <= w) break; } return f; };
   async function poster(m) {
     const t = mentorOf(m.mentor_id) || { name: "Mentor" }, W = 1080, H = 1350, cv = document.createElement("canvas"); cv.width = W; cv.height = H;
-    const c = cv.getContext("2d");
+    const c = cv.getContext("2d"), SERIF = "Cinzel, Georgia, serif", HEAD = "Georgia, 'Noto Serif', 'Times New Roman', serif", SANS = "Inter, Arial, sans-serif";
     try { await Promise.all([document.fonts.load("700 60px Cinzel"), document.fonts.load("800 60px Inter"), document.fonts.load("600 30px Inter")]); } catch {}
-    const [bg, logo, ph] = await Promise.all([loadImg("data:image/svg+xml;charset=utf-8," + encodeURIComponent(SKY)), loadImg("img/logo-dark.webp"), t.photo ? loadImg(`${SHARE_API}/meet/photo/${t.id}?v=${t.photo}`, true) : null]);
-    if (bg) c.drawImage(bg, 0, 0, W, H);
-    c.fillStyle = "rgba(20,2,6,.28)"; c.fillRect(0, 0, W, H);
-    if (logo) { const w = 250, h = logo.height * w / logo.width; c.drawImage(logo, (W - w) / 2, 48, w, h); }
-    c.textAlign = "center";
-    // the label
-    c.font = "700 30px Inter, sans-serif"; const lbl = m.kind === "public" ? "ONLINE MEETING" : "MENTOR MEETING", lw = c.measureText(lbl).width + 64;
-    c.fillStyle = "#E3B866"; c.beginPath(); c.roundRect((W - lw) / 2, 290, lw, 58, 29); c.fill(); c.fillStyle = "#3A0610"; c.fillText(lbl, W / 2, 330);
-    // mentor photo with a gold ring
-    const cx = W / 2, cy = 520, r = 130;
-    c.save(); c.beginPath(); c.arc(cx, cy, r + 12, 0, Math.PI * 2); const gr = c.createLinearGradient(cx - r, cy - r, cx + r, cy + r); gr.addColorStop(0, "#FFF1CC"); gr.addColorStop(.5, "#D9A748"); gr.addColorStop(1, "#F6DCA0"); c.fillStyle = gr; c.fill();
-    c.beginPath(); c.arc(cx, cy, r, 0, Math.PI * 2); c.clip();
-    if (ph) c.drawImage(ph, cx - r, cy - r, r * 2, r * 2); else { c.fillStyle = "#8B0920"; c.fillRect(cx - r, cy - r, r * 2, r * 2); c.fillStyle = "#fff"; c.font = "700 120px Cinzel, serif"; c.fillText((t.name || "?")[0], cx, cy + 42); }
+    const [logo, ph] = await Promise.all([loadImg("img/logo-dark.webp"), t.photo ? loadImg(`${SHARE_API}/meet/photo/${t.id}?v=${t.photo}`, true) : null]);
+    // background: deep burgundy with a soft light in the middle, gold sweeps in two corners, the campus along the bottom
+    const bg = c.createRadialGradient(540, 560, 60, 540, 620, 900); bg.addColorStop(0, "#8E1428"); bg.addColorStop(.55, "#6A0A1C"); bg.addColorStop(1, "#3A0410");
+    c.fillStyle = bg; c.fillRect(0, 0, W, H);
+    campus(c); swoosh(c, false); swoosh(c, true);
+    c.textAlign = "center"; c.textBaseline = "alphabetic";
+    // logo
+    if (logo) { const w = 262, h = logo.height * w / logo.width; c.drawImage(logo, (W - w) / 2, 28, w, h); }
+    // the label pill
+    const lbl = (m.kind === "public" ? T("Onlayn uchrashuv") : T("Mentor bilan uchrashuv")).toUpperCase();
+    c.font = `800 34px ${SANS}`; const lw = c.measureText(lbl).width + 130, ly = 270;
+    c.save(); c.shadowColor = "rgba(0,0,0,.35)"; c.shadowBlur = 16; c.shadowOffsetY = 6; c.fillStyle = GOLD(c, (W - lw) / 2, ly, (W + lw) / 2, ly + 62); rr(c, (W - lw) / 2, ly, lw, 62, 31); c.fill(); c.restore();
+    iconVideo(c, (W - lw) / 2 + 30, ly + 12, 40, "#4A0712"); c.fillStyle = "#4A0712"; c.textAlign = "left"; c.fillText(lbl, (W - lw) / 2 + 88, ly + 44); c.textAlign = "center";
+    // the photo: large, in a thick gold ring with a glow
+    const cx = W / 2, cy = 512, r = 148;
+    c.save(); c.shadowColor = "rgba(255,200,110,.6)"; c.shadowBlur = 40; c.beginPath(); c.arc(cx, cy, r + 14, 0, Math.PI * 2); c.fillStyle = GOLD(c, cx - r, cy - r, cx + r, cy + r); c.fill(); c.restore();
+    c.save(); c.beginPath(); c.arc(cx, cy, r + 4, 0, Math.PI * 2); c.fillStyle = "#5A0716"; c.fill(); c.beginPath(); c.arc(cx, cy, r, 0, Math.PI * 2); c.clip();
+    if (ph) { const k = Math.max(r * 2 / ph.width, r * 2 / ph.height), w = ph.width * k, h = ph.height * k; c.drawImage(ph, cx - w / 2, cy - h / 2, w, h); }
+    else { c.fillStyle = "#8B0920"; c.fillRect(cx - r, cy - r, r * 2, r * 2); c.fillStyle = "#FFFFFF"; c.font = `700 140px ${SERIF}`; c.fillText((t.name || "?")[0], cx, cy + 50); }
     c.restore();
-    c.fillStyle = "#FFFFFF"; c.font = "700 54px Cinzel, Georgia, serif"; c.fillText(t.name, W / 2, 735);
-    c.fillStyle = "#F6DCA0"; c.font = "600 32px Inter, sans-serif"; c.fillText([t.uni, t.field].filter(Boolean).join(" · ").slice(0, 60), W / 2, 785);
-    // the topic
-    c.fillStyle = "#FFFFFF"; c.font = "800 58px Inter, sans-serif"; const n = wrap(c, m.topic, W / 2, 880, 900, 70, 3);
+    // name and university
+    c.fillStyle = "#FFFFFF"; c.save(); c.shadowColor = "rgba(0,0,0,.45)"; c.shadowBlur = 12;
+    fitFont(c, t.name.toUpperCase(), 700, SERIF, 62, 36, 920); c.fillText(t.name.toUpperCase(), W / 2, 740); c.restore();
+    let y = 760;
+    if (t.uni) { c.font = `700 32px ${SANS}`; const uw = Math.min(700, c.measureText(t.uni).width + 70);
+      c.fillStyle = "rgba(60,4,14,.55)"; rr(c, (W - uw) / 2, y, uw, 52, 26); c.fill(); c.strokeStyle = GOLD(c, 0, y, 0, y + 52); c.lineWidth = 2.5; c.stroke();
+      c.fillStyle = "#F6D58E"; c.fillText(t.uni.slice(0, 40), W / 2, y + 37); y += 70; } else y += 16;
+    // the topic in a gold bar (one line, or two for a long topic)
+    let f = fitFont(c, m.topic, 800, HEAD, 66, 44, 780), two = c.measureText(m.topic).width > 780;
+    const th = two ? 140 : 96, tw = 860;
+    c.save(); c.shadowColor = "rgba(0,0,0,.4)"; c.shadowBlur = 20; c.shadowOffsetY = 8; c.fillStyle = GOLD(c, (W - tw) / 2, y, (W + tw) / 2, y + th); rr(c, (W - tw) / 2, y, tw, th, th / 2); c.fill(); c.restore();
+    c.fillStyle = "#4A0712"; c.font = `800 ${two ? 46 : f}px ${HEAD}`;
+    if (two) wrap(c, m.topic, W / 2, y + 64, 780, 54, 2); else c.fillText(m.topic, W / 2, y + th / 2 + f * .34);
+    y += th + 30;
     // day and time
-    const by = 880 + n * 70 + 20, d = new Date(m.starts);
-    c.fillStyle = "rgba(255,255,255,.12)"; c.beginPath(); c.roundRect(110, by, 860, 150, 30); c.fill(); c.strokeStyle = "rgba(227,184,102,.6)"; c.lineWidth = 2; c.stroke();
-    c.fillStyle = "#F6DCA0"; c.font = "600 26px Inter, sans-serif"; c.fillText(T("SANA").toUpperCase(), 325, by + 50); c.fillText(T("VAQT").toUpperCase(), 755, by + 50);
-    c.fillStyle = "#FFFFFF"; c.font = "800 44px Inter, sans-serif"; c.fillText(`${fmtDay(d)}, ${dayName(d)}`.slice(0, 22), 325, by + 108); c.fillText(`${hm(m.starts)} (UZT)`, 755, by + 108);
-    c.fillStyle = "rgba(227,184,102,.6)"; c.fillRect(539, by + 30, 2, 90);
-    // where
-    c.fillStyle = "#FFFFFF"; c.font = "600 30px Inter, sans-serif"; c.fillText(`${plat(m.link)}: ${m.link.replace(/^https:\/\//, "")}`.slice(0, 58), W / 2, by + 210);
-    c.fillStyle = "#F6DCA0"; c.font = "600 28px Inter, sans-serif"; c.fillText(T("Qo'shilish: @{b} → Online meeting", { b: BOT }), W / 2, H - 50);
+    const d = new Date(m.starts), bh = 120;
+    c.fillStyle = "rgba(60,4,14,.45)"; rr(c, 100, y, 880, bh, 28); c.fill(); c.strokeStyle = GOLD(c, 100, y, 980, y + bh); c.lineWidth = 2.5; c.stroke();
+    c.fillStyle = "rgba(240,200,130,.6)"; c.fillRect(539, y + 24, 2, bh - 48);
+    iconCal(c, 140, y + 32, 56); iconClock(c, 580, y + 32, 56);
+    c.textAlign = "left"; c.fillStyle = "#F0C46E"; c.font = `800 26px ${SANS}`; c.fillText(T("Sana").toUpperCase(), 216, y + 48); c.fillText(T("Vaqt").toUpperCase(), 656, y + 48);
+    c.fillStyle = "#FFFFFF"; fitFont(c, `${fmtDay(d)}, ${dayName(d)}`, 700, SANS, 38, 26, 300); c.fillText(`${fmtDay(d)}, ${dayName(d)}`, 216, y + 92);
+    c.font = `700 38px ${SANS}`; c.fillText(`${hm(m.starts)} (UZT)`, 656, y + 92);
+    y += bh + 24;
+    // where: the meeting link
+    const isMeet = /meet\.google\.com/.test(m.link), where = `${plat(m.link)}:`, link = m.link.replace(/^https:\/\//, "");
+    c.fillStyle = "rgba(60,4,14,.45)"; rr(c, 160, y, 760, 80, 40); c.fill(); c.strokeStyle = GOLD(c, 160, y, 920, y + 80); c.lineWidth = 2; c.stroke();
+    c.font = `800 30px ${SANS}`; const ww = c.measureText(where).width; fitFont(c, link, 500, SANS, 30, 20, 760 - 140 - ww - 14);
+    const lw2 = c.measureText(link).width, total = 52 + 14 + ww + 14 + lw2, x0 = (W - total) / 2;
+    if (isMeet) iconMeet(c, x0, y + 17, 46); else iconVideo(c, x0, y + 17, 46, "#F0C46E");
+    c.fillStyle = "#FFFFFF"; c.font = `800 30px ${SANS}`; c.fillText(where, x0 + 66, y + 51);
+    fitFont(c, link, 500, SANS, 30, 20, 760 - 140 - ww - 14); c.fillStyle = "#F4E6D0"; c.fillText(link, x0 + 66 + ww + 14, y + 51);
+    y += 80 + 48;
+    // how to join
+    const join = T("Qo'shilish: @{b}", { b: BOT }); c.font = `600 32px ${SANS}`; const jw = c.measureText(join).width, jx = (W - jw - 52) / 2;
+    iconPlane(c, jx, y - 30, 38); c.fillStyle = "#FFFFFF"; c.fillText(join, jx + 52, y);
+    c.textAlign = "center";
     return await new Promise((ok) => cv.toBlob(ok, "image/png"));
   }
   window.mtPoster = async (id) => {

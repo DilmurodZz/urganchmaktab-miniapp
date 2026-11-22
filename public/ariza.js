@@ -149,6 +149,15 @@ const Ariza = (() => {
     "Discuss an accomplishment, event, or realization that sparked a period of personal growth and a new understanding of yourself or others.",
     "Describe a topic, idea, or concept you find so engaging that it makes you lose all track of time. Why does it captivate you? What or who do you turn to when you want to learn more?",
     "Share an essay on any topic of your choice. It can be one you've already written, one that responds to a different prompt, or one of your own design."];
+  // short names for the 7 Common App prompts: an icon, a clear title, the official theme in English
+  const CA_SHORT = () => [["user", T("Kimligingiz va hikoyangiz"), "Background, identity, interest or talent"],
+    ["trend", T("Qiyinchilik va undan olingan saboq"), "Challenge, setback or failure"],
+    ["chat", T("Bir g'oyaga qarshi chiqqan payt"), "Questioning a belief or idea"],
+    ["heart", T("Kutilmagan minnatdorlik"), "Gratitude that surprised you"],
+    ["star", T("O'sish va o'zingizni kashf etish"), "Personal growth and new understanding"],
+    ["book", T("Vaqtni unuttiradigan mavzu"), "A topic that makes you lose track of time"],
+    ["pen", T("Erkin mavzu"), "Any topic of your choice"]];
+  window.stPrompt = (i) => { S.ca.prompt = String(i); saveS(); haptic("light"); keepY(); };
   const UC_Q = ["Why do you want to study this course or subject?", "How have your qualifications and studies helped you to prepare for this course or subject?", "What else have you done to prepare outside of education, and why are these experiences useful?"];
 
   const field = (path, label, en, type = "text", max) => {
@@ -187,8 +196,9 @@ const Ariza = (() => {
   const ucCount = () => { const n = ucTotal(); return `<em class="${n > 4000 ? "over" : S.uc.every((t) => String(t || "").length >= 350) ? "ok" : ""}">${T("{n} belgi", { n: fmtN(n) })} / 4 000</em>`; };
   function EssayTab() {
     return `<div class="card st-card"><h4>Common App · Personal essay</h4>
-      <label class="st-f"><span>${T("Mavzu")}<small>Prompt</small></span><select data-sk="ca.prompt" data-rerender="1">${CA_PROMPTS.map((p, i) => `<option value="${i}" ${+S.ca.prompt === i ? "selected" : ""}>${i + 1}. ${esc(p.slice(0, 70))}…</option>`).join("")}</select></label>
-      <p class="st-prompt notr">${esc(CA_PROMPTS[+S.ca.prompt || 0])}</p>
+      <p class="st-pick-h">${T("Mavzuni tanlang")}<small>${T("7 ta rasmiy savoldan biri")}</small></p>
+      <div class="st-prompts">${CA_PROMPTS.map((p, i) => { const on = (+S.ca.prompt || 0) === i, [ico, uz, en] = CA_SHORT()[i];
+        return `<button class="st-pr ${on ? "on" : ""}" onclick="stPrompt(${i})"><i>${ic(ico)}</i><span><b>${uz}</b><small>${en}</small>${on ? `<em class="notr">${esc(p)}</em>` : ""}</span><s>${i + 1}</s></button>`; }).join("")}</div>
       <textarea class="st-essay" data-sk="ca.text" rows="12" placeholder="${T("Inshoingizni shu yerda yozing…")}">${esc(S.ca.text)}</textarea>
       <div class="st-count" id="st-ca">${caCount()}</div></div>
     <div class="card st-card"><h4>UCAS · Personal statement</h4>
@@ -269,17 +279,17 @@ const Ariza = (() => {
     let ok = false; try { ok = document.execCommand("copy"); } catch {} ta.remove(); return ok;
   }
   const copied = async (i, next) => {
-    const L = items(sub.plat), x = L[i]; if (!x) return;
+    const b = evBtn(), L = items(sub.plat), x = L[i]; if (!x) return;
     if (!(await copyText(x.v))) return toast(T("Nusxa olib bo'lmadi"));
-    sub.done[sub.plat + i] = true; haptic("medium"); toast(T("Nusxa olindi: {n}", { n: x.label }));
-    sub.cur = next ? Math.min(L.length - 1, i + 1) : i; keepY();
+    sub.done[sub.plat + i] = true; copyTick(b); toast(T("Nusxa olindi: {n}", { n: x.label }));
+    sub.cur = next ? Math.min(L.length - 1, i + 1) : i; setTimeout(keepY, 650);   // the tick shows first, then the next field comes up
   };
   window.stCopyNext = () => copied(sub.cur, true);
   window.stCopyAt = (i) => copied(i, true);
   window.stCopyAll = async () => {
-    const L = items(sub.plat); let out = `${PLAT()[sub.plat].name} · Alumni Mentor\n`, sec = "";
+    const b = evBtn(), L = items(sub.plat); let out = `${PLAT()[sub.plat].name} · Alumni Mentor\n`, sec = "";
     L.forEach((x) => { if (x.sec !== sec) { sec = x.sec; out += `\n== ${sec} ==\n`; } out += `${x.label}:\n${x.v}\n\n`; });
-    if (await copyText(out)) { haptic("medium"); toast(T("Butun hujjatdan nusxa olindi")); } else toast(T("Nusxa olib bo'lmadi"));
+    if (await copyText(out)) { copyTick(b); toast(T("Butun hujjatdan nusxa olindi")); } else toast(T("Nusxa olib bo'lmadi"));
   };
   window.stPlat = (k) => { sub.plat = k; sub.cur = 0; store.set("studio_plat", k); haptic("light"); keepY(); };
 

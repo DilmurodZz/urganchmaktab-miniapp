@@ -1458,4 +1458,20 @@ Object.assign(I18N.en, {
 "Ma'lumotlarni ingliz tilida, pasportingizdagidek yozing.": "Write your details in English, exactly as in your passport.",
 "Kiritganlaringiz avtomatik saqlanadi: ilovadan chiqib ketsangiz ham yo'qolmaydi.": "Everything you enter is saved automatically and stays even if you leave the app.",
 "Application Studio hujjatlarni topshirguningizcha yoningizda: ma'lumotlaringizni shu yerda jamlang, tekshiring va to'g'rilang, so'ng nusxa olib Common App yoki UCAS'ga joylashtiring.": "Application Studio stays with you until you submit: gather your details here, check and correct them, then copy them into Common App or UCAS.",
+// --- v21: Common App prompts
+"Mavzuni tanlang": "Choose your prompt",
+"7 ta rasmiy savoldan biri": "one of the 7 official prompts",
+"Kimligingiz va hikoyangiz": "Your identity and story",
+"Qiyinchilik va undan olingan saboq": "A challenge and its lesson",
+"Bir g'oyaga qarshi chiqqan payt": "When you challenged an idea",
+"Kutilmagan minnatdorlik": "Unexpected gratitude",
+"O'sish va o'zingizni kashf etish": "Growth and discovering yourself",
+"Vaqtni unuttiradigan mavzu": "A topic that makes you forget time",
+"Erkin mavzu": "Your own topic",
+// --- v21: admin in Profil, poster
+"Mentor qo'shish, parol va ro'yxat": "Add mentors, passwords and the list",
+"Bot orqali hammaga xabar yuborish": "Message everyone through the bot",
+"Onlayn uchrashuv": "Online meeting",
+"Mentor bilan uchrashuv": "Mentor meeting",
+"Qo'shilish: @{b}": "Join: @{b}",
 });

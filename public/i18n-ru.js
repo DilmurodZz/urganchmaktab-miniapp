@@ -1458,4 +1458,20 @@ Object.assign(I18N.ru, {
 "Ma'lumotlarni ingliz tilida, pasportingizdagidek yozing.": "Пишите данные на английском, как в паспорте.",
 "Kiritganlaringiz avtomatik saqlanadi: ilovadan chiqib ketsangiz ham yo'qolmaydi.": "Всё, что вы вводите, сохраняется автоматически и не пропадёт, даже если вы выйдете из приложения.",
 "Application Studio hujjatlarni topshirguningizcha yoningizda: ma'lumotlaringizni shu yerda jamlang, tekshiring va to'g'rilang, so'ng nusxa olib Common App yoki UCAS'ga joylashtiring.": "Application Studio рядом с вами до самой подачи документов: собирайте здесь свои данные, проверяйте и исправляйте их, а затем скопируйте и вставьте в Common App или UCAS.",
+// --- v21: Common App prompts
+"Mavzuni tanlang": "Выберите тему",
+"7 ta rasmiy savoldan biri": "одна из 7 официальных тем",
+"Kimligingiz va hikoyangiz": "Ваша личность и история",
+"Qiyinchilik va undan olingan saboq": "Трудность и урок из неё",
+"Bir g'oyaga qarshi chiqqan payt": "Когда вы оспорили идею",
+"Kutilmagan minnatdorlik": "Неожиданная благодарность",
+"O'sish va o'zingizni kashf etish": "Рост и открытие себя",
+"Vaqtni unuttiradigan mavzu": "Тема, за которой забываешь о времени",
+"Erkin mavzu": "Свободная тема",
+// --- v21: admin in Profil, poster
+"Mentor qo'shish, parol va ro'yxat": "Добавить ментора, пароль и список",
+"Bot orqali hammaga xabar yuborish": "Сообщение всем через бота",
+"Onlayn uchrashuv": "Онлайн-встреча",
+"Mentor bilan uchrashuv": "Встреча с ментором",
+"Qo'shilish: @{b}": "Присоединиться: @{b}",
 });

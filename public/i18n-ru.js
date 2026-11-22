@@ -1453,4 +1453,9 @@ Object.assign(I18N.ru, {
 "Qabul komissiyasi xodimlari va top universitetlarga qabul qilingan talabalar eng ko'p beradigan maslahatlar.": "Советы, которые чаще всего дают сотрудники приёмных комиссий и студенты, поступившие в топовые университеты.",
 "Har bir universitetning aniq talablarini uning rasmiy saytidan tekshiring.": "Точные требования каждого университета проверяйте на его официальном сайте.",
 "Common App inshosi, qo'shimcha insholar, tavsiyanomalar va sun'iy intellekt haqida": "Эссе Common App, дополнительные эссе, рекомендации и про ИИ",
+// --- v18: Application Studio note
+"Application Studio sizga qanday yordam beradi": "Чем вам поможет Application Studio",
+"Ma'lumotlarni ingliz tilida, pasportingizdagidek yozing.": "Пишите данные на английском, как в паспорте.",
+"Kiritganlaringiz avtomatik saqlanadi: ilovadan chiqib ketsangiz ham yo'qolmaydi.": "Всё, что вы вводите, сохраняется автоматически и не пропадёт, даже если вы выйдете из приложения.",
+"Application Studio hujjatlarni topshirguningizcha yoningizda: ma'lumotlaringizni shu yerda jamlang, tekshiring va to'g'rilang, so'ng nusxa olib Common App yoki UCAS'ga joylashtiring.": "Application Studio рядом с вами до самой подачи документов: собирайте здесь свои данные, проверяйте и исправляйте их, а затем скопируйте и вставьте в Common App или UCAS.",
 });

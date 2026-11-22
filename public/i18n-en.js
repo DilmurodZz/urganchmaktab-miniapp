@@ -1453,4 +1453,9 @@ Object.assign(I18N.en, {
 "Qabul komissiyasi xodimlari va top universitetlarga qabul qilingan talabalar eng ko'p beradigan maslahatlar.": "The advice admissions officers and students admitted to top universities give most often.",
 "Har bir universitetning aniq talablarini uning rasmiy saytidan tekshiring.": "Check each university's exact requirements on its official site.",
 "Common App inshosi, qo'shimcha insholar, tavsiyanomalar va sun'iy intellekt haqida": "The Common App essay, supplements, recommendations and a word on AI",
+// --- v18: Application Studio note
+"Application Studio sizga qanday yordam beradi": "How Application Studio helps you",
+"Ma'lumotlarni ingliz tilida, pasportingizdagidek yozing.": "Write your details in English, exactly as in your passport.",
+"Kiritganlaringiz avtomatik saqlanadi: ilovadan chiqib ketsangiz ham yo'qolmaydi.": "Everything you enter is saved automatically and stays even if you leave the app.",
+"Application Studio hujjatlarni topshirguningizcha yoningizda: ma'lumotlaringizni shu yerda jamlang, tekshiring va to'g'rilang, so'ng nusxa olib Common App yoki UCAS'ga joylashtiring.": "Application Studio stays with you until you submit: gather your details here, check and correct them, then copy them into Common App or UCAS.",
 });

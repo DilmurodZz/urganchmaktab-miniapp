@@ -160,7 +160,11 @@ const Ariza = (() => {
   const group = (title, list, base) => `<div class="card st-card"><h4>${title}</h4>${list.map(([k, l, en, t]) => field(base + "." + k, l, en, t)).join("")}</div>`;
 
   function ProfTab() {
-    return `<p class="st-tip">${ic("globe")}${T("Ma'lumotlarni ingliz tilida, pasportingizdagidek yozing: ular rasmiy formaga aynan shu ko'rinishda ko'chiriladi.")}</p>
+    // a calm, friendly note: how to fill the form and what Application Studio is for
+    return `<div class="st-note"><b>${T("Application Studio sizga qanday yordam beradi")}</b>
+      <ul><li>${T("Ma'lumotlarni ingliz tilida, pasportingizdagidek yozing.")}</li>
+      <li>${T("Kiritganlaringiz avtomatik saqlanadi: ilovadan chiqib ketsangiz ham yo'qolmaydi.")}</li>
+      <li>${T("Application Studio hujjatlarni topshirguningizcha yoningizda: ma'lumotlaringizni shu yerda jamlang, tekshiring va to'g'rilang, so'ng nusxa olib Common App yoki UCAS'ga joylashtiring.")}</li></ul></div>
     ${group(T("Shaxsiy ma'lumotlar"), PERS(), "p")}${group(T("Ta'lim"), EDU(), "p")}${group(T("Testlar"), TESTS(), "p")}
     <div class="card st-card"><h4>${T("Faoliyatlar")}<small>${S.acts.length} / 10</small></h4>
       ${S.acts.map((a, i) => `<div class="st-item"><div class="st-ih"><b>${T("Faoliyat {n}", { n: i + 1 })}</b><button class="icon-btn" onclick="stDel('acts',${i})" aria-label="x">${ic("x")}</button></div>

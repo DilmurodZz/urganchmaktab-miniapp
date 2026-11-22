@@ -209,3 +209,11 @@ body[data-theme] .tile4.k0 { --fc: var(--c-main); --fc2: var(--c-sec); }
 .tp-list p { margin: 0; font-size: 14px; line-height: 1.5; color: #333333; }
 .meet-bn .sbn-t b { white-space: nowrap !important; font-size: clamp(18px, 5.6vw, 21px) !important; }
 .meet-bn .sbn-t small { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* ---------- v18: the calm note at the top of Shaxsiy ma'lumotlar ---------- */
+.st-note { margin: 0 0 14px; padding: 14px 16px 14px 18px; border-radius: 16px; background: #FFFFFF; border: 1px solid #EDE3D7; border-left: 4px solid var(--c-sec, var(--p3));
+  box-shadow: 0 8px 20px -16px rgba(17,17,17,.35); color: #3A3A3A; }
+.st-note b { display: block; margin-bottom: 8px; font-size: 14.5px; font-weight: 700; color: var(--c-ink, var(--p-text)); }
+.st-note ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 7px; }
+.st-note li { position: relative; padding-left: 16px; font-size: 13.5px; line-height: 1.5; }
+.st-note li::before { content: ""; position: absolute; left: 2px; top: .62em; width: 6px; height: 6px; border-radius: 50%; background: var(--c-sec, var(--p3)); opacity: .7; }

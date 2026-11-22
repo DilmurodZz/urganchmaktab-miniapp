@@ -4,7 +4,8 @@
 // Videos are streamed straight from the network (sw.js never caches them), so they cannot slow the app down.
 window.Lessons = (() => {
   const LESSONS = [
-    { id: 1, file: "video/dars-1.mp4", t: () => T("1-dars. Amerika universitetlarida o'qish"), d: () => T("AQSh universitetlariga qanday tayyorlanish kerak, nimadan boshlash va qanday xatolardan qochish"), len: "11:16", mb: 35 },
+    { id: 1, file: "video/dars-1.mp4", t: () => T("1-dars. Amerika universitetlarida o'qish"), d: () => T("AQSh universitetlariga qanday tayyorlanish kerak, nimadan boshlash va qanday xatolardan qochish"), len: "11:16", mb: 35, img: "img/lessons/poster.webp" },
+    { id: 2, file: "video/dars-2.mp4", t: () => T("2-dars. Ivy League (Pechak ligasi) haqida"), d: () => T("Ivy League qaysi universitetlardan iborat, ular nimasi bilan farq qiladi va ularga qanday tayyorlanish kerak"), len: "12:22", mb: 28, img: "img/lessons/dars-2.webp" },
   ];
   const abs = (f) => new URL(f, location.href).href;
   function Screen() {
@@ -18,7 +19,7 @@ window.Lessons = (() => {
     <div class="section-title">${T("Darslar")}<small>${LESSONS.length}</small></div>
     ${LESSONS.map((l) => `<div class="card ls-item" id="ls-${l.id}">
       <div class="ls-player" id="lsp-${l.id}"><button class="ls-thumb" onclick="lsPlay(${l.id})" aria-label="${T("Ko'rish")}">
-        <img src="img/lessons/poster.webp" alt="" loading="lazy"><i>${ic("play")}</i><s>${l.len}</s></button></div>
+        <img src="${l.img}" alt="" loading="lazy"><i>${ic("play")}</i><s>${l.len}</s></button></div>
       <b>${esc(l.t())}</b><p>${esc(l.d())}</p>
       <div class="ls-btns"><button class="btn-primary" onclick="lsPlay(${l.id})">${ic("play")} ${T("Ko'rish")}</button>
         <button class="btn-ghost" onclick="lsSave(${l.id})">${ic("download")} ${T("Yuklab olish")} · ${l.mb} MB</button></div></div>`).join("")}
@@ -30,7 +31,7 @@ window.Lessons = (() => {
     const l = LESSONS.find((x) => x.id === id), box = document.getElementById("lsp-" + id); if (!l || !box) return;
     haptic("light");
     if (box.querySelector("video")) { box.querySelector("video").play().catch(() => {}); return; }
-    box.innerHTML = `<video controls autoplay playsinline preload="auto" poster="img/lessons/poster.webp" src="${l.file}" controlslist="nodownload"></video>`;
+    box.innerHTML = `<video controls autoplay playsinline preload="auto" poster="${l.img}" src="${l.file}" controlslist="nodownload"></video>`;
     const v = box.querySelector("video");
     v.onerror = () => toast(T("Videoni ochib bo'lmadi. Internetni tekshiring."));
     v.play().catch(() => {});

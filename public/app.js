@@ -170,7 +170,7 @@ window.goBack = () => { if (document.getElementById("sheet")) return closeSheet(
 /* ---------- screens ---------- */
 function Home() {
   // Alumni Mentor is about meeting the mentors, so Online meeting has the big card; Application Studio is a tile
-  const tiles = [["cap", "Application Studio", "#/ariza", "k0"], ["clock", "Muddatlar", "#/muddatlar", "k2"], ["grid", "Foydali vositalar", "#/vositalar", "k3 g"]];
+  const tiles = [["cap", "Application Studio", "#/ariza", "k0"], ["play", "Video darslar", "#/darslar", "k2"], ["grid", "Foydali vositalar", "#/vositalar", "k3 g"]];
   return `
   <div class="topbar"><div class="brand"><img class="brand-logo" src="img/logo-emblem-light.webp" alt="" decoding="async"><span class="brand-name"><b>ALUMNI</b><small>MENTOR</small></span></div><span class="school" role="img" aria-label="Urganch 1-IMI"><img src="img/school.webp" alt="" decoding="async"></span></div>
   <a class="hero2 um-card" href="#/unimatch">
@@ -200,15 +200,12 @@ function Profil() {
     <h2>${esc(user.first_name)} ${esc(user.last_name || "")}</h2>
     <small>${user.username ? "@" + esc(user.username) : "Urganch 1-IMI o'quvchisi"}</small>
   </div>
-  ${statsCard()}
-  ${langCard()}
-  ${adminCard()}
-  <div class="card box">
-    <h4>${ic("palette")} Ilova rangi</h4><p>O'zingizga yoqqan rangni tanlang</p>
+  ${ddCard("stats", "chart", T("Ilova statistikasi"), T("Foydalanuvchilar va eng ko'p ochilgan bo'limlar"), statsCard)}
+  ${ddCard("lang", "globe", T("Ilova tili"), LANGS[LANG], langCard)}
+  ${ddCard("color", "palette", T("Ilova rangi"), THEMES[theme][0], () => `<div class="card box">
     ${(() => { const sw = ([k, [l, a, b]]) => `<i class="dd-sw" style="background:linear-gradient(135deg,${a},${b})"></i><b>${l}</b><small>${colorCounts ? T("{n} kishi", { n: fmtN(colorCounts[k] || 0) }) : ""}</small>`;
-      const cur = Object.entries(THEMES).find(([k]) => k === theme);
-      return `<details class="dd"><summary>${sw(cur)}${ic("chev", "dd-chev")}</summary><div class="dd-list">${Object.entries(THEMES).map((e) => `<button class="${e[0] === theme ? "on" : ""}" onclick="pickTheme('${e[0]}')">${sw(e)}${e[0] === theme ? ic("check", "dd-ok") : ""}</button>`).join("")}</div></details>`; })()}
-  </div>
+      return `<div class="dd-list open">${Object.entries(THEMES).map((e) => `<button class="${e[0] === theme ? "on" : ""}" onclick="pickTheme('${e[0]}')">${sw(e)}${e[0] === theme ? ic("check", "dd-ok") : ""}</button>`).join("")}</div>`; })()}</div>`)}
+  ${adminCard()}
   ${startParam ? `<p class="note">Kirish manbasi: ${esc(startParam)}</p>` : ""}
   <p class="credit">O'yin 3D modellari (CC BY 4.0): own.guest, Nicholas-3D, Dimiter, Tom (trbaker), te1ko</p>`;
 }

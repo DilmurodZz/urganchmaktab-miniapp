@@ -340,11 +340,11 @@ const Meet = (() => {
     const t = mentorOf(m.mentor_id) || { name: "Mentor" }, W = 1080, H = 1350, cv = document.createElement("canvas"); cv.width = W; cv.height = H;
     const c = cv.getContext("2d"), SERIF = "Cinzel, Georgia, serif", HEAD = "Georgia, 'Noto Serif', 'Times New Roman', serif", SANS = "Inter, Arial, sans-serif";
     try { await Promise.all([document.fonts.load("700 60px Cinzel"), document.fonts.load("800 60px Inter"), document.fonts.load("600 30px Inter")]); } catch {}
-    const [logo, ph] = await Promise.all([loadImg("img/logo-dark.webp"), t.photo ? loadImg(`${SHARE_API}/meet/photo/${t.id}?v=${t.photo}`, true) : null]);
-    // background: deep burgundy with a soft light in the middle, gold sweeps in two corners, the campus along the bottom
-    const bg = c.createRadialGradient(540, 560, 60, 540, 620, 900); bg.addColorStop(0, "#8E1428"); bg.addColorStop(.55, "#6A0A1C"); bg.addColorStop(1, "#3A0410");
-    c.fillStyle = bg; c.fillRect(0, 0, W, H);
-    campus(c); swoosh(c, false); swoosh(c, true);
+    const [logo, ph, bgi] = await Promise.all([loadImg("img/logo-dark.webp"), t.photo ? loadImg(`${SHARE_API}/meet/photo/${t.id}?v=${t.photo}`, true) : null, loadImg("img/poster-bg.webp")]);
+    // background: the burgundy picture with gold sweeps and the campus at dusk (drawn by hand if the picture fails to load)
+    if (bgi) c.drawImage(bgi, 0, 0, W, H);
+    else { const bg = c.createRadialGradient(540, 560, 60, 540, 620, 900); bg.addColorStop(0, "#8E1428"); bg.addColorStop(.55, "#6A0A1C"); bg.addColorStop(1, "#3A0410");
+      c.fillStyle = bg; c.fillRect(0, 0, W, H); campus(c); swoosh(c, false); swoosh(c, true); }
     c.textAlign = "center"; c.textBaseline = "alphabetic";
     // logo
     if (logo) { const w = 262, h = logo.height * w / logo.width; c.drawImage(logo, (W - w) / 2, 28, w, h); }
@@ -394,7 +394,7 @@ const Meet = (() => {
     y += 80 + 48;
     // how to join
     const join = T("Qo'shilish: @{b}", { b: BOT }); c.font = `600 32px ${SANS}`; const jw = c.measureText(join).width, jx = (W - jw - 52) / 2;
-    iconPlane(c, jx, y - 30, 38); c.fillStyle = "#FFFFFF"; c.fillText(join, jx + 52, y);
+    c.save(); c.shadowColor = "rgba(20,0,6,.9)"; c.shadowBlur = 14; iconPlane(c, jx, y - 30, 38); c.fillStyle = "#FFFFFF"; c.fillText(join, jx + 52, y); c.restore();
     c.textAlign = "center";
     return await new Promise((ok) => cv.toBlob(ok, "image/png"));
   }

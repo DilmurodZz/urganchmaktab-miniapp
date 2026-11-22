@@ -355,8 +355,8 @@ const Ariza = (() => {
       i: T("Germaniyada yozgi semestr (aprel) uchun ko'p universitetlarga ariza 15-yanvargacha, ko'pincha uni-assist orqali topshiriladi. Aniq muddat va talablarni har bir universitet sahifasidan tekshiring.") },
     { m: 7, d: 15, t: T("Germaniya: qishki semestrga ariza"), p: "daad",
       i: T("Germaniyada qishki semestr (oktabr) uchun asosiy muddat 15-iyul. Xalqaro talabalar ko'pincha uni-assist orqali topshiradi. Tayyorlov kursi (Studienkolleg) kerak bo'lishi mumkin, buni oldindan bilib oling.") },
-    { when: T("Yanvar"), t: T("UCAS: boshqa kurslar uchun asosiy muddat"), p: "ucas",
-      i: T("Oksford, Kembrij va tibbiyotdan tashqari ko'pchilik kurslar uchun UCAS asosiy muddati yanvar oxirida. Bitta arizada 5 tagacha kurs tanlanadi va bitta shaxsiy bayonot yoziladi.") },
+    { m: 1, d: 13, t: T("UCAS: boshqa kurslar uchun asosiy muddat"), p: "ucas",
+      i: T("Oksford, Kembrij va tibbiyotdan tashqari ko'pchilik kurslar uchun UCAS asosiy muddati 2027-yilga qabul uchun 13-yanvar. Bitta arizada 5 tagacha kurs tanlanadi va bitta shaxsiy bayonot yoziladi.") },
     { when: T("Aprel va noyabr"), t: T("El-yurt umidi jamg'armasi tanlovlari"), lg: ["EL-YURT", "UMIDI"], lc: "ey",
       i: T("El-yurt umidi jamg'armasi xorijdagi nufuzli universitetlarda o'qish uchun grantlar beradi. Tanlovlar odatda bahor va kuzda e'lon qilinadi. Shartlar va hujjatlar ro'yxatini jamg'armaning rasmiy saytidan kuzatib boring.") },
     { when: T("Mart, may, iyun, avgust, oktabr, noyabr, dekabr"), t: T("SAT xalqaro sanalari"), img: "img/sat-logo.webp",
@@ -373,22 +373,74 @@ const Ariza = (() => {
   const uniLogo = (a) => { const h = host(a.site || ""), ini = esc((a.name || "?").trim()[0] || "?");
     return h ? `<span class="ap-logo dl-img"><img src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(h)}&sz=64" alt="" loading="lazy" onerror="this.parentNode.innerHTML='<b>${ini}</b>'"></span>` : `<span class="ap-logo di"><b>${ini}</b></span>`; };
   const daysTxt = (left) => left < 0 ? T("Muddat o'tgan") : left === 0 ? T("Bugun oxirgi kun") : T("{n} kun qoldi", { n: left });
+  /* ---------- the student's own list of Top 300 universities and their deadlines ---------- */
+  let T3 = null;
+  let T3p = null;
+  const loadT3 = () => T3 ? Promise.resolve(T3) : (T3p = T3p || fetch("top300.json").then((r) => r.json()).then((d) => (T3 = d.rows)).catch((e) => { T3p = null; throw e; }));
+  const dlUnis = () => store.get("dl_unis", []);
+  // a "MM-DD" date in this admission season (August to July), and the days left (negative once it has passed)
+  const cyc = (md) => { const now = new Date(), [m, d] = md.split("-").map(Number), y0 = now.getMonth() >= 7 ? now.getFullYear() : now.getFullYear() - 1;
+    const date = new Date(m >= 8 ? y0 : y0 + 1, m - 1, d, 23, 59); return { date, left: Math.ceil((date - now) / 864e5) }; };
+  const uniPlans = (u) => { const r = (T3 || []).find((x) => x[1] === u); if (!r || !window.DL_DATA) return null;
+    const d = DL_DATA.of(r[1], r[2]); return { r, ok: d.ok, plans: d.plans.map(([k, md]) => ({ k, ...cyc(md) })).sort((a, b) => a.date - b.date) }; };
+  const siteLogo = (site, name) => uniLogo({ site, name });
+  function uniCards() {
+    const list = dlUnis(); if (!list.length) return "";
+    if (!T3 || !window.DL_DATA) { Promise.all([loadT3(), loadScripts(["deadlines-data.js"])]).then(() => { if (location.hash === "#/muddatlar") keepY(); }).catch(() => {}); return spinner(); }
+    const P = DL_DATA.PLAN;
+    return list.map((u) => uniPlans(u)).filter(Boolean).map(({ r, ok, plans }) => `<div class="card dlu">
+      <div class="dlu-h">${siteLogo(r[14], r[1])}<span class="notr"><b>${esc(r[1])}</b><small>${esc(r[2])} · #${esc(String(r[0]).replace("=", ""))}</small></span>
+        <button class="icon-btn" onclick="dlUniDel('${encodeURIComponent(r[1])}')" aria-label="x">${ic("x")}</button></div>
+      ${plans.length ? plans.map((x) => `<div class="dlu-p ${x.left < 0 ? "past" : x.left <= 14 ? "soon" : ""}"><span><b>${esc(P[x.k][0])}</b><small>${T(P[x.k][1])}</small></span>
+        <span class="dlu-d"><b>${esc(fmtDate(x.date))}</b><em>${x.left < 0 ? T("O'tgan") : x.left === 0 ? T("Bugun") : T("{n} kun qoldi", { n: x.left })}</em></span></div>`).join("")
+        : `<p class="dlu-note">${T("Bu universitet muddatlarini har yili o'zi e'lon qiladi. Rasmiy saytidan tekshiring.")}</p>`}
+      ${plans.length && !ok ? `<p class="dlu-note">${T("Taxminiy muddat: mamlakatdagi odatiy sana. Aniq sanani rasmiy saytdan tekshiring.")}</p>` : ""}
+      ${r[14] ? `<button class="btn-ghost dlu-site" onclick="openExt('${encodeURIComponent(r[14])}')">${ic("globe")} ${T("Rasmiy sayt")}</button>` : ""}</div>`).join("");
+  }
+  // "Universitet qo'shish": tick several of the Top 300, then "Tayyor" brings them back to Muddatlar
+  let pick = new Set();
+  window.dlPick = () => {
+    haptic("light"); pick = new Set(dlUnis());
+    sheet(`<div class="dlp"><h3>${T("Universitetlarni tanlang")}</h3><p class="mt-hint">${T("Top 300 ichidan bir nechtasini belgilang")}</p>
+      <label class="km-search">${ic("search")}<input id="dlp-q" placeholder="${T("Universitet yoki davlat nomi")}" oninput="dlFilter(this.value)" autocomplete="off"></label>
+      <div class="dlp-list" id="dlp-list">${spinner()}</div>
+      <button class="btn-primary dlp-go" id="dlp-go" onclick="dlPickGo()">${ic("check")} ${T("Tayyor")} (<span id="dlp-n">${pick.size}</span>)</button></div>`);
+    Promise.all([loadT3(), loadScripts(["deadlines-data.js"])]).then(() => {
+      const el = document.getElementById("dlp-list"); if (!el) return;
+      el.innerHTML = T3.map((r) => `<button class="dlp-row ${pick.has(r[1]) ? "on" : ""}" data-n="${esc(r[1])}" data-q="${esc((r[1] + " " + r[2]).toLowerCase())}" onclick="dlTick(this)">
+        <i>${ic("check")}</i><span class="notr"><b>${esc(r[1])}</b><small>${esc(r[2])} · #${esc(String(r[0]).replace("=", ""))}</small></span></button>`).join("");
+    }).catch(() => toast(T("Yuklab bo'lmadi")));
+  };
+  window.dlTick = (b) => { const n = b.dataset.n; if (pick.has(n)) pick.delete(n); else pick.add(n); b.classList.toggle("on", pick.has(n)); haptic("light");
+    const c = document.getElementById("dlp-n"); if (c) c.textContent = pick.size; };
+  window.dlFilter = (q) => { q = q.trim().toLowerCase(); document.querySelectorAll(".dlp-row").forEach((b) => { b.hidden = !!q && !b.dataset.q.includes(q); }); };
+  window.dlPickGo = () => {
+    const before = dlUnis().length; store.set("dl_unis", [...pick]); closeSheet(); haptic("medium");
+    const added = pick.size - before; if (added > 0) toast(T("{n} ta universitet qo'shildi", { n: added }));
+    if (location.hash !== "#/muddatlar") location.hash = "#/muddatlar"; else { render(); scrollTo(0, 0); }
+  };
+  window.dlUniDel = (u) => { u = decodeURIComponent(u); store.set("dl_unis", dlUnis().filter((x) => x !== u)); haptic("light"); keepY(); };
   function Deadlines() {
+    if (dlUnis().length && (!T3 || !window.DL_DATA)) uniCards();
     const mine = list().filter((a) => a.deadline).map((a) => ({ a, left: daysLeft(a.deadline) })).sort((x, y) => x.left - y.left);
     const keys = keyRows().sort((x, y) => (x.left ?? 9999) - (y.left ?? 9999));
     const badge = (left) => `<span class="dl-left ${left < 0 ? "late" : left <= 14 ? "soon" : ""}"><b>${left < 0 ? "!" : left}</b><small>${left < 0 ? T("o'tgan") : T("kun")}</small></span>`;
     // ending soon: everything still open within 60 days (the nearest one at least), most urgent first
     const soon = mine.filter((x) => x.left >= 0).map((x) => ({ t: x.a.name, logo: uniLogo(x.a), left: x.left, go: `dlMine(${x.a.id})` }))
-      .concat(keys.filter((k) => k.left != null).map((k) => ({ t: k.t, logo: keyLogo(k), left: k.left, go: `dlKey(${k.n})` }))).sort((x, y) => x.left - y.left);
+      .concat(keys.filter((k) => k.left != null).map((k) => ({ t: k.t, logo: keyLogo(k), left: k.left, go: `dlKey(${k.n})` })))
+      .concat(T3 && window.DL_DATA ? dlUnis().map(uniPlans).filter(Boolean).map((x) => ({ x, p: x.plans.find((q) => q.left >= 0) })).filter((y) => y.p)
+        .map(({ x, p }) => ({ t: `${x.r[1]} · ${DL_DATA.PLAN[p.k][0]}`, logo: siteLogo(x.r[14], x.r[1]), left: p.left, go: "document.querySelector('.dlu')&&document.querySelector('.dlu').scrollIntoView({behavior:'smooth',block:'start'})" })) : [])
+      .sort((x, y) => x.left - y.left);
     const hot = soon.filter((x) => x.left <= 60); const top = (hot.length ? hot : soon.slice(0, 1)).slice(0, 4);
     return `${navbar(T("Muddatlar"))}
     ${top.length ? `<div class="section-title">${T("Muddati yakunlanayotganlar")}<small>${hot.length}</small></div>
     <div class="dl-hot">${top.map((x) => `<button class="dl-hc ${x.left <= 14 ? "red" : ""}" onclick="${x.go}">${x.logo}<span class="dl-hn"><b>${x.left}</b><small>${T("kun qoldi")}</small></span><span class="dl-ht notr">${esc(x.t)}</span></button>`).join("")}</div>` : ""}
-    <div class="section-title">${T("Mening muddatlarim")}<small>${mine.length}</small></div>
-    ${mine.length ? `<div class="dl-list">${mine.map(({ a, left }) => `<button class="card dl-row" onclick="dlMine(${a.id})">${uniLogo(a)}
+    <div class="section-title">${T("Mening universitetlarim")}<small>${dlUnis().length}</small></div>
+    <button class="btn-primary dl-add" onclick="dlPick()">${ic("plus")} ${T("Universitet qo'shish")}</button>
+    ${dlUnis().length ? uniCards() : `<p class="note">${T("Top 300 ichidan universitetlarni tanlang: ularning Early Decision, Early Action va Regular Decision muddatlari shu yerda chiqadi.")}</p>`}
+    ${mine.length ? `<div class="section-title">${T("Application Studio muddatlari")}<small>${mine.length}</small></div><div class="dl-list">${mine.map(({ a, left }) => `<button class="card dl-row" onclick="dlMine(${a.id})">${uniLogo(a)}
       <span class="notr"><b>${esc(a.name)}</b><small>${esc((PLAT()[a.plat] || PLAT().direct).name)} · ${esc(fmtDate(new Date(a.deadline + "T12:00:00")))}</small></span>${badge(left)}</button>`).join("")}</div>`
-      : `<div class="card ap-empty">${chip("clock", "lg")}<p>${T("Application Studio'da universitet qo'shib, topshirish muddatini kiriting: u shu yerda ko'rinadi.")}</p>
-        <button class="btn-ghost" onclick="store.set('studio_tab','apps');location.hash='#/ariza'">${ic("plus")} ${T("Universitet qo'shish")}</button></div>`}
+      : ""}
     <div class="section-title">${T("Asosiy muddatlar")}</div>
     <div class="dl-list">${keys.map((k) => `<button class="card dl-row ${k.left == null ? "nodate" : ""}" onclick="dlKey(${k.n})">${keyLogo(k)}
       <span><b>${k.t}</b><small>${k.date ? esc(fmtDate(k.date)) : k.when}</small></span>${k.left != null ? badge(k.left) : `<span class="dl-left mo">${ic("clock")}</span>`}</button>`).join("")}</div>

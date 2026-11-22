@@ -64,20 +64,22 @@ function langCard() {
   </div>`;
 }
 
-// admins: the admin tools open right here in Profil as dropdowns (no separate admin page, one step less)
+// Profil: every section is a dropdown in the same style (only one open at a time); its content is built when it opens,
+// so its data (statistics, mentor list) loads only then. Admins also get their tools here, one step closer.
 let admOpen = "";
+window._dd = {};
+const ddCard = (k, icn, title, sub, html) => { _dd[k] = html;
+  return `<details class="card adm-dd" data-k="${k}" ${admOpen === k ? "open" : ""} ontoggle="admToggle('${k}', this.open)">
+    <summary><i class="adm-ic">${ic(icn)}</i><span><b>${title}</b><small>${sub}</small></span>${ic("chev", "adm-chev")}</summary>
+    <div class="adm-body">${admOpen === k ? html() : ""}</div></details>`; };
 const adminCard = () => {
   if (!isAdmin()) return "";
-  const secs = adminSections();
-  return `<div class="section-title">${T("Admin bo'limi")}</div>
-  ${secs.map(([k, icn, title, sub, html]) => `<details class="card adm-dd" ${admOpen === k ? "open" : ""} ontoggle="admToggle('${k}', this.open)">
-    <summary><i class="adm-ic">${ic(icn)}</i><span><b>${title}</b><small>${sub}</small></span>${ic("chev", "adm-chev")}</summary>
-    <div class="adm-body">${admOpen === k ? html() : ""}</div></details>`).join("")}`;
+  return `<div class="section-title">${T("Admin bo'limi")}</div>${adminSections().map(([k, icn, title, sub, html]) => ddCard(k, icn, title, sub, html)).join("")}`;
 };
-// a section's content is built when it opens, so its data loads only then
 window.admToggle = (k, on) => {
-  if (on) { admOpen = k; document.querySelectorAll(".adm-dd[open]").forEach((d) => { if (!d.getAttribute("ontoggle").includes(`'${k}'`)) d.open = false; });
-    const sec = adminSections().find((x) => x[0] === k), el = document.querySelector(`.adm-dd[open] .adm-body`); if (sec && el && !el.innerHTML) el.innerHTML = sec[4](); }
+  if (on) { admOpen = k; document.querySelectorAll(".adm-dd[open]").forEach((d) => { if (d.dataset.k !== k) d.open = false; });
+    if (k === "bc") adminSections();   // starts loading the user count for the broadcast confirmation
+    const el = document.querySelector(`.adm-dd[data-k="${k}"] .adm-body`); if (el && !el.innerHTML && _dd[k]) el.innerHTML = _dd[k](); }
   else if (admOpen === k) admOpen = "";
 };
 

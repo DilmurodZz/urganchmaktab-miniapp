@@ -1524,4 +1524,6 @@ Object.assign(I18N.ru, {
 // --- v25: lesson 4
 "4-dars. Arizada faoliyatlarning (extracurricular) o'rni": "Урок 4. Роль внеклассной деятельности в заявке",
 "Qanday faoliyatlar universitetga kirishda yordam beradi va ularni arizada qanday ko'rsatish kerak": "Какие активности помогают при поступлении и как показать их в заявке",
+// --- v27: intro
+"Urganchdan dunyoning eng yaxshi universitetlariga": "Из Ургенча в лучшие университеты мира",
 });

@@ -1524,4 +1524,6 @@ Object.assign(I18N.en, {
 // --- v25: lesson 4
 "4-dars. Arizada faoliyatlarning (extracurricular) o'rni": "Lesson 4. The role of extracurricular activities in applications",
 "Qanday faoliyatlar universitetga kirishda yordam beradi va ularni arizada qanday ko'rsatish kerak": "Which activities help you get in and how to present them in your application",
+// --- v27: intro
+"Urganchdan dunyoning eng yaxshi universitetlariga": "From Urganch to the world's best universities",
 });

@@ -1,89 +1,92 @@
-/* ---------- Alumni Mentor: the opening intro ----------
-   Five universities arrive one by one out of the depth, from Top 50 to Top 10 (THE World University Rankings 2027,
-   the same table as top300.json). Each new card takes the front; the earlier ones step back into a line behind it.
-   Then the line sinks away and the Alumni Mentor logo rises in gold light. About 7.5 s; a tap or "O'tkazib yuborish" skips it.
-   Plays on the first open only (and with ?intro=1 for testing). Only transform and opacity move, so it stays smooth on phones. */
+/* ---------- Alumni Mentor: the opening intro, "Urganchdan dunyoga" ----------
+   A paper plane takes off from Urganch on a burgundy globe, flies a golden arc past Oxford, MIT and Stanford
+   (each pin lights up as it passes), then its gold trail curls into a ring and the Alumni Mentor logo rises inside it.
+   About 5 s, drawn in SVG (no video, a few KB), crisp on every screen. A tap or "O'tkazib yuborish" skips it.
+   Plays once a day (and with ?intro=1 for testing); "prefers-reduced-motion" shows only the logo. */
 (function () {
-  const UNIS = [
-    { tier: 50, rank: "47", name: "London School of Economics", country: "Buyuk Britaniya", mono: "LSE", c1: "#E4022D", c2: "#8E0019" },
-    { tier: 40, rank: "32", name: "Duke University", country: "AQSH", mono: "D", c1: "#1F3F99", c2: "#012169" },
-    { tier: 30, rank: "21", name: "Cornell University", country: "AQSH", mono: "C", c1: "#C9302C", c2: "#7E1212" },
-    { tier: 20, rank: "19", name: "Columbia University", country: "AQSH", mono: "CU", c1: "#6FA3D8", c2: "#1D4F91" },
-    { tier: 10, rank: "3", name: "Stanford University", country: "AQSH", mono: "S", c1: "#B1282B", c2: "#6E0F12" },
-  ];
-  const STEP = 1050, FIRST = 650;   // ms between cards, and before the first one
+  // the flight: Urganch, then Oxford, MIT, Stanford, then down and once round the ring where the logo appears
+  const PATH = "M148 312 C 96 280, 92 205, 128 182 S 205 120, 252 150 S 318 222, 286 262 C 262 300, 236 360, 200 360 A 95 95 0 0 1 200 170 A 95 95 0 0 1 200 360";
+  const PINS = [{ x: 128, y: 182, n: "Oxford", dx: -8, a: "end" }, { x: 252, y: 150, n: "MIT", dx: 10, a: "start" }, { x: 286, y: 262, n: "Stanford", dx: 10, a: "start" }];
+  const FLY0 = 700, FLY = 2500;   // ms: when the plane takes off, and how long it flies
+  const ease = (t) => (t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
-  const crest = (u, i) => `<svg class="ami-crest" viewBox="0 0 80 92" aria-hidden="true">
-    <defs><linearGradient id="amc${i}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${u.c1}"/><stop offset="1" stop-color="${u.c2}"/></linearGradient>
-      <linearGradient id="amg${i}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F8E3AE"/><stop offset=".5" stop-color="#D9A748"/><stop offset="1" stop-color="#F3D58F"/></linearGradient></defs>
-    <path d="M40 3 75 12v28c0 24-15.5 41-35 48C20.5 81 5 64 5 40V12z" fill="url(#amc${i})" stroke="url(#amg${i})" stroke-width="3"/>
-    <path d="M40 10 68 17.5V40c0 19.5-12 33.5-28 40-16-6.5-28-20.5-28-40V17.5z" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="1"/>
-    <text x="40" y="${u.mono.length > 2 ? 52 : 55}" text-anchor="middle" font-family="Cinzel, Georgia, serif" font-weight="700" font-size="${u.mono.length > 2 ? 19 : u.mono.length > 1 ? 24 : 30}" fill="#fff" letter-spacing="1">${u.mono}</text>
-  </svg>`;
+  const stars = () => Array.from({ length: 46 }, () => `<circle cx="${(Math.random() * 400).toFixed(1)}" cy="${(Math.random() * 600).toFixed(1)}" r="${(Math.random() * 1.3 + .3).toFixed(2)}"
+    style="animation-delay:${(Math.random() * 2.5).toFixed(2)}s;animation-duration:${(Math.random() * 2 + 1.6).toFixed(2)}s"/>`).join("");
+  // dotted "land" on the globe: random dots inside a few blobs, clipped to the globe
+  const land = () => { let s = ""; [[150, 205, 38, 26], [235, 200, 46, 30], [215, 285, 30, 40], [140, 285, 22, 18], [275, 300, 26, 20]].forEach(([cx, cy, rx, ry]) => {
+    for (let i = 0; i < 46; i++) { const a = Math.random() * 6.283, r = Math.sqrt(Math.random()); s += `<circle cx="${(cx + Math.cos(a) * rx * r).toFixed(1)}" cy="${(cy + Math.sin(a) * ry * r).toFixed(1)}" r="1.5"/>`; } }); return s; };
 
   function play(force) {
-    const store = window.amStore;
-    if (!force && store.get("am_intro_seen", false)) return;
-    store.set("am_intro_seen", true);
+    const store = window.amStore, today = new Date().toDateString();
+    if (!force && store.get("am_intro_day", "") === today) return;
+    store.set("am_intro_day", today);
     const reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
     const el = document.createElement("div");
     el.className = "ami"; el.setAttribute("role", "presentation");
     el.innerHTML = `
-      <div class="ami-dust"></div><div class="ami-dust ami-dust2"></div>
-      <div class="ami-floor"></div>
-      <div class="ami-src">THE World University Rankings 2027</div>
-      <div class="ami-stage">${UNIS.map((u, i) => `
-        <div class="ami-card" data-i="${i}">
-          <div class="ami-shine"></div>
-          <div class="ami-tier"><small>TOP</small><b>${u.tier}</b></div>
-          ${crest(u, i)}
-          <h3>${u.name}</h3>
-          <p>${T("{n}-o'rin", { n: u.rank })} · ${T(u.country)}</p>
-        </div>`).join("")}
-      </div>
-      <div class="ami-end">
-        <div class="ami-halo"></div>
-        <img class="ami-logo" src="img/logo-dark.webp" alt="Alumni Mentor" decoding="async">
-        <span class="ami-tag">${T("Top universitetlar sari ishonchli yo'l")}</span>
-        <i class="ami-bar"><em></em></i>
-      </div>
+      <svg class="ami-svg" viewBox="20 70 360 500" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <defs>
+          <radialGradient id="amiG" cx=".38" cy=".32" r=".75"><stop offset="0" stop-color="#A3203A"/><stop offset=".6" stop-color="#5E0A1A"/><stop offset="1" stop-color="#2A040C"/></radialGradient>
+          <linearGradient id="amiGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF1C7"/><stop offset=".45" stop-color="#E0B25A"/><stop offset="1" stop-color="#F6D58E"/></linearGradient>
+          <filter id="amiGlow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <radialGradient id="amiHalo"><stop offset="0" stop-color="#FFD68C" stop-opacity=".55"/><stop offset="1" stop-color="#FFD68C" stop-opacity="0"/></radialGradient>
+          <clipPath id="amiClip"><circle cx="200" cy="250" r="118"/></clipPath>
+        </defs>
+        <g class="ami-stars">${stars()}</g>
+        <g class="ami-globe">
+          <circle cx="200" cy="250" r="140" class="ami-atmo"/>
+          <circle cx="200" cy="250" r="118" fill="url(#amiG)"/>
+          <g clip-path="url(#amiClip)">
+            <g class="ami-land">${land()}</g>
+            <g class="ami-grid"><ellipse cx="200" cy="250" rx="118" ry="40"/><ellipse cx="200" cy="250" rx="118" ry="84"/><line x1="82" y1="250" x2="318" y2="250"/>
+              <ellipse class="ami-mer m1" cx="200" cy="250" rx="40" ry="118"/><ellipse class="ami-mer m2" cx="200" cy="250" rx="84" ry="118"/><line x1="200" y1="132" x2="200" y2="368"/></g>
+          </g>
+          <circle cx="200" cy="250" r="118" class="ami-rim"/>
+          <g class="ami-home"><circle cx="148" cy="312" r="13" class="ami-ping"/><circle cx="148" cy="312" r="4.5" class="ami-dot"/>
+            <text x="148" y="336" text-anchor="middle">Urganch</text></g>
+          ${PINS.map((p, i) => `<g class="ami-pin" data-i="${i}"><circle cx="${p.x}" cy="${p.y}" r="11" class="ami-ping"/><circle cx="${p.x}" cy="${p.y}" r="4.5" class="ami-dot"/>
+            <text x="${p.x + p.dx}" y="${p.y - 12}" text-anchor="${p.a}">${p.n}</text></g>`).join("")}
+        </g>
+        <path class="ami-trail" d="${PATH}" filter="url(#amiGlow)"/>
+        <g class="ami-plane"><path d="M14 0 L-11 -9 L-6 0 L-11 9 Z" fill="#FFFFFF" stroke="#E0B25A" stroke-width="1.2" stroke-linejoin="round"/><path d="M14 0 L-6 0" stroke="#E0B25A" stroke-width="1"/></g>
+        <g class="ami-end"><circle cx="200" cy="265" r="120" fill="url(#amiHalo)" class="ami-halo"/>
+          <image href="img/logo-dark.webp" x="122" y="198" width="156" height="133" class="ami-logo"/>
+          <text x="200" y="412" text-anchor="middle" class="ami-tag">${T("Urganchdan dunyoning eng yaxshi universitetlariga")}</text></g>
+        <g class="ami-burst">${Array.from({ length: 14 }, (_, i) => { const a = i / 14 * 6.283; return `<circle cx="200" cy="265" r="2.4" style="--x:${(Math.cos(a) * 130).toFixed(1)}px;--y:${(Math.sin(a) * 130).toFixed(1)}px"/>`; }).join("")}</g>
+      </svg>
       <button class="ami-skip">${T("O'tkazib yuborish")}</button>`;
     document.body.appendChild(el);
     document.body.classList.add("ami-on");
-    const cards = [...el.querySelectorAll(".ami-card")];
-    const timers = [];
-    const later = (f, ms) => timers.push(setTimeout(f, ms));
     const buzz = (t) => { try { Telegram.WebApp.HapticFeedback.impactOccurred(t); } catch {} };
-
-    // card i when card k is in front: earlier cards stand in a line, higher, further back and a little to the left
-    const place = (k) => cards.forEach((c, i) => {
-      const d = k - i;
-      if (d < 0) { c.style.opacity = 0; c.style.transform = "translate3d(0, 60px, -1500px) rotateX(18deg)"; return; }
-      c.classList.toggle("front", d === 0);
-      c.style.opacity = d === 0 ? 1 : Math.max(0, .78 - d * .18);
-      c.style.transform = `translate3d(${-d * 22}px, ${-d * 64}px, ${-d * 270}px) rotateY(${d ? 10 : 0}deg) rotateX(${d ? 7 : 0}deg)`;
-      c.style.filter = d ? `brightness(${.82 - d * .12})` : "none";
-    });
-
+    const timers = []; let raf = 0;
+    const later = (f, ms) => timers.push(setTimeout(f, ms));
     const finish = () => {
-      timers.forEach(clearTimeout);
+      timers.forEach(clearTimeout); cancelAnimationFrame(raf);
       if (el.classList.contains("out")) return;
-      el.classList.add("out");
-      document.body.classList.remove("ami-on");
+      el.classList.add("out"); document.body.classList.remove("ami-on");
       setTimeout(() => el.remove(), 700);
     };
     el.addEventListener("click", finish);
-
     if (reduce) { el.classList.add("end"); later(finish, 1800); return; }
-    place(-1);
-    UNIS.forEach((u, k) => later(() => { place(k); buzz(k === UNIS.length - 1 ? "medium" : "light"); }, FIRST + k * STEP));
-    const tEnd = FIRST + UNIS.length * STEP + 250;
-    // the line sinks back into the depth, one card after another, then the logo rises
-    later(() => cards.forEach((c, i) => setTimeout(() => {
-      c.style.opacity = 0; c.style.transform = `translate3d(${(i - 2) * 30}px, ${-120 - i * 10}px, -1800px) rotateX(24deg)`;
-    }, (UNIS.length - 1 - i) * 70)), tEnd);
-    later(() => { el.classList.add("end"); buzz("soft"); }, tEnd + 350);
-    later(finish, tEnd + 3000);
+
+    // the plane follows the path; the gold trail is drawn behind it; each pin lights up as the plane passes it
+    const path = el.querySelector(".ami-trail"), plane = el.querySelector(".ami-plane"), L = path.getTotalLength();
+    path.style.strokeDasharray = L; path.style.strokeDashoffset = L;
+    const near = (p) => { let best = 0, bd = 1e9; for (let s = 0; s <= L; s += 4) { const q = path.getPointAtLength(s), d = (q.x - p.x) ** 2 + (q.y - p.y) ** 2; if (d < bd) { bd = d; best = s; } } return best / L; };
+    const at = PINS.map(near), lit = PINS.map(() => false), ringAt = Math.min(.92, at[2] + .07);   // the globe gives way just after Stanford
+    let t0 = 0, ringOn = false;
+    const step = (now) => {
+      if (!t0) t0 = now;
+      const k = Math.min(1, (now - t0) / FLY), e = ease(k), s = e * L;
+      const p = path.getPointAtLength(s), q = path.getPointAtLength(Math.min(L, s + 1.5)), ang = Math.atan2(q.y - p.y, q.x - p.x) * 57.2958;
+      plane.setAttribute("transform", `translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${ang.toFixed(1)}) scale(1.4)`);
+      path.style.strokeDashoffset = (L - s).toFixed(1);
+      at.forEach((f, i) => { if (!lit[i] && e >= f) { lit[i] = true; el.querySelector(`.ami-pin[data-i="${i}"]`).classList.add("on"); buzz("light"); } });
+      if (!ringOn && e >= ringAt) { ringOn = true; el.classList.add("ring"); }   // the globe gives way as the trail starts the ring
+      if (k < 1) raf = requestAnimationFrame(step);
+      else { el.classList.add("end"); buzz("medium"); later(finish, 1600); }
+    };
+    later(() => { el.classList.add("fly"); raf = requestAnimationFrame(step); }, FLY0);
   }
   window.playIntro = play;
 })();

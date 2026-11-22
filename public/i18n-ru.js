@@ -1521,4 +1521,7 @@ Object.assign(I18N.ru, {
 // --- v24: lesson 3
 "3-dars. Top universitetlar uchun qanday natijalar kerak": "Урок 3. Какие результаты нужны для топ-университетов",
 "Top universitetlarda raqobatbardosh bo'lish uchun baholar, SAT, IELTS va boshqa akademik ko'rsatkichlar": "Оценки, SAT, IELTS и другие академические показатели, чтобы быть конкурентным в топ-вузах",
+// --- v25: lesson 4
+"4-dars. Arizada faoliyatlarning (extracurricular) o'rni": "Урок 4. Роль внеклассной деятельности в заявке",
+"Qanday faoliyatlar universitetga kirishda yordam beradi va ularni arizada qanday ko'rsatish kerak": "Какие активности помогают при поступлении и как показать их в заявке",
 });

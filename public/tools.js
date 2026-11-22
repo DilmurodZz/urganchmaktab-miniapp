@@ -199,7 +199,7 @@ const Tools = (() => {
     // every tool is the same card: picture, name, one line about it, order number
     const items = [
       { go: "location.hash='#/unis'", img: "img/tool-uni.webp", t: T("Grant va sertifikatlar"), d: T("Mahalliy grantlar, stipendiyalar, milliy va xalqaro sertifikatlar") },
-      { go: "location.hash='#/muddatlar'", icon: "clock", t: T("Muddatlar"), d: T("Top 300 universitetlarning Early va Regular Decision muddatlari, sizning ro'yxatingiz bo'yicha") },
+      { go: "location.hash='#/muddatlar'", img: "img/tool-deadlines.webp", t: T("Muddatlar"), d: T("Top 300 universitetlarning Early va Regular Decision muddatlari, sizning ro'yxatingiz bo'yicha") },
       { go: "location.hash='#/workshop'", img: "img/hgse/harvard.webp", t: "Admission tips from Harvard", d: T("Garvard qabul bo'limidan Stanislav Rivkinning seminari: kitob shaklida, o'zbek va ingliz tilida.") },
       { go: "location.hash='#/tips'", img: "img/tool-tips.webp", t: T("Insho va tavsiyanoma maslahatlari"), d: T("Common App inshosi, qo'shimcha insholar, tavsiyanomalar va sun'iy intellekt haqida") },
       { go: "location.hash='#/dtm'", img: "img/tool-dtm.webp", t: T("DTM ball kalkulyatori"), d: T("Ballingizni hisoblang va qaysi universitetda grant yoki shartnomaga yetishini ko'ring") },

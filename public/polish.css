@@ -325,3 +325,11 @@ button.copied .ic { animation: cpPop .35s ease-out; stroke: currentColor; }
 .ls-b { min-width: 0; overflow: hidden; } .ls-b span { overflow: hidden; text-overflow: ellipsis; }
 .ls-item { margin-bottom: 14px !important; }
 .ls-b { gap: 5px; padding: 0 8px; font-size: 13.5px; } .ls-b .ic { width: 16px; height: 16px; } .ls-b small { font-size: 11px; }
+
+/* ---------- v25: each lesson as its own clearly separated card ---------- */
+.card.ls-item { padding: 10px 10px 12px !important; margin: 0 0 18px !important; background: #FFFFFF !important; border: 1px solid #EDE3D7 !important; border-radius: 22px !important;
+  box-shadow: 0 14px 28px -20px rgba(72,0,15,.45) !important; }
+.ls-item > b { margin: 12px 4px 4px; } .ls-item > p { margin: 0 4px 12px; }
+.ls-item .ls-player { border-radius: 14px; }
+.ls-b.dl { background: #FBF6F1; }
+.ls-b { gap: 4px; padding: 0 6px; font-size: 13px; } .ls-b .ic { width: 15px; height: 15px; } .ls-b small { font-size: 10.5px; margin-left: 1px; }

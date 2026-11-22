@@ -1521,4 +1521,7 @@ Object.assign(I18N.en, {
 // --- v24: lesson 3
 "3-dars. Top universitetlar uchun qanday natijalar kerak": "Lesson 3. The academic stats you need for top universities",
 "Top universitetlarda raqobatbardosh bo'lish uchun baholar, SAT, IELTS va boshqa akademik ko'rsatkichlar": "Grades, SAT, IELTS and other academic stats you need to be competitive at top universities",
+// --- v25: lesson 4
+"4-dars. Arizada faoliyatlarning (extracurricular) o'rni": "Lesson 4. The role of extracurricular activities in applications",
+"Qanday faoliyatlar universitetga kirishda yordam beradi va ularni arizada qanday ko'rsatish kerak": "Which activities help you get in and how to present them in your application",
 });

@@ -7,6 +7,7 @@ window.Lessons = (() => {
     { id: 1, file: "video/dars-1.mp4", t: () => T("1-dars. Amerika universitetlarida o'qish"), d: () => T("AQSh universitetlariga qanday tayyorlanish kerak, nimadan boshlash va qanday xatolardan qochish"), len: "11:16", mb: 35, img: "img/lessons/poster.webp" },
     { id: 2, file: "video/dars-2.mp4", t: () => T("2-dars. Ivy League (Pechak ligasi) haqida"), d: () => T("Ivy League qaysi universitetlardan iborat, ular nimasi bilan farq qiladi va ularga qanday tayyorlanish kerak"), len: "12:22", mb: 28, img: "img/lessons/dars-2.webp" },
     { id: 3, file: "video/dars-3.mp4", t: () => T("3-dars. Top universitetlar uchun qanday natijalar kerak"), d: () => T("Top universitetlarda raqobatbardosh bo'lish uchun baholar, SAT, IELTS va boshqa akademik ko'rsatkichlar"), len: "15:25", mb: 29, img: "img/lessons/dars-3.webp" },
+    { id: 4, file: "video/dars-4.mp4", t: () => T("4-dars. Arizada faoliyatlarning (extracurricular) o'rni"), d: () => T("Qanday faoliyatlar universitetga kirishda yordam beradi va ularni arizada qanday ko'rsatish kerak"), len: "16:59", mb: 37, img: "img/lessons/dars-4.webp" },
   ];
   const abs = (f) => new URL(f, location.href).href;
   function Screen() {
@@ -17,7 +18,6 @@ window.Lessons = (() => {
       <div><b class="notr">Bobirjon Bakhtiyorov</b>
         <p class="ls-tags"><em>IELTS 9.0</em><em>SAT 1600</em></p>
         <small><b>Johns Hopkins University</b> ${T("bitiruvchisi")} · ${T("BS SAT Academy hammuassisi")}</small></div></div>
-    <button class="btn-ghost ls-tg" onclick="openTg('https://t.me/BobirjonsThoughts')">${ic("send")} ${T("Telegram kanali")}: @BobirjonsThoughts</button>
     <div class="section-title">${T("Darslar")}<small>${LESSONS.length}</small></div>
     ${LESSONS.map((l) => `<div class="card ls-item" id="ls-${l.id}">
       <div class="ls-player" id="lsp-${l.id}"><button class="ls-thumb" onclick="lsPlay(${l.id})" aria-label="${T("Ko'rish")}">

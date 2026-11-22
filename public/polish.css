@@ -163,8 +163,13 @@ body[data-theme] .tile4.k0 { --fc: #0B55D9; --fc2: #2F7BFF; }   /* Application S
 .live-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px 4px 8px; border-radius: 999px; background: #16A34A; color: #FFFFFF;
   font-size: 12px; font-weight: 800; font-style: normal; line-height: 1.2; white-space: nowrap; box-shadow: 0 4px 12px -4px rgba(22,163,74,.8); }
 .live-pill[hidden] { display: none !important; }
-.live-pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #FFFFFF; animation: livePulse 1.4s ease-in-out infinite; }
-@keyframes livePulse { 0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(255,255,255,.7); } 50% { opacity: .6; box-shadow: 0 0 0 4px rgba(255,255,255,0); } }
+/* three white dots that light up one after another (the 2nd and 3rd are shadows of the 1st) */
+.live-pill::before { content: ""; flex: none; width: 5px; height: 5px; margin-right: 14px; border-radius: 50%; background: rgba(255,255,255,1);
+  box-shadow: 7px 0 0 rgba(255,255,255,.4), 14px 0 0 rgba(255,255,255,.4); animation: liveDots 1.2s linear infinite; }
+@keyframes liveDots {
+  0%, 100% { background: rgba(255,255,255,1); box-shadow: 7px 0 0 rgba(255,255,255,.4), 14px 0 0 rgba(255,255,255,.4); }
+  33% { background: rgba(255,255,255,.4); box-shadow: 7px 0 0 rgba(255,255,255,1), 14px 0 0 rgba(255,255,255,.4); }
+  66% { background: rgba(255,255,255,.4); box-shadow: 7px 0 0 rgba(255,255,255,.4), 14px 0 0 rgba(255,255,255,1); } }
 .meet-bn .sbn-t .live-pill { align-self: flex-start; margin: 4px 0 2px; }
 .mt-hero .live-pill { position: relative; margin-left: 8px; vertical-align: middle; }
 .mt-card .mt-btns > * { min-width: 0; }

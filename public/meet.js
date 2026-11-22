@@ -43,7 +43,7 @@ const Meet = (() => {
     if (!tgInit()) return `${navbar("Online meeting")}<div class="card ap-empty">${chip("video", "lg")}<p>${T("Online meeting faqat Telegram ichida ishlaydi. Mini ilovani bot orqali oching.")}</p></div>`;
     setTimeout(load, 0); store.set("meet_seen", Date.now()); setTimeout(paintBadge, 50);
     const isM = S && S.me.mentor;
-    const tabs = [["meet", T("Uchrashuvlar"), "video"], ["mentors", T("Mentorlar"), "users"], ["req", T("So'rovlar"), "hand"]].concat(isM ? [["panel", T("Mentor paneli"), "briefcase"]] : []);
+    const tabs = [["meet", T("Uchrashuvlar"), "video"], ["mentors", T("Mentorlar"), "users"], ["req", T("So'rovlar"), "plus"]].concat(isM ? [["panel", T("Mentor paneli"), "briefcase"]] : []);
     if (!tabs.some(([k]) => k === tab)) tab = "meet";
     const body = !S ? spinner() : { meet: MeetTab, mentors: MentorsTab, req: ReqTab, panel: PanelTab }[tab]();
     return `${navbar("Online meeting")}
@@ -78,19 +78,24 @@ const Meet = (() => {
     const isM = S.me.mentor;
     return `${S.mentors.filter((t) => t.photo || (isM && isM.id === t.id)).map((t) => `<div class="card mt-mentor">${photo(t, "lg")}
       <div><b>${esc(t.name)}</b><small>${esc(t.uni || "")}${t.field ? " · " + esc(t.field) : ""}</small>${t.bio ? `<p class="notr">${esc(t.bio)}</p>` : ""}
-      ${isM && isM.id === t.id ? `<em class="mt-you">${T("Bu sizsiz")}</em>` : `<button class="btn-primary" onclick="mtAsk(${t.id})">${ic("hand")} ${T("Uchrashuv so'rash")}</button>`}</div></div>`).join("")
+      ${isM && isM.id === t.id ? `<em class="mt-you">${T("Bu sizsiz")}</em>` : `<button class="btn-primary" onclick="mtAsk(${t.id})">${ic("plus")} ${T("Uchrashuv so'rash")}</button>`}</div></div>`).join("")
       || `<div class="card ap-empty">${chip("users", "lg")}<p>${T("Mentorlar tez orada qo'shiladi.")}</p></div>`}
     ${isM ? "" : `<button class="btn-ghost mt-login" onclick="mtLogin()">${ic("shield")} ${T("Mentor sifatida kirish")}</button>`}`;
   }
   const ST = () => ({ open: T("Kutilmoqda"), ready: T("Mentorga yuborildi"), proposed: T("Yangi vaqt taklif qilindi"), accepted: T("Tasdiqlandi"), declined: T("Rad etildi") });
+  // a group request: how many students are asking, and their names
+  const whoList = (q) => { const who = q.who || [q.name || ""], n = Math.max(q.votes || 0, who.length);
+    return `<div class="mt-who-list"><b>${T("{n} talaba so'ramoqda", { n })}</b><div>${who.slice(0, 30).map((w) => `<span class="notr">${esc(w)}</span>`).join("")}${n > 30 ? `<span>+${n - 30}</span>` : ""}</div></div>`; };
   function reqCard(q, mineView) {
     const t = mentorOf(q.mentor_id) || { name: "Mentor" }, pub = q.kind === "public";
     const prop = q.status === "proposed" && q.p_starts ? `<div class="mt-prop">${ic("clock")}<span><b>${T("Mentor taklifi")}: ${esc(fmtDay(new Date(q.p_starts)))}, ${hm(q.p_starts)}</b>${q.p_note ? `<small class="notr">${esc(q.p_note)}</small>` : ""}</span></div>` : "";
     return `<div class="card mt-req st-${q.status}" id="rq-${q.id}"><div class="mt-who sm">${photo(t)}<span><b>${esc(t.name)}</b><small>${pub ? T("Ommaviy so'rov") : T("Shaxsiy so'rov")} · ${ST()[q.status] || ""}</small></span></div>
       <h4 class="notr">${esc(q.topic)}</h4>${q.note ? `<p class="notr">${esc(q.note)}</p>` : ""}
-      ${pub && q.status === "open" ? `<div class="mt-votes"><i><s style="width:${Math.min(100, q.votes / S.need * 100)}%"></s></i><small>${T("{a} / {b} talaba", { a: q.votes, b: S.need })}</small></div>
-        <div class="mt-btns">${q.voted ? `<button class="btn-ghost on">${ic("check")} ${T("Qo'llab-quvvatladingiz")}</button>` : `<button class="btn-primary" onclick="mtVote(${q.id})">${ic("hand")} ${T("Men ham qatnashaman")}</button>`}
+      ${pub ? whoList(q) : ""}
+      ${pub && q.status === "open" ? `<p class="mt-wait">${ic("clock")}<span>${T("Mentor so'rovni ko'rib chiqmoqda: uchrashuv o'tkazish yoki o'tkazmaslikni o'zi hal qiladi.")}</span></p>
+        <div class="mt-btns">${q.voted ? `<button class="btn-ghost on">${ic("check")} ${T("Siz ham so'rayapsiz")}</button>` : `<button class="btn-primary" onclick="mtVote(${q.id})">${ic("plus")} ${T("Men ham qatnashaman")}</button>`}
         <button class="btn-ghost" onclick="mtInvite(${q.id})">${ic("send")} ${T("Do'stlarni chaqirish")}</button></div>` : ""}
+      ${(q.status === "accepted" || q.status === "declined") && q.p_note ? `<div class="mt-cmt ${q.status}">${ic("chat")}<span><b>${T("Mentor izohi")}</b><small class="notr">${esc(q.p_note)}</small></span></div>` : ""}
       ${prop}${mineView && q.status === "proposed" && q.uid === S.me.uid ? `<div class="mt-btns"><button class="btn-primary" onclick="mtAnswer(${q.id},true)">${ic("check")} ${T("Tasdiqlash")}</button><button class="btn-ghost" onclick="mtAnswer(${q.id},false)">${T("Rad etish")}</button></div>` : ""}
       ${q.status === "accepted" && q.meeting_id ? `<button class="btn-ghost" onclick="mtTab('meet');setTimeout(()=>mtFocus('mt-${q.meeting_id}'),300)">${ic("video")} ${T("Uchrashuvni ko'rish")}</button>` : ""}</div>`;
   }
@@ -99,14 +104,14 @@ const Meet = (() => {
     const mine = S.requests.filter((q) => q.uid === S.me.uid && !(q.kind === "public" && q.status === "open"));
     return `<div class="mt-ways">
         <button class="mt-way one" onclick="mtPick('individual')"><i>${ic("user")}</i><b>${T("Shaxsiy so'rov")}</b><small>${T("Faqat siz va mentor. So'rov darhol mentorga boradi.")}</small><em>${ic("plus")} ${T("Yuborish")}</em></button>
-        <button class="mt-way grp" onclick="mtPick('public')"><i>${ic("users")}</i><b>${T("Guruh so'rovi")}</b><small>${T("{n} ta talaba qo'llab-quvvatlasa, mentorga yuboriladi.", { n: S.need })}</small><em>${ic("plus")} ${T("Boshlash")}</em></button></div>
+        <button class="mt-way grp" onclick="mtPick('public')"><i>${ic("users")}</i><b>${T("Guruh so'rovi")}</b><small>${T("Boshqa talabalar ham qo'shiladi. So'rov darhol mentorga boradi, mentor o'zi hal qiladi.")}</small><em>${ic("plus")} ${T("Boshlash")}</em></button></div>
       <div class="section-title">${T("Guruh so'rovlari")}<small>${pubOpen.length}</small></div>
       ${pubOpen.map((q) => reqCard(q)).join("") || `<p class="note">${T("Hozircha guruh so'rovi yo'q. Yuqoridagi \"Guruh so'rovi\" tugmasi bilan birinchisini boshlang.")}</p>`}
       <div class="section-title">${T("Mening so'rovlarim")}<small>${mine.length}</small></div>
       ${mine.map((q) => reqCard(q, true)).join("") || `<p class="note">${T("Siz hali so'rov yubormagansiz.")}</p>`}`;
   }
   function PanelTab() {
-    const me = S.me.mentor, inbox = S.requests.filter((q) => q.mentor_id === me.id && ((q.kind === "individual" && q.status === "open") || q.status === "ready" || q.status === "proposed"));
+    const me = S.me.mentor, inbox = S.requests.filter((q) => q.mentor_id === me.id && ["open", "ready", "proposed"].includes(q.status));
     const mineM = S.meetings.filter((m) => m.mentor_id === me.id);
     return `<div class="card mt-me">${photo(me, "lg")}<div><b>${esc(me.name)}</b><small>${esc(me.uni || "")}${me.field ? " · " + esc(me.field) : ""}</small>
         <button class="btn-ghost" onclick="mtProfile()">${ic("pen")} ${T("Profilni tahrirlash")}</button></div></div>
@@ -116,10 +121,10 @@ const Meet = (() => {
         ${me.google ? `<button class="btn-ghost" onclick="mtGoogleOff()">${T("Uzish")}</button>` : `<button class="btn-primary" onclick="mtGoogle()">${T("Ulash")}</button>`}</div>` : ""}
       <button class="btn-primary mt-new" onclick="mtNew()">${ic("plus")} ${T("Uchrashuv rejalashtirish")}</button>
       <div class="section-title">${T("Kelgan so'rovlar")}<small>${inbox.length}</small></div>
-      ${inbox.map((q) => `<div class="card mt-req" id="rq-${q.id}"><div class="mt-who sm"><span class="mt-ph none">${esc((q.name || "?")[0])}</span><span><b>${esc(q.name || "")}${q.kind === "public" ? ` + ${q.votes - 1}` : ""}</b><small>${q.kind === "public" ? T("Ommaviy so'rov") : T("Shaxsiy so'rov")} · ${ST()[q.status]}</small></span></div>
-        <h4 class="notr">${esc(q.topic)}</h4>${q.note ? `<p class="notr">${esc(q.note)}</p>` : ""}${q.pref ? `<small class="mt-pref">${T("Qulay vaqt")}: ${esc(fmtDay(new Date(q.pref)))}, ${hm(q.pref)}</small>` : ""}
+      ${inbox.map((q) => `<div class="card mt-req" id="rq-${q.id}"><div class="mt-who sm"><span class="mt-ph none">${esc((q.name || "?")[0])}</span><span><b class="notr">${esc(q.name || "")}${q.kind === "public" && q.votes > 1 ? ` + ${q.votes - 1}` : ""}</b><small>${q.kind === "public" ? T("Ommaviy so'rov") : T("Shaxsiy so'rov")} · ${ST()[q.status]}</small></span></div>
+        <h4 class="notr">${esc(q.topic)}</h4>${q.note ? `<p class="notr">${esc(q.note)}</p>` : ""}${q.kind === "public" ? whoList(q) : ""}${q.pref ? `<small class="mt-pref">${T("Qulay vaqt")}: ${esc(fmtDay(new Date(q.pref)))}, ${hm(q.pref)}</small>` : ""}
         ${q.status === "proposed" ? `<small class="mt-pref">${T("Siz taklif qilgan vaqt")}: ${esc(fmtDay(new Date(q.p_starts)))}, ${hm(q.p_starts)} · ${T("javob kutilmoqda")}</small>` : `<div class="mt-btns three">
-          <button class="btn-primary" onclick="mtRespond(${q.id},'accept')">${ic("check")} ${T("Qabul qilish")}</button><button class="btn-ghost" onclick="mtRespond(${q.id},'propose')">${ic("clock")} ${T("Boshqa vaqt")}</button><button class="btn-ghost red" onclick="mtDecline(${q.id})">${ic("x")}</button></div>`}</div>`).join("")
+          <button class="btn-primary" onclick="mtRespond(${q.id},'accept')">${ic("check")} ${T("Qabul qilish")}</button>${q.kind === "public" ? "" : `<button class="btn-ghost" onclick="mtRespond(${q.id},'propose')">${ic("clock")} ${T("Boshqa vaqt")}</button>`}<button class="btn-ghost red" onclick="mtDecline(${q.id})">${ic("x")} ${T("Rad etish")}</button></div>`}</div>`).join("")
         || `<p class="note">${T("Yangi so'rov yo'q.")}</p>`}
       <div class="section-title">${T("Mening uchrashuvlarim")}<small>${mineM.length}</small></div>
       ${mineM.map(meetCard).join("") || `<p class="note">${T("Siz hali uchrashuv rejalashtirmagansiz.")}</p>`}
@@ -136,7 +141,7 @@ const Meet = (() => {
     S.going = on ? S.going.concat(id) : S.going.filter((x) => x !== id); const m = meetOf(id); if (m) m.going = (m.going || 0) + (on ? 1 : -1); keep(); };
   window.mtCancel = (id) => { const go = (ok) => { if (ok) api("/cancel", { id }).then(() => { toast(T("Uchrashuv bekor qilindi")); load(true); }).catch(fail); }; try { tg.showConfirm(T("Uchrashuvni bekor qilasizmi? Qatnashuvchilarga xabar boradi."), go); } catch { go(confirm(T("Uchrashuvni bekor qilasizmi? Qatnashuvchilarga xabar boradi."))); } };
   window.mtChat = (id) => { const m = meetOf(id); store.set("mchat", { room: "m_" + id, title: m ? m.topic : "Online meeting" }); location.hash = "#/mchat"; };
-  window.mtVote = (id) => { haptic("medium"); api("/vote", { id }).then((r) => { toast(r.votes >= S.need ? T("So'rov mentorga yuborildi!") : T("Qo'llab-quvvatladingiz: {a} / {b}", { a: r.votes, b: S.need })); load(true); }).catch(fail); };
+  window.mtVote = (id) => { haptic("medium"); api("/vote", { id }).then((r) => { toast(T("Qo'shildingiz. Hozir {n} talaba so'ramoqda", { n: r.votes })); load(true); }).catch(fail); };
   window.mtInvite = (id) => { const q = S.requests.find((x) => x.id === id); openTg(`https://t.me/share/url?url=${encodeURIComponent("https://t.me/" + BOT)}&text=${encodeURIComponent(T("Mentor bilan ommaviy uchrashuv uchun ovoz bering: \"{t}\". Alumni Mentor ilovasida So'rovlar bo'limini oching.", { t: q ? q.topic : "" }))}`); };
   window.mtAnswer = (id, okk) => { api("/answer", { id, ok: okk }).then(() => { toast(okk ? T("Uchrashuv tasdiqlandi!") : T("Taklif rad etildi")); load(true); }).catch(fail); };
   window.mtAsk = (mentorId, kind) => {
@@ -159,13 +164,13 @@ const Meet = (() => {
       <div class="mt-pick">${list.map((t) => `<button onclick="mtAsk(${t.id},'${kind}')">${photo(t)}<span><b>${esc(t.name)}</b><small>${esc(t.uni || "")}${t.field ? " · " + esc(t.field) : ""}</small></span>${ic("chev")}</button>`).join("")}</div></div>`);
   };
   window.mtKind = (b) => { b.parentNode.querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b)); const pub = b.dataset.k === "public";
-    document.getElementById("mt-khint").textContent = pub ? T("Boshqa talabalar ham qo'shiladi. {n} ta talaba qo'llab-quvvatlaganda so'rov mentorga yuboriladi.", { n: (S && S.need) || 10 }) : T("Faqat siz va mentor. Mentor qabul qilsa yoki boshqa vaqt taklif qilsa, xabar olasiz.");
+    document.getElementById("mt-khint").textContent = pub ? T("Boshqa talabalar ham qo'shiladi. So'rov darhol mentorga boradi, mentor o'zi hal qiladi.") : T("Faqat siz va mentor. Mentor qabul qilsa yoki boshqa vaqt taklif qilsa, xabar olasiz.");
     document.getElementById("mt-prefbox").style.display = pub ? "none" : ""; };
   window.mtSendReq = (mentorId) => {
     const kind = document.querySelector(".mt-kindsel .on").dataset.k, topic = document.getElementById("mt-topic").value.trim(), pv = document.getElementById("mt-pref").value;
     if (!topic) return toast(T("Mavzuni yozing"));
     api("/request", { mentorId, kind, topic, note: document.getElementById("mt-note").value, pref: pv ? new Date(pv).getTime() : null }).then(() => {
-      closeSheet(); haptic("medium"); toast(kind === "public" ? T("Ommaviy so'rov ochildi. Do'stlaringizni chaqiring!") : T("So'rov mentorga yuborildi")); tab = "req"; store.set("meet_tab", "req"); load(true); render();
+      closeSheet(); haptic("medium"); toast(kind === "public" ? T("Guruh so'rovi mentorga yuborildi. Do'stlaringizni chaqiring!") : T("So'rov mentorga yuborildi")); tab = "req"; store.set("meet_tab", "req"); load(true); render();
     }).catch(fail);
   };
 
@@ -254,12 +259,17 @@ const Meet = (() => {
   window.mtRespond = (id, action) => {
     const q = S.requests.find((x) => x.id === id);
     sheet(`<div class="ap-sheet mt-form"><h3>${action === "accept" ? T("So'rovni qabul qilish") : T("Boshqa vaqt taklif qilish")}</h3><p class="mt-hint notr">${esc(q ? q.topic : "")}</p>
-      ${timeFields("mr")}${action === "propose" ? `<label>${T("Izoh")}<input id="mr-note" maxlength="300" placeholder="${T("Masalan: bugun bandman, ertaga kechqurun bo'shman")}"></label>` : ""}
+      ${timeFields("mr")}<label>${T("Talabalarga qisqa izoh (ixtiyoriy)")}<input id="mr-note" maxlength="300" placeholder="${action === "propose" ? T("Masalan: bugun bandman, ertaga kechqurun bo'shman") : T("Masalan: savollaringizni oldindan tayyorlab keling")}"></label>
       <button class="btn-primary" onclick="mtRespondGo(${id},'${action}')">${ic(action === "accept" ? "check" : "send")} ${action === "accept" ? T("Tasdiqlash va e'lon qilish") : T("Taklifni yuborish")}</button></div>`);
     if (q && q.pref) { const d = new Date(q.pref); document.getElementById("mr-date").value = new Date(q.pref - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); document.getElementById("mr-time").value = hm(q.pref); }
   };
   window.mtRespondGo = (id, action) => { const x = readTime("mr"), note = (document.getElementById("mr-note") || {}).value || ""; api("/respond", { id, action, note, ...x }).then(() => { closeSheet(); haptic("medium"); toast(action === "accept" ? T("Uchrashuv e'lon qilindi!") : T("Taklif yuborildi")); load(true); }).catch(fail); };
-  window.mtDecline = (id) => { const go = (ok) => { if (ok) api("/respond", { id, action: "decline" }).then(() => { toast(T("So'rov rad etildi")); load(true); }).catch(fail); }; try { tg.showConfirm(T("So'rovni rad etasizmi?"), go); } catch { go(confirm(T("So'rovni rad etasizmi?"))); } };
+  // declining: a short comment goes to every student who asked (no long chat, just the reason)
+  window.mtDecline = (id) => { const q = S.requests.find((x) => x.id === id); haptic("light");
+    sheet(`<div class="ap-sheet mt-form"><h3>${T("So'rovni rad etish")}</h3><p class="mt-hint notr">${esc(q ? q.topic : "")}</p>
+      <label>${T("Talabalarga qisqa izoh")}<input id="md-note" maxlength="300" placeholder="${T("Masalan: bu mavzuda yaxshiroq mentor bor, unga yozing")}"></label>
+      <button class="btn-primary zk-red" onclick="mtDeclineGo(${id})">${ic("x")} ${T("Rad etish va xabar berish")}</button></div>`); };
+  window.mtDeclineGo = (id) => { const note = document.getElementById("md-note").value.trim(); api("/respond", { id, action: "decline", note }).then(() => { closeSheet(); toast(T("So'rov rad etildi")); load(true); }).catch(fail); };
 
   /* ---------- the poster: mentor, photo, topic, day, time, link, over a campus at dusk ---------- */
   const SKY = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1350"><defs>

@@ -148,8 +148,14 @@ const TABS = [["#/", "Asosiy", "home"], ["#/chat", "Chat", "chat"], ["#/vositala
 function renderTabs(route) {
   const hidden = ["#/kompas", "#/natija", "#/oyin", "#/duo", "#/chat", "#/mchat"].includes(route);
   tabbar.classList.toggle("hide", hidden);
-  tabbar.innerHTML = TABS.map(([h, l, i]) => `<a href="${h}" class="${h === route ? "on" : ""}">${ic(i)}<span>${l}</span></a>`).join("");
+  tabbar.innerHTML = TABS.map(([h, l, i]) => `<a href="${h}" class="${h === route ? "on" : ""}">${ic(i)}<span>${l}</span>${h === "#/chat" ? `<em class="tb-unread" id="tb-unread" hidden></em>` : ""}</a>`).join("");
+  window.paintUnread && paintUnread();
 }
+// the red number on the Chat tab: new messages in the students' chat since the student last looked
+window.paintUnread = () => { const el = document.getElementById("tb-unread"); if (!el) return; let n = 0; try { n = window.Chat ? Chat.unread() : 0; } catch {}
+  el.hidden = !n; el.textContent = n > 99 ? "99+" : String(n); };
+setInterval(() => { if (!document.hidden && window.Chat && !/^#\/(m?chat)$/.test(location.hash)) { try { Chat.poll(); } catch {} } }, 40000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden && window.Chat) { try { Chat.poll(); } catch {} } });
 
 const navbar = (title) => `<div class="navbar"><button class="icon-btn" onclick="goBack()">${ic("back")}</button><h1>${title}</h1><span></span></div>`;
 window.goBack = () => { if (document.getElementById("sheet")) return closeSheet(); if (typeof Game !== "undefined" && gameOn && Game.onBack()) return; history.length > 1 ? history.back() : (location.hash = "#/"); };
@@ -159,12 +165,11 @@ function Home() {
   const tiles = [["video", "Online meeting", "#/meet", "k1"], ["clock", "Muddatlar", "#/muddatlar", "k2"], ["grid", "Foydali vositalar", "#/vositalar", "k3 g"]];
   return `
   <div class="topbar"><div class="brand"><img class="brand-logo" src="img/logo-emblem-light.webp" alt="" decoding="async"><span class="brand-name"><b>ALUMNI</b><small>MENTOR</small></span></div><span class="school" role="img" aria-label="Urganch 1-IMI"><img src="img/school.webp" alt="" decoding="async"></span></div>
-  <a class="hero2" href="#/unimatch">
-    <img class="hero2-art" src="img/hero-compass.webp" alt="" decoding="async">
-    <span class="hero2-tag">Top 300</span>
+  <a class="hero2 um-card" href="#/unimatch">
+    <img class="um-art" src="img/unimatch-letter.webp" alt="" decoding="async">
+    <span class="um-l"><span class="hero2-tag">Top 300</span>
     <h3>UniMatch</h3>
-    <span class="btn-orange">Boshlash ${ic("chev")}</span>
-    <span class="hero2-letter" role="link" tabindex="0" onclick="event.preventDefault();event.stopPropagation();location.hash='#/orzu'">${ic("plane")}<b>${T("Orzu xati")}</b></span>
+    <span class="um-go">Boshlash ${ic("chev")}</span></span>
   </a>
   <a class="banner studio-bn" href="#/ariza">
     <span class="sbn-ic">${ic("cap")}</span><span class="banner-sep"></span><span class="sbn-t"><b>Application Studio</b><small>${T("Profil, insholar, tavsiyalar va topshirish")}</small></span><span class="banner-go">${ic("chev")}</span>
@@ -276,7 +281,7 @@ const ROUTES = {
   "#/": Home, "#/kompas": () => needScript("kompas.js", "Compass", "Screen", T("UniMatch")), "#/natija": () => needScript("kompas.js", "Compass", "Result", T("UniMatch")), "#/profil": Profil,
   "#/kurslar": () => Kurslar.List(), "#/kurs": () => Kurslar.Detail(location.hash.slice(7)), "#/oyin": () => "", "#/mutolaa": () => Soon("mutolaa"),
   "#/duo": DuoScreen, "#/vositalar": () => needTools("Screen"), "#/cv": () => needTools("CV"), "#/dtm": () => needScript("study.js", "Study", "DTM", T("DTM ball kalkulyatori")), "#/ielts": () => needScript("study.js", "Study", "IELTS", T("IELTS ball kalkulyatori")), "#/unis": () => needScript("study.js", "Study", "Unis", T("Grant va sertifikatlar")),
-  "#/muddatlar": () => needScript("ariza.js", "Ariza", "Deadlines", T("Muddatlar")), "#/workshop": () => needScript("workshop.js", "Workshop", "Screen", "Application Workshop"),
+  "#/muddatlar": () => needScript("ariza.js", "Ariza", "Deadlines", T("Muddatlar")), "#/workshop": () => needScript("workshop.js", "Workshop", "Screen", "Harvard Admission tips"),
   "#/unimatch": () => needScript("study.js", "Study", "UniMatch", "UniMatch"), "#/unimatch-natija": () => needScript("study.js", "Study", "UniMatchResult", "UniMatch"),
   "#/ariza": () => needScript("ariza.js", "Ariza", "Screen", "Application Studio"),
   "#/chat": () => needScript("chat.js", "Chat", "Screen", "Chat"), "#/mchat": () => needScript("chat.js", "Chat", "Screen", "Chat"),

@@ -199,7 +199,7 @@ const Tools = (() => {
     // every tool is the same card: picture, name, one line about it, order number
     const items = [
       { go: "location.hash='#/unis'", img: "img/tool-uni.webp", t: T("Grant va sertifikatlar"), d: T("Mahalliy grantlar, stipendiyalar, milliy va xalqaro sertifikatlar") },
-      { go: "location.hash='#/workshop'", img: "img/hgse/icon.webp", t: "Application Workshop", d: T("Garvard (HGSE) qabul bo'limidan Stanislav Rivkinning seminari: kitob shaklida, o'zbek va ingliz tilida") },
+      { go: "location.hash='#/workshop'", img: "img/hgse/harvard.webp", t: "Harvard Admission tips", d: T("Garvard (HGSE) qabul bo'limidan Stanislav Rivkinning seminari: kitob shaklida, o'zbek va ingliz tilida") },
       { go: "location.hash='#/dtm'", img: "img/tool-dtm.webp", t: T("DTM ball kalkulyatori"), d: T("Ballingizni hisoblang va qaysi OTMda grant yoki shartnomaga yetishini ko'ring") },
       { go: "location.hash='#/ielts'", img: "img/tool-ielts.webp", t: T("IELTS ball kalkulyatori"), d: T("To'g'ri javoblaringizdan har bir ko'nikma va umumiy bandni hisoblang") },
       { go: "location.hash='#/kurslar'", img: "img/ic-courses.webp", round: true, t: T("Kurslar"), d: T("Eng talabgir kurslar, mehnat bozori tahlili va omad g'ildiragi") },

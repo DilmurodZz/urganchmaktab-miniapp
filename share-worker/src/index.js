@@ -91,7 +91,9 @@ export default {
           if (!m) return new Response("no meeting", { status: 404 });
           mod = m.tg_id === Number(user.id);
         }
-        const h = new Headers(req.headers); h.set("X-User", JSON.stringify({ id: user.id, first_name: user.first_name, photo_url: user.photo_url, mod }));
+        // a mentor's messages carry a "Mentor" badge (and their university), so students know who is answering
+        const mt = await env.DB.prepare("SELECT name, uni FROM mentors WHERE tg_id = ?1 AND active = 1").bind(Number(user.id)).first();
+        const h = new Headers(req.headers); h.set("X-User", JSON.stringify({ id: user.id, first_name: mt ? mt.name : user.first_name, photo_url: user.photo_url, mod, mentor: mt ? (mt.uni || "Mentor") : "" }));
         return room.fetch(new Request(req, { headers: h }));
       }
     }

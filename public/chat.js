@@ -18,10 +18,22 @@ const Chat = (() => {
     fetch(SHARE_API + "/chat/recent?room=" + r, { headers: { "X-Init-Data": initData() } }).then((x) => x.ok ? x.json() : null).then((d) => {
       if (!d) return;
       try { store.set(CK(r), { msgs: d.msgs, pin: d.pin }); } catch {}
+      if (r === "main" && window.paintUnread) paintUnread();
       if (paint && !live && room === r && $("ch-msgs")) { take(d); paintAll(); paintPin(); chatBottom(); }
     }).catch(() => {});
   }
-  function warm() { if (initData() && !store.get(CK("main"), null)) fetchRecent("main", false); }
+  function warm() { if (initData()) fetchRecent("main", false); }
+  // unread messages in the main chat (for the red number on the Chat tab): newer than the last one seen, not your own
+  const myId = () => (me && me.id) || (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) || 0;
+  const lastId = (list) => list.reduce((x, m) => (m.id > x ? m.id : x), 0);
+  function markSeen() { if (room !== "main" || !location.hash.startsWith("#/chat")) return; const id = lastId(msgs.filter((m) => !m.tmp)); if (id > store.get("chat_seen", 0)) store.set("chat_seen", id); window.paintUnread && paintUnread(); }
+  function unread() {
+    const c = store.get(CK("main"), null), list = (c && c.msgs) || []; if (!list.length) return 0;
+    const seen = store.get("chat_seen", null), top = lastId(list);
+    if (seen == null) { store.set("chat_seen", top); return 0; }   // first time: start counting from now
+    return list.filter((m) => m.id > seen && m.uid !== myId() && !m.deleted).length;
+  }
+  const poll = () => fetchRecent("main", false);
   const initData = () => tgInit();
   // which room: "main" for the students' chat, "m_<id>" for one meeting's chat (#/mchat)
   let room = "main", wsRoom = null;
@@ -91,15 +103,15 @@ const Chat = (() => {
   }
   const send = (o) => { if (ws && ws.readyState === 1) { ws.send(JSON.stringify(o)); return true; } return false; };
   function onData(d) {
-    if (d.t === "hello") { me = d.me; online = d.online; live = true; take(d); paintAll(); paintPin(); paintStatus(); chatBottom(); saveCache(); return; }
+    if (d.t === "hello") { me = d.me; online = d.online; live = true; take(d); paintAll(); paintPin(); paintStatus(); chatBottom(); saveCache(); markSeen(); return; }
     if (d.t === "msg") {
       if (d.tmp) { msgs = msgs.filter((x) => x.tmp !== d.tmp); if (!byId[d.m.id]) { msgs.push(d.m); byId[d.m.id] = d.m; } paintAll(); chatBottom(); saveCache(); return; }
       if (byId[d.m.id]) return;
       const list = $("ch-list"), near = list && list.scrollHeight - list.scrollTop - list.clientHeight < 160;
       msgs.push(d.m); byId[d.m.id] = d.m; append(d.m);
       if (d.m.uid === (me && me.id) || near) chatBottom(true); else { const n = $("ch-new"); if (n) n.textContent = String((+n.textContent || 0) + 1); }
-      if (d.m.uid !== (me && me.id)) haptic("light");
-      saveCache(); return;
+      if (d.m.uid !== (me && me.id)) haptic(d.m.reply && d.m.reply.uid === myId() ? "medium" : "light");
+      saveCache(); markSeen(); return;
     }
     if (d.t === "upd" && d.m.deleted) {   // a deleted message disappears for everyone, as in Telegram
       delete byId[d.m.id]; msgs = msgs.filter((x) => x.id !== d.m.id); paintAll(); saveCache();
@@ -119,13 +131,16 @@ const Chat = (() => {
     const prev = msgs[i - 1], mine = me && m.uid === me.id, cont = prev && prev.uid === m.uid && !prev.deleted && m.ts - prev.ts < 5 * 60000 && dayKey(prev.ts) === dayKey(m.ts);
     const day = !prev || dayKey(prev.ts) !== dayKey(m.ts) ? `<div class="cday"><span>${dayLabel(m.ts)}</span></div>` : "";
     if (m.deleted) return `${day}<div class="cm del ${mine ? "me" : ""}" data-id="${m.id}"><div class="cb"><i>${T("Xabar o'chirildi")}</i></div></div>`;
-    const rp = m.reply ? `<button class="crp" onclick="event.stopPropagation();chatJump(${m.reply.id})"><b>${esc(m.reply.name)}</b><span>${m.reply.text ? esc(m.reply.text) : m.reply.img ? T("Rasm") : m.reply.sticker ? T("Stiker") : T("Xabar o'chirildi")}</span></button>` : "";
+    const toMe = m.reply && m.reply.uid === myId() && !mine;
+    const rp = m.reply ? `<button class="crp" onclick="event.stopPropagation();chatJump(${m.reply.id})"><b>@${esc(m.reply.name)}${toMe ? ` · ${T("sizga javob")}` : ""}</b><span>${m.reply.text ? esc(m.reply.text) : m.reply.img ? T("Rasm") : m.reply.sticker ? T("Stiker") : T("Xabar o'chirildi")}</span></button>` : "";
     const body = m.sticker && !m.text && !m.img ? `<div class="cstk">${esc(m.sticker)}</div>`
       : `${rp}${m.img ? `<img class="cimg" src="${imgUrl(m.img)}" alt="" loading="lazy" onclick="event.stopPropagation();chatView(${m.img})">` : ""}${m.sticker ? `<div class="cstk sm">${esc(m.sticker)}</div>` : ""}${m.text ? `<div class="ct">${linkify(m.text)}</div>` : ""}`;
-    return `${day}<div class="cm ${mine ? "me" : ""} ${cont ? "cont" : ""} ${m.sticker && !m.text && !m.img ? "stk" : ""} ${m.tmp ? "sending" : ""}" data-id="${m.id || ""}" ${m.tmp ? `data-tmp="${m.tmp}"` : ""}>
+    const badge = m.mentor ? `<em class="cmt-b">${ic("cap")} Mentor${m.mentor !== "Mentor" ? " · " + esc(m.mentor) : ""}</em>` : "";
+    const quick = me && me.mentor && !mine && !m.tmp ? `<button class="cq" onclick="event.stopPropagation();chatReply(${m.id})">${ic("back")} ${T("Javob")}</button>` : "";
+    return `${day}<div class="cm ${mine ? "me" : ""} ${m.mentor ? "mentor" : ""} ${toMe ? "tome" : ""} ${cont ? "cont" : ""} ${m.sticker && !m.text && !m.img ? "stk" : ""} ${m.tmp ? "sending" : ""}" data-id="${m.id || ""}" ${m.tmp ? `data-tmp="${m.tmp}"` : ""}>
       ${mine ? "" : cont ? `<span class="ca sp"></span>` : avatar(m)}
-      <div class="cb" onclick="chatMenu(${m.id || 0})">${!mine && !cont ? `<b class="cn" style="color:${COLORS[m.uid % COLORS.length]}">${esc(m.name)}</b>` : ""}${body}
-        <span class="cmeta">${m.edited ? T("tahrirlangan") + " · " : ""}${tm(m.ts)}${mine ? ` ${ic(m.tmp ? "clock" : "check")}` : ""}</span></div></div>`;
+      <div class="cb" onclick="chatMenu(${m.id || 0})">${!mine && (!cont || m.mentor) ? `<b class="cn" style="color:${m.mentor ? "#B07C1E" : COLORS[m.uid % COLORS.length]}">${esc(m.name)}${badge}</b>` : ""}${body}
+        <span class="cmeta">${m.edited ? T("tahrirlangan") + " · " : ""}${tm(m.ts)}${mine ? ` ${ic(m.tmp ? "clock" : "check")}` : ""}</span></div>${quick}</div>`;
   }
   function paintAll() { const box = $("ch-msgs"); if (!box) return; box.innerHTML = msgs.length ? msgs.map(msgHTML).join("") : !ready ? `<div class="ch-skel"><i></i><i class="me"></i><i></i><i class="me s"></i><i class="s"></i></div>` : `<div class="ch-empty">${chip("chat", "lg")}<p>${T("Hali xabar yo'q. Birinchi bo'lib salom bering!")}</p></div>`; const o = $("ch-older"); if (o) o.innerHTML = noMore && msgs.length ? `<small>${T("Chat boshi")}</small>` : ""; }
   function append(m) { const box = $("ch-msgs"); if (!box) return; if (box.querySelector(".ch-empty")) box.innerHTML = ""; box.insertAdjacentHTML("beforeend", msgHTML(m, msgs.indexOf(m))); }
@@ -139,7 +154,7 @@ const Chat = (() => {
   function paintCtx() {
     const el = $("ch-ctx"); if (!el) return;
     const m = editing || reply;
-    el.innerHTML = m ? `<div class="ch-ctx">${ic(editing ? "pen" : "back")}<span><b>${editing ? T("Tahrirlash") : esc(m.name)}</b><small>${esc(m.text || (m.img ? T("Rasm") : T("Stiker")))}</small></span><button onclick="chatCancel()">${ic("x")}</button></div>` : "";
+    el.innerHTML = m ? `<div class="ch-ctx">${ic(editing ? "pen" : "back")}<span><b>${editing ? T("Tahrirlash") : T("{n} ga javob", { n: "@" + esc(m.name) })}</b><small>${esc(m.text || (m.img ? T("Rasm") : T("Stiker")))}</small></span><button onclick="chatCancel()">${ic("x")}</button></div>` : "";
   }
   window.chatBottom = (smooth) => { const l = $("ch-list"); if (l) l.scrollTo({ top: l.scrollHeight, behavior: smooth ? "smooth" : "auto" }); };
   window.chatJump = (id) => { const el = document.querySelector(`.cm[data-id="${id}"]`); if (!el) return toast(T("Xabar eskiroq, yuqoriga suring")); el.scrollIntoView({ block: "center", behavior: "smooth" }); el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 1400); };
@@ -150,7 +165,7 @@ const Chat = (() => {
     if (editing) { if (send({ t: "edit", id: editing.id, text })) { editing = null; inp.value = ""; paintCtx(); } else toast(T("Internet yo'q")); inp.style.height = "auto"; return; }
     const tmp = "t" + (++tmpN), o = { t: "send", text, reply: reply && reply.id, tmp };
     if (!send(o)) return toast(T("Internet yo'q"));
-    const m = { tmp, uid: me.id, name: "", text, ts: Date.now(), reply: reply ? { id: reply.id, name: reply.name, text: reply.text } : null };
+    const m = { tmp, uid: me.id, name: "", text, ts: Date.now(), reply: reply ? { id: reply.id, uid: reply.uid, name: reply.name, text: reply.text } : null };
     msgs.push(m); append(m); chatBottom(true);
     inp.value = ""; inp.style.height = "auto"; reply = null; paintCtx(); haptic("light"); inp.focus();
   };
@@ -243,6 +258,6 @@ const Chat = (() => {
     vvOff = () => { vv.removeEventListener("resize", fit); vv.removeEventListener("scroll", fit); try { tg.offEvent("viewportChanged", fit); } catch {} vvOff = null; };
     fit();
   }
-  return { Screen, mount, unmount, warm };
+  return { Screen, mount, unmount, warm, unread, poll };
 })();
 window.Chat = Chat;

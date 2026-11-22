@@ -39,7 +39,7 @@ export async function meet(req, env, url, origin, { json, verifyInitData, tg, AP
   if (req.method !== "POST") return json({ error: "method" }, 405, origin);
   const user = await verifyInitData(req.headers.get("X-Init-Data"), env.BOT_TOKEN, 7 * 86400);
   if (!user || !user.id) return json({ error: "unauthorised" }, 401, origin);
-  const uid = Number(user.id), name = clip(user.first_name, 40) || "Talaba";
+  const uid = Number(user.id), name = clip(user.first_name, 40) || "Talaba", full = clip(`${user.first_name || ""} ${user.last_name || ""}`.trim(), 60) || name;
   const body = await req.json().catch(() => ({}));
   const DB = env.DB, now = Date.now();
   const admins = String(env.ADMIN_IDS || "").split(",").map((x) => Number(x.trim()));
@@ -80,8 +80,13 @@ export async function meet(req, env, url, origin, { json, verifyInitData, tg, AP
     const going = (await all("SELECT meeting_id FROM rsvps WHERE uid = ?1", uid)).map((r) => r.meeting_id);
     const reqs = await all(`SELECT q.*, (SELECT COUNT(*) FROM request_votes v WHERE v.request_id = q.id) votes,
       EXISTS (SELECT 1 FROM request_votes v WHERE v.request_id = q.id AND v.uid = ?1) voted FROM requests q
-      WHERE (q.uid = ?1 AND q.created > ?3) OR (q.kind = 'public' AND q.status IN ('open', 'ready', 'proposed')) OR (q.mentor_id = ?2 AND q.status IN ('open', 'ready', 'proposed') AND (q.kind = 'individual' OR q.status != 'open'))
+      WHERE (q.uid = ?1 AND q.created > ?3) OR (q.kind = 'public' AND q.status IN ('open', 'ready', 'proposed')) OR (q.mentor_id = ?2 AND q.status IN ('open', 'ready', 'proposed'))
       ORDER BY q.created DESC LIMIT 80`, uid, meMentor ? meMentor.id : -1, now - 30 * 864e5);
+    const pubIds = reqs.filter((q) => q.kind === "public").map((q) => q.id);
+    if (pubIds.length) {
+      const vs = await all(`SELECT request_id, name FROM request_votes WHERE request_id IN (${pubIds.join(",")}) ORDER BY ts`);
+      reqs.forEach((q) => { if (q.kind === "public") q.who = vs.filter((v) => v.request_id === q.id).map((v) => v.name || "Talaba"); });
+    }
     const me = { uid, admin: isAdmin, mentor: meMentor ? { ...pubMentor(meMentor), google: meMentor.g_token ? meMentor.g_email || "Google" : null } : null, googleReady: googleReady(env) };
     meetings.forEach((m) => { m.attend = !!m.g_space && meMentor && m.mentor_id === meMentor.id; delete m.g_space; });
     return ok({ me, mentors, meetings, going, requests: reqs, need: VOTES_NEEDED });
@@ -175,17 +180,19 @@ export async function meet(req, env, url, origin, { json, verifyInitData, tg, AP
     if (open.n >= 5) return bad("too_many", 429);
     const pref = Number(body.pref) || null;
     const r = await one("INSERT INTO requests (kind, mentor_id, uid, name, topic, note, pref, created) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8) RETURNING id",
-      kind, mentor.id, uid, name, topic, clip(body.note, 600), pref, now);
-    if (kind === "public") await run("INSERT INTO request_votes (request_id, uid) VALUES (?1, ?2)", r.id, uid);
-    else if (mentor.tg_id) await notify(mentor.tg_id, `Yangi shaxsiy uchrashuv so'rovi\n\n${name}: ${topic}${pref ? "\nQulay vaqt: " + when(pref) : ""}`, "r_" + r.id, "So'rovni ochish");
+      kind, mentor.id, uid, full, topic, clip(body.note, 600), pref, now);
+    if (kind === "public") {
+      await run("INSERT INTO request_votes (request_id, uid, name, ts) VALUES (?1, ?2, ?3, ?4)", r.id, uid, full, now);
+      if (mentor.tg_id) await notify(mentor.tg_id, `Yangi guruh uchrashuv so'rovi\n\n${full}: ${topic}\nHozircha 1 talaba so'ramoqda. Qabul qilish yoki rad etishni o'zingiz hal qilasiz.`, "r_" + r.id, "So'rovni ochish");
+    } else if (mentor.tg_id) await notify(mentor.tg_id, `Yangi shaxsiy uchrashuv so'rovi\n\n${name}: ${topic}${pref ? "\nQulay vaqt: " + when(pref) : ""}`, "r_" + r.id, "So'rovni ochish");
     return ok({ id: r.id });
   }
   if (path === "/vote") {
     const q = await one("SELECT * FROM requests WHERE id = ?1 AND kind = 'public' AND status = 'open'", Number(body.id)); if (!q) return bad("none", 404);
-    await run("INSERT OR IGNORE INTO request_votes (request_id, uid) VALUES (?1, ?2)", q.id, uid);
+    const added = (await run("INSERT OR IGNORE INTO request_votes (request_id, uid, name, ts) VALUES (?1, ?2, ?3, ?4)", q.id, uid, full, now)).meta.changes;
     const n = (await one("SELECT COUNT(*) n FROM request_votes WHERE request_id = ?1", q.id)).n;
-    if (n >= VOTES_NEEDED) {
-      await run("UPDATE requests SET status = 'ready' WHERE id = ?1 AND status = 'open'", q.id);
+    // the mentor already sees the request; a short note at 5 and 10 students
+    if (added && (n === 5 || n === VOTES_NEEDED)) {
       const mentor = await one("SELECT * FROM mentors WHERE id = ?1", q.mentor_id);
       if (mentor && mentor.tg_id) await notify(mentor.tg_id, `${n} ta talaba siz bilan ommaviy uchrashuv so'ramoqda!\n\nMavzu: ${q.topic}`, "r_" + q.id, "So'rovni ochish");
     }
@@ -194,11 +201,12 @@ export async function meet(req, env, url, origin, { json, verifyInitData, tg, AP
   if (path === "/respond") {
     if (!meMentor) return bad("not_mentor", 403);
     const q = await one("SELECT * FROM requests WHERE id = ?1 AND mentor_id = ?2", Number(body.id), meMentor.id); if (!q) return bad("none", 404);
-    if (!(q.status === "open" && q.kind === "individual") && q.status !== "ready" && q.status !== "proposed") return bad("state");
+    if (!["open", "ready", "proposed"].includes(q.status)) return bad("state");
+    const note = clip(body.note, 300);
     const askers = q.kind === "public" ? (await all("SELECT uid FROM request_votes WHERE request_id = ?1", q.id)).map((r) => r.uid) : [q.uid];
     if (body.action === "decline") {
-      await run("UPDATE requests SET status = 'declined', p_note = ?1 WHERE id = ?2", clip(body.note, 300), q.id);
-      for (const u of askers) await notify(u, `Mentor ${meMentor.name} hozircha "${q.topic}" uchrashuvini o'tkaza olmaydi.${body.note ? "\nIzoh: " + clip(body.note, 300) : ""}`);
+      await run("UPDATE requests SET status = 'declined', p_note = ?1 WHERE id = ?2", note, q.id);
+      for (const u of askers) await notify(u, `Mentor ${meMentor.name} hozircha "${q.topic}" uchrashuvini o'tkaza olmaydi.${note ? "\nMentor izohi: " + note : ""}`, "r_" + q.id, "So'rovni ochish");
       return ok();
     }
     const s = Number(body.starts), d = Number(body.dur) || 60;
@@ -208,12 +216,15 @@ export async function meet(req, env, url, origin, { json, verifyInitData, tg, AP
     if (!meMentor.photo) return bad("photo_required");
     if (body.action === "accept") {
       const m = await createMeeting({ kind: q.kind, topic: q.topic, about: q.note, starts: s, dur: d, link, space: made.space, forUid: q.kind === "individual" ? q.uid : null, requestId: q.id }, meMentor);
-      await run("UPDATE requests SET status = 'accepted', meeting_id = ?1 WHERE id = ?2", m.id, q.id);
-      if (q.kind === "public") for (const u of askers) await run("INSERT OR IGNORE INTO rsvps (meeting_id, uid, created) VALUES (?1, ?2, ?3)", m.id, u, now);
+      await run("UPDATE requests SET status = 'accepted', meeting_id = ?1, p_note = ?2 WHERE id = ?3", m.id, note, q.id);
+      if (q.kind === "public") for (const u of askers) {
+        await run("INSERT OR IGNORE INTO rsvps (meeting_id, uid, created) VALUES (?1, ?2, ?3)", m.id, u, now);
+        await notify(u, `Mentor ${meMentor.name} guruh so'rovingizni qabul qildi!\n\nMavzu: ${q.topic}\nVaqt: ${when(s)}${note ? "\nMentor izohi: " + note : ""}`, "m_" + m.id, "Uchrashuvni ochish");
+      } else if (note) await notify(q.uid, `Mentor izohi: ${note}`, "m_" + m.id, "Uchrashuvni ochish");
       return ok({ meeting: m });
     }
     if (body.action === "propose") {
-      await run("UPDATE requests SET status = 'proposed', p_starts = ?1, p_dur = ?2, p_link = ?3, p_note = ?4 WHERE id = ?5", s, d, link, clip(body.note, 300), q.id);
+      await run("UPDATE requests SET status = 'proposed', p_starts = ?1, p_dur = ?2, p_link = ?3, p_note = ?4 WHERE id = ?5", s, d, link, note, q.id);
       if (made.space) await env.COLORS.put("pspace:" + q.id, made.space, { expirationTtl: 120 * 86400 });
       await notify(q.uid, `Mentor ${meMentor.name} boshqa vaqt taklif qildi\n\nMavzu: ${q.topic}\nTaklif: ${when(s)}${body.note ? "\nIzoh: " + clip(body.note, 300) : ""}\n\nIlovada tasdiqlang yoki rad eting.`, "r_" + q.id, "Javob berish");
       return ok();

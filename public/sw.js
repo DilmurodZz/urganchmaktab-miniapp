@@ -3,7 +3,7 @@
 // - the start page is asked from the network but opens from the cache if the network is slower than 1.5 s;
 // - pictures and course data open from the cache at once and refresh quietly in the background;
 // - Telegram's script and the font are kept too; models, music and libraries are kept once downloaded.
-const CACHE = "maktab-v15";
+const CACHE = "maktab-v16";
 const V = CACHE.split("-v")[1];
 const SHELL = ["styles.css", "features.css", "purple.css", "intro.css", "apply.css", "chat.css", "meet.css", "polish.css", "intro.js", "i18n.js", "data.js", "duo.js", "courses.js", "app.js", "profile.js", "stories.js", "meet.js"].map((f) => f + "?v=" + V);
 const FILES = ["./", "index.html", ...SHELL,

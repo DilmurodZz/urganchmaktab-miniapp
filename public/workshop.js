@@ -10,7 +10,7 @@ window.Workshop = (() => {
     : s.startsWith("* ") ? `<p class="wb-note">${esc(s.slice(2))}</p>` : s.startsWith("! ") ? `<p class="wb-hi">${esc(s.slice(2))}</p>` : `<p>${esc(s)}</p>`;
   const body = (b) => b.map(line).join("").replace(/(<li>.*?<\/li>)+/g, (m) => `<ul>${m}</ul>`);
   function cover() {
-    return `<div class="wb-cover">
+    return `<div class="wb-cover"><img class="wb-shield" src="img/hgse/harvard.webp" alt="Harvard" draggable="false">
       <span class="wb-kicker">The Road to Harvard · ${L("Tashkent", "Toshkent")}</span>
       <h2>Application Workshop</h2>
       <p class="wb-sub">${L("How to apply to the Harvard Graduate School of Education: programs, statement of purpose, recommendations, tests and financial aid.", "Garvard Ta'lim oliy maktabiga qanday topshiriladi: dasturlar, maqsad bayonoti, tavsiyanomalar, testlar va moliyaviy yordam.")}</p>
@@ -27,9 +27,9 @@ window.Workshop = (() => {
       <span class="wb-folio">${n} / ${N() - 1}</span></div></div>`;
   }
   function Screen() {
-    if (!window.WB_PAGES) { loadScripts(["workshop-data.js"]).then(() => { if (location.hash === "#/workshop") render(); }); return `${navbar("Application Workshop")}${spinner()}`; }
+    if (!window.WB_PAGES) { loadScripts(["workshop-data.js"]).then(() => { if (location.hash === "#/workshop") render(); }); return `${navbar("Harvard Admission tips")}${spinner()}`; }
     i = Math.min(i, N() - 1);
-    return `${navbar("Application Workshop")}
+    return `${navbar("Harvard Admission tips")}
     <div class="wb" oncontextmenu="return false">
       <div class="seg wb-lang"><button class="${lang === "uz" ? "on" : ""}" onclick="wbLang('uz')">O'zbekcha</button><button class="${lang === "en" ? "on" : ""}" onclick="wbLang('en')">English</button></div>
       <div class="wb-book" id="wb-book">${pageHTML(i)}</div>

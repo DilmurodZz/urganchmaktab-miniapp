@@ -16,6 +16,8 @@ export class ChatRoom extends DurableObject {
       sticker TEXT, reply INTEGER, edited INTEGER DEFAULT 0, deleted INTEGER DEFAULT 0, ts INTEGER)`);
     this.sql.exec(`CREATE TABLE IF NOT EXISTS imgs (id INTEGER PRIMARY KEY AUTOINCREMENT, data BLOB, type TEXT)`);
     this.sql.exec(`CREATE TABLE IF NOT EXISTS meta (k TEXT PRIMARY KEY, v TEXT)`);
+    try { this.sql.exec("ALTER TABLE msgs ADD COLUMN mentor TEXT"); } catch {}   // older rooms: add the mentor badge column once
+    this.env = env;
     this.admins = String(env.ADMIN_IDS || "").split(",").map((x) => Number(x.trim())).filter(Boolean);
   }
 
@@ -33,19 +35,19 @@ export class ChatRoom extends DurableObject {
     if (!user || !user.id) return new Response("unauthorized", { status: 401 });
     const pair = new WebSocketPair();
     this.ctx.acceptWebSocket(pair[1]);
-    const me = { id: Number(user.id), name: String(user.first_name || "").slice(0, 40) || "Talaba", photo: String(user.photo_url || "").slice(0, 500), admin: this.admins.includes(Number(user.id)) || !!user.mod, hits: [] };
+    const me = { id: Number(user.id), name: String(user.first_name || "").slice(0, 40) || "Talaba", photo: String(user.photo_url || "").slice(0, 500), admin: this.admins.includes(Number(user.id)) || !!user.mod, mentor: String(user.mentor || "").slice(0, 60), hits: [] };
     pair[1].serializeAttachment(me);
-    pair[1].send(JSON.stringify({ t: "hello", me: { id: me.id, admin: me.admin }, msgs: this.page(), pin: this.pinned(), online: this.ctx.getWebSockets().length }));
+    pair[1].send(JSON.stringify({ t: "hello", me: { id: me.id, admin: me.admin, mentor: me.mentor }, msgs: this.page(), pin: this.pinned(), online: this.ctx.getWebSockets().length }));
     this.broadcast({ t: "online", n: this.ctx.getWebSockets().length });
     return new Response(null, { status: 101, webSocket: pair[0] });
   }
 
   row(m) {
     if (!m) return null;
-    const r = m.reply ? this.sql.exec("SELECT id, name, text, img, sticker, deleted FROM msgs WHERE id = ?", m.reply).toArray()[0] : null;
+    const r = m.reply ? this.sql.exec("SELECT id, uid, name, text, img, sticker, deleted FROM msgs WHERE id = ?", m.reply).toArray()[0] : null;
     return { id: m.id, uid: m.uid, name: m.name, photo: m.photo, text: m.deleted ? "" : m.text, img: m.deleted ? null : m.img, sticker: m.deleted ? null : m.sticker,
-      edited: !!m.edited, deleted: !!m.deleted, ts: m.ts,
-      reply: r ? { id: r.id, name: r.name, text: r.deleted ? "" : (r.text || "").slice(0, 120), img: !r.deleted && !!r.img, sticker: !r.deleted && !!r.sticker } : null };
+      edited: !!m.edited, deleted: !!m.deleted, ts: m.ts, mentor: m.mentor || "", 
+      reply: r ? { id: r.id, uid: r.uid, name: r.name, text: r.deleted ? "" : (r.text || "").slice(0, 120), img: !r.deleted && !!r.img, sticker: !r.deleted && !!r.sticker } : null };
   }
   get(id) { return this.sql.exec("SELECT * FROM msgs WHERE id = ?", id).toArray()[0]; }
   page(before) {
@@ -78,8 +80,17 @@ export class ChatRoom extends DurableObject {
       }
       if (!text && !img && !sticker) return;
       const reply = d.reply && this.get(Number(d.reply)) ? Number(d.reply) : null;
-      const id = this.sql.exec("INSERT INTO msgs (uid, name, photo, text, img, sticker, reply, ts) VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id",
-        me.id, me.name, me.photo, text, img, sticker, reply, now).one().id;
+      const id = this.sql.exec("INSERT INTO msgs (uid, name, photo, text, img, sticker, reply, ts, mentor) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id",
+        me.id, me.name, me.photo, text, img, sticker, reply, now, me.mentor || null).one().id;
+      // a mentor answering a student's question: the student also hears about it from the bot
+      const to = reply && this.get(reply);
+      if (me.mentor && to && to.uid !== me.id && this.env.DB) {
+        const btn = JSON.stringify({ text: "Chatni ochish", web_app: { url: "https://dilmurodzz.github.io/urganchmaktab-miniapp/#/chat" } });
+        try { await this.env.DB.prepare("INSERT INTO outbox (chat, text, btn, created) VALUES (?1, ?2, ?3, ?4)")
+          .bind(to.uid, `Mentor ${me.name} chatda savolingizga javob berdi:
+
+${(text || "Rasm").slice(0, 400)}`, btn, now).run(); } catch {}
+      }
       const msg = this.row(this.get(id));
       ws.send(JSON.stringify({ t: "msg", m: msg, tmp: d.tmp }));
       return this.broadcast({ t: "msg", m: msg }, ws);

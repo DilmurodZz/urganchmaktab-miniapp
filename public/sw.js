@@ -3,7 +3,7 @@
 // - the start page is asked from the network but opens from the cache if the network is slower than 1.5 s;
 // - pictures and course data open from the cache at once and refresh quietly in the background;
 // - Telegram's script and the font are kept too; models, music and libraries are kept once downloaded.
-const CACHE = "maktab-v21";
+const CACHE = "maktab-v22";
 const V = CACHE.split("-v")[1];
 const SHELL = ["styles.css", "features.css", "purple.css", "intro.css", "apply.css", "chat.css", "meet.css", "polish.css", "intro.js", "i18n.js", "data.js", "duo.js", "courses.js", "app.js", "profile.js", "stories.js", "meet.js"].map((f) => f + "?v=" + V);
 const FILES = ["./", "index.html", ...SHELL,
@@ -44,6 +44,8 @@ self.addEventListener("fetch", (e) => {
     return;
   }
   const path = url.pathname;
+  // videos stream straight from the network (in parts), never through the cache, so they cannot slow the app down
+  if (/\.(mp4|webm|m4v)$/.test(path) || req.headers.has("range")) return;
   if (/\/(models|music|lib)\//.test(path)) return e.respondWith(cacheFirst(req, true));
   if (url.searchParams.has("v")) return e.respondWith(cacheFirst(req));
   if (req.mode === "navigate" || path.endsWith("/") || path.endsWith(".html")) return e.respondWith(networkFast(req, e));

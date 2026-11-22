@@ -289,7 +289,7 @@ const ROUTES = {
   "#/": Home, "#/kompas": () => needScript("kompas.js", "Compass", "Screen", T("UniMatch")), "#/natija": () => needScript("kompas.js", "Compass", "Result", T("UniMatch")), "#/profil": Profil,
   "#/kurslar": () => Kurslar.List(), "#/kurs": () => Kurslar.Detail(location.hash.slice(7)), "#/oyin": () => "", "#/mutolaa": () => Soon("mutolaa"),
   "#/duo": DuoScreen, "#/vositalar": () => needTools("Screen"), "#/cv": () => needTools("CV"), "#/dtm": () => needScript("study.js", "Study", "DTM", T("DTM ball kalkulyatori")), "#/ielts": () => needScript("study.js", "Study", "IELTS", T("IELTS ball kalkulyatori")), "#/unis": () => needScript("study.js", "Study", "Unis", T("Grant va sertifikatlar")),
-  "#/muddatlar": () => needScript("ariza.js", "Ariza", "Deadlines", T("Muddatlar")), "#/workshop": () => needScript("workshop.js", "Workshop", "Screen", "Admission tips from Harvard"), "#/tips": () => needScript("tips.js", "Tips", "Screen", T("Insho va tavsiyanoma maslahatlari")),
+  "#/muddatlar": () => needScript("ariza.js", "Ariza", "Deadlines", T("Muddatlar")), "#/workshop": () => needScript("workshop.js", "Workshop", "Screen", "Admission tips from Harvard"), "#/tips": () => needScript("tips.js", "Tips", "Screen", T("Insho va tavsiyanoma maslahatlari")), "#/darslar": () => needScript("lessons.js", "Lessons", "Screen", T("Video darslar")),
   "#/unimatch": () => needScript("study.js", "Study", "UniMatch", "UniMatch"), "#/unimatch-natija": () => needScript("study.js", "Study", "UniMatchResult", "UniMatch"),
   "#/ariza": () => needScript("ariza.js", "Ariza", "Screen", "Application Studio"),
   "#/chat": () => needScript("chat.js", "Chat", "Screen", "Chat"), "#/mchat": () => needScript("chat.js", "Chat", "Screen", "Chat"),
@@ -349,6 +349,7 @@ function render() {
   const isChat = route === "#/chat" || route === "#/mchat";
   document.body.classList.toggle("chat-on", isChat);
   if (!isChat && window.Chat) Chat.unmount();
+  if (route !== "#/darslar" && window.Lessons) Lessons.unmount();   // leaving the lessons stops the video and its download
   const newPage = route !== shownRoute; shownRoute = route;
   app.innerHTML = ROUTES[route]();
   if (route === "#/oyin") {

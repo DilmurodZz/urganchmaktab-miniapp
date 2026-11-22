@@ -254,3 +254,32 @@ button.copied .ic { animation: cpPop .35s ease-out; stroke: currentColor; }
 .adm-body > .card > h4 { display: none; }
 .adm-ic { flex: none; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; color: #FFFFFF; background: linear-gradient(160deg, var(--c-sec, var(--p3)), var(--c-main, var(--p1))); }
 .adm-ic .ic { width: 20px; height: 20px; }
+
+/* ---------- v22: clear day labels in Muddatlar ---------- */
+.dl-left small, .dl-row .dl-left small { color: #FFFFFF !important; opacity: 1 !important; font-size: 11px; font-weight: 700; letter-spacing: .2px; margin-top: 3px; }
+.dl-left b { font-size: 20px; font-weight: 800; }
+.dl-left.mo small { color: var(--p-text) !important; }
+.dl-hn small { color: inherit !important; opacity: .95 !important; font-weight: 700; }
+
+/* ---------- v22: video lessons ---------- */
+.ls-hero { margin: 0 0 12px; border-radius: 20px; overflow: hidden; box-shadow: 0 16px 30px -18px rgba(72,0,15,.7); }
+.ls-hero img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; }
+.ls-who { display: flex; align-items: center; gap: 14px; }
+.ls-who > img { flex: none; width: 64px; height: 64px; border-radius: 18px; }
+.ls-who b.notr { font-size: 17px; }
+.ls-tags { display: flex; gap: 6px; margin: 6px 0; }
+.ls-tags em { font-style: normal; font-weight: 800; font-size: 13px; padding: 3px 10px; border-radius: 99px; background: var(--c-soft, #F6E3E1); color: var(--c-ink, #720D20); }
+.ls-who small { display: block; font-size: 13px; color: #444444; line-height: 1.4; }
+.ls-who small b { color: #111111; }
+.btn-ghost.ls-tg { width: 100%; margin: 10px 0 4px; }
+.ls-item > b { display: block; margin: 12px 0 4px; font-size: 15.5px; }
+.ls-item > p { margin: 0 0 12px; font-size: 13.5px; color: #555555; line-height: 1.45; }
+.ls-player { border-radius: 16px; overflow: hidden; background: #000000; aspect-ratio: 16 / 9; }
+.ls-player video { display: block; width: 100%; height: 100%; background: #000000; }
+.ls-thumb { position: relative; display: block; width: 100%; height: 100%; padding: 0; border: 0; background: none; }
+.ls-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.ls-thumb i { position: absolute; left: 50%; top: 50%; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; display: grid; place-items: center; background: rgba(255,255,255,.92); color: #B3122E; box-shadow: 0 10px 24px -8px rgba(0,0,0,.6); }
+.ls-thumb i .ic { width: 30px; height: 30px; stroke-width: 2.2; }
+.ls-thumb s { position: absolute; right: 10px; bottom: 10px; padding: 3px 8px; border-radius: 8px; background: rgba(0,0,0,.7); color: #FFFFFF; font-size: 12px; font-weight: 700; text-decoration: none; }
+.ls-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tool-link small b { display: inline; font-size: inherit !important; line-height: inherit; margin: 0; color: #111111; font-weight: 800; }

@@ -361,8 +361,8 @@ const Ariza = (() => {
       i: T("El-yurt umidi jamg'armasi xorijdagi nufuzli universitetlarda o'qish uchun grantlar beradi. Tanlovlar odatda bahor va kuzda e'lon qilinadi. Shartlar va hujjatlar ro'yxatini jamg'armaning rasmiy saytidan kuzatib boring.") },
     { when: T("Mart, may, iyun, avgust, oktabr, noyabr, dekabr"), t: T("SAT xalqaro sanalari"), img: "img/sat-logo.webp",
       i: T("SAT yiliga bir necha marta xalqaro sanalarda topshiriladi. Ro'yxatdan o'tish imtihondan taxminan bir oy oldin yopiladi. Natijani universitet muddatidan oldin yuborish uchun imtihonni erta rejalashtiring.") },
-    { when: T("Iyun-iyul"), t: T("DTM: OTMlarga hujjat topshirish"), lg: ["DTM"], lc: "dt",
-      i: T("O'zbekiston OTMlariga hujjatlar odatda iyun-iyul oylarida rasmiy portal orqali topshiriladi, test esa yozda o'tkaziladi. Aniq sanalar har yili alohida e'lon qilinadi.") },
+    { when: T("Iyun-iyul"), t: T("DTM: universitetlarga hujjat topshirish"), lg: ["DTM"], lc: "dt",
+      i: T("O'zbekiston universitetlariga hujjatlar odatda iyun-iyul oylarida rasmiy portal orqali topshiriladi, test esa yozda o'tkaziladi. Aniq sanalar har yili alohida e'lon qilinadi.") },
   ];
   const nextDate = (m, d) => { const now = new Date(), y = now.getFullYear(); let x = new Date(y, m - 1, d, 23, 59); if (x < now) x = new Date(y + 1, m - 1, d, 23, 59); return x; };
   const fmtDate = (x) => fmtDay(x);

@@ -1,61 +1,37 @@
-/* ---------- Alumni Mentor opening intro, "Urganchdan dunyoga" (intro.js) ---------- */
+/* ---------- Alumni Mentor opening intro (intro.js): logo, crests spread out, dots gather into one ---------- */
 body.ami-on { overflow: hidden; }
 .ami { position: fixed; inset: 0; z-index: 200; overflow: hidden; cursor: pointer; user-select: none; -webkit-user-select: none;
-  background: radial-gradient(120% 80% at 50% 40%, #6E0C1F 0%, #3A0610 50%, #140105 100%); transition: opacity .6s ease; }
+  background: radial-gradient(90% 60% at 50% 45%, #FFFFFF 0%, #F7F3EE 60%, #EFE6DB 100%); transition: opacity .6s ease; }
 .ami.out { opacity: 0; pointer-events: none; }
-.ami-svg { position: absolute; left: 50%; top: 50%; width: min(100vw, 520px); height: min(100vh, 720px); transform: translate(-50%, -52%); overflow: visible; }
+.ami-c { position: absolute; left: 50%; top: 46%; width: 0; height: 0; }
 
-/* stars twinkle */
-.ami-stars circle { fill: #F6DCA0; opacity: .15; animation: amiTw 2.4s ease-in-out infinite alternate; }
-@keyframes amiTw { to { opacity: .85; } }
+/* the logo in the middle */
+.ami-brand { position: absolute; left: 0; top: 0; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 10px; white-space: nowrap;
+  opacity: 0; animation: amiIn .7s cubic-bezier(.2,.8,.2,1) .05s forwards; transition: opacity .45s ease, transform .6s ease; }
+.ami-brand img { width: 58px; height: auto; }
+.ami-brand span { display: flex; flex-direction: column; line-height: 1; }
+.ami-brand b { font: 700 24px/1 Cinzel, Georgia, serif; letter-spacing: 2px; color: #111111; }
+.ami-brand small { margin-top: 5px; font: 600 12px/1 Cinzel, Georgia, serif; letter-spacing: 5.5px; color: #8B0920; }
+@keyframes amiIn { from { opacity: 0; transform: translate(-50%, -50%) scale(.92); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+.ami.gather .ami-brand { opacity: 0; transform: translate(-50%, -50%) scale(.9); animation: none; }
 
-/* the globe: fades and grows in, the meridians turn slowly, then it gives way to the ring */
-.ami-globe { transform-origin: 200px 250px; opacity: 0; transform: scale(.82); animation: amiIn .9s cubic-bezier(.2,.8,.2,1) .1s forwards; transition: opacity .7s ease, transform .9s ease; }
-@keyframes amiIn { to { opacity: 1; transform: scale(1); } }
-.ami.ring .ami-globe { opacity: 0 !important; transform: scale(1.12) !important; animation: none; }
-.ami-atmo { fill: none; stroke: rgba(240,190,110,.18); stroke-width: 18; filter: blur(6px); }
-.ami-rim { fill: none; stroke: url(#amiGold); stroke-width: 2.2; stroke-dasharray: 742; stroke-dashoffset: 742; animation: amiDraw 1.1s ease-out .25s forwards; }
-@keyframes amiDraw { to { stroke-dashoffset: 0; } }
-.ami-land circle { fill: #F3CF85; opacity: .28; }
-.ami-grid ellipse, .ami-grid line { fill: none; stroke: rgba(246,220,160,.22); stroke-width: .8; }
-.ami-mer { transform-origin: 200px 250px; animation: amiSpin 3.2s linear infinite; }
-.ami-mer.m2 { animation-delay: -1.6s; }
-@keyframes amiSpin { 0% { transform: scaleX(1); } 50% { transform: scaleX(.05); } 100% { transform: scaleX(1); } }
+/* the crests: hidden behind the logo, then out to a circle; each turns into a dot; the dots come back */
+.ami-u { position: absolute; left: 0; top: 0; width: 40px; height: 46px; margin: -23px 0 0 -20px; opacity: 0; transform: translate(0, 0) scale(.3);
+  transition: transform .9s cubic-bezier(.2,.85,.25,1) var(--d), opacity .5s ease var(--d); }
+.ami-u svg { display: block; width: 100%; height: 100%; filter: drop-shadow(0 4px 8px rgba(0,0,0,.18)); transition: transform .35s ease, opacity .3s ease; }
+.ami-u i { position: absolute; left: 50%; top: 50%; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; background: var(--c); opacity: 0; transform: scale(.3);
+  box-shadow: 0 0 0 3px rgba(255,255,255,.9); transition: opacity .3s ease .1s, transform .35s ease .1s; }
+.ami.spread .ami-u { opacity: 1; transform: translate(var(--x), var(--y)) scale(1); }
+.ami.dots .ami-u svg { opacity: 0; transform: scale(.2); }
+.ami.dots .ami-u i { opacity: 1; transform: scale(1); }
+.ami.gather .ami-u { transform: translate(0, 0) scale(1); transition: transform .7s cubic-bezier(.6,0,.35,1) calc(var(--d) / 2), opacity .3s ease .55s; }
+.ami.one .ami-u { opacity: 0; }
 
-/* Urganch and the university pins */
-.ami-dot { fill: #FFE6A6; filter: drop-shadow(0 0 4px #FFD27A); }
-.ami-ping { fill: none; stroke: #FFD27A; stroke-width: 1.6; opacity: 0; transform-box: fill-box; transform-origin: center; }
-.ami-home .ami-ping { animation: amiPing 1.4s ease-out .5s infinite; }
-@keyframes amiPing { 0% { opacity: .9; transform: scale(.4); } 100% { opacity: 0; transform: scale(2.2); } }
-.ami-svg .ami-globe text { font: 700 11px Inter, Arial, sans-serif; fill: #F6DCA0; letter-spacing: .4px; }
-.ami-home text { opacity: 0; animation: amiFade .5s ease .6s forwards; }
-@keyframes amiFade { to { opacity: 1; } }
-.ami-pin { opacity: 0; transform-box: fill-box; transform-origin: center; transform: scale(.4); transition: opacity .3s ease, transform .45s cubic-bezier(.3,1.6,.5,1); }
-.ami-pin.on { opacity: 1; transform: scale(1); }
-.ami-pin.on .ami-ping { animation: amiPing 1s ease-out 1; }
+/* the one dot at the end */
+.ami-one { position: absolute; left: 0; top: 0; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; opacity: 0; transform: scale(.4);
+  background: radial-gradient(circle at 35% 35%, #C2253F, #8B0920 70%); box-shadow: 0 0 0 4px rgba(139,9,32,.12), 0 6px 16px -4px rgba(139,9,32,.6); }
+.ami.one .ami-one { animation: amiOne .7s cubic-bezier(.3,1.6,.5,1) forwards; }
+@keyframes amiOne { 0% { opacity: 0; transform: scale(.4); } 55% { opacity: 1; transform: scale(1.5); } 100% { opacity: 1; transform: scale(1); } }
 
-/* the plane and its gold trail */
-.ami-trail { fill: none; stroke: url(#amiGold); stroke-width: 2.6; stroke-linecap: round; }
-.ami-plane { opacity: 0; transition: opacity .3s ease; filter: drop-shadow(0 0 6px rgba(255,214,140,.9)); }
-.ami.fly .ami-plane { opacity: 1; }
-.ami.end .ami-plane { opacity: 0; }
-.ami.end .ami-trail { animation: amiRing 1.6s ease-out forwards; }
-@keyframes amiRing { 0% { stroke-width: 2.6; } 30% { stroke-width: 4; filter: drop-shadow(0 0 10px #FFD27A); } 100% { stroke-width: 2.6; } }
-
-/* sparks burst out of the ring when the logo arrives */
-.ami-burst circle { fill: #FFE3A0; opacity: 0; }
-.ami.end .ami-burst circle { animation: amiSpark .9s ease-out forwards; }
-@keyframes amiSpark { 0% { opacity: 1; transform: translate(0, 0); } 100% { opacity: 0; transform: translate(var(--x), var(--y)); } }
-
-/* the logo rises inside the ring, the tagline follows */
-.ami-end .ami-halo { opacity: 0; transform-box: fill-box; transform-origin: center; transform: scale(.4); transition: opacity .8s ease, transform 1.2s ease; }
-.ami-end .ami-logo { opacity: 0; transform-box: fill-box; transform-origin: center; transform: translateY(10px) scale(.8); filter: drop-shadow(0 8px 16px rgba(0,0,0,.5));
-  transition: opacity .7s ease .1s, transform .9s cubic-bezier(.2,.9,.25,1.15) .1s; }
-.ami-end .ami-tag { font: 600 13.5px Inter, Arial, sans-serif; fill: #F6DCA0; letter-spacing: .2px; opacity: 0; transition: opacity .6s ease .5s; }
-.ami.end .ami-halo { opacity: 1; transform: scale(1); }
-.ami.end .ami-logo { opacity: 1; transform: none; }
-.ami.end .ami-tag { opacity: 1; }
-
-.ami-skip { position: absolute; right: 16px; bottom: max(22px, env(safe-area-inset-bottom)); padding: 9px 16px; border-radius: 999px; border: 1px solid rgba(246,220,160,.35);
-  background: rgba(20,2,6,.35); color: #F6DCA0; font: 600 13px Inter, Arial, sans-serif; }
-@media (prefers-reduced-motion: reduce) { .ami-globe, .ami-svg { display: none; } }
+.ami-skip { position: absolute; right: 16px; bottom: max(22px, env(safe-area-inset-bottom)); padding: 9px 16px; border-radius: 999px; border: 1px solid #E5D9CB;
+  background: rgba(255,255,255,.7); color: #6B5B4B; font: 600 13px Inter, Arial, sans-serif; }

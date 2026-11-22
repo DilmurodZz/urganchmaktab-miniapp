@@ -1518,4 +1518,7 @@ Object.assign(I18N.ru, {
 "Mening universitetlarim": "Мои университеты",
 "Top 300 ichidan universitetlarni tanlang: ularning Early Decision, Early Action va Regular Decision muddatlari shu yerda chiqadi.": "Выберите университеты из топ-300: здесь появятся их сроки Early Decision, Early Action и Regular Decision.",
 "Application Studio muddatlari": "Сроки из Application Studio",
+// --- v24: lesson 3
+"3-dars. Top universitetlar uchun qanday natijalar kerak": "Урок 3. Какие результаты нужны для топ-университетов",
+"Top universitetlarda raqobatbardosh bo'lish uchun baholar, SAT, IELTS va boshqa akademik ko'rsatkichlar": "Оценки, SAT, IELTS и другие академические показатели, чтобы быть конкурентным в топ-вузах",
 });

@@ -74,7 +74,7 @@ const Ariza = (() => {
         <label>${T("Holati")}<select onchange="apSet(${a.id},'status',this.value)">${STATUS().map(([k, t]) => `<option value="${k}" ${k === a.status ? "selected" : ""}>${t}</option>`).join("")}</select></label>
         <label>${T("Topshirish muddati")}<input type="date" value="${esc(a.deadline || "")}" onchange="apSet(${a.id},'deadline',this.value)"></label>
         <div class="ap-docs">${docs.map(([k, t]) => `<button class="${a.docs && a.docs[k] ? "on" : ""}" onclick="apDoc(${a.id},'${k}')">${ic("check")}<span>${t}</span></button>`).join("")}</div>
-        <div class="ap-btns">${p.url ? `<button class="btn-primary" onclick="openExt('${encodeURIComponent(p.url)}')">${ic("globe")} ${p.name}</button>` : a.site ? `<button class="btn-primary" onclick="openExt('${encodeURIComponent(a.site)}')">${ic("globe")} ${T("Rasmiy sayt")}</button>` : ""}
+        <div class="ap-btns">${p.url ? `<button class="btn-primary" onclick="openExt('${encodeURIComponent(p.url)}')">${ic("globe")} ${p.name}</button>` : a.site ? `<button class="btn-primary" onclick="openExt('${encodeURIComponent(a.site)}')">${ic("ext")} ${T("Rasmiy sayt")}</button>` : ""}
           <button class="btn-ghost" onclick="apDel(${a.id})">${ic("x")} ${T("O'chirish")}</button></div>
       </div></details>`;
   }
@@ -395,7 +395,7 @@ const Ariza = (() => {
         <span class="dlu-d"><b>${esc(fmtDate(x.date))}</b><em>${x.left < 0 ? T("O'tgan") : x.left === 0 ? T("Bugun") : T("{n} kun qoldi", { n: x.left })}</em></span></div>`).join("")
         : `<p class="dlu-note">${T("Bu universitet muddatlarini har yili o'zi e'lon qiladi. Rasmiy saytidan tekshiring.")}</p>`}
       ${plans.length && !ok ? `<p class="dlu-note">${T("Taxminiy muddat: mamlakatdagi odatiy sana. Aniq sanani rasmiy saytdan tekshiring.")}</p>` : ""}
-      ${r[14] ? `<button class="btn-ghost dlu-site" onclick="openExt('${encodeURIComponent(r[14])}')">${ic("globe")} ${T("Rasmiy sayt")}</button>` : ""}</div>`).join("");
+      ${r[14] ? `<button class="btn-ghost dlu-site" onclick="openExt('${encodeURIComponent(r[14])}')">${ic("ext")} ${T("Rasmiy sayt")}</button>` : ""}</div>`).join("");
   }
   // "Universitet qo'shish": tick several of the Top 300, then "Tayyor" brings them back to Muddatlar
   let pick = new Set();
@@ -453,7 +453,7 @@ const Ariza = (() => {
     sheet(`<div class="dl-sheet">${keyLogo(k)}<h3>${k.t}</h3>
       <p class="dl-when">${k.date ? `<b>${esc(fmtDate(k.date))}</b> · ${daysTxt(k.left)}` : `<b>${k.when}</b>`}</p>
       <p>${k.i}</p>
-      ${p && p.url ? `<button class="btn-primary" onclick="openExt('${encodeURIComponent(p.url)}')">${ic("globe")} ${esc(p.name)}</button>` : ""}</div>`);
+      ${p && p.url ? `<button class="btn-primary" onclick="openExt('${encodeURIComponent(p.url)}')">${ic("ext")} ${esc(p.name)}</button>` : ""}</div>`);
   };
   window.dlMine = (id) => {
     const a = list().find((x) => x.id === id); if (!a) return; haptic("light");

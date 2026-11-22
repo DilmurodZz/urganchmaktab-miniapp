@@ -6,10 +6,12 @@ window.Lessons = (() => {
   const LESSONS = [
     { id: 1, file: "video/dars-1.mp4", t: () => T("1-dars. Amerika universitetlarida o'qish"), d: () => T("AQSh universitetlariga qanday tayyorlanish kerak, nimadan boshlash va qanday xatolardan qochish"), len: "11:16", mb: 35, img: "img/lessons/poster.webp" },
     { id: 2, file: "video/dars-2.mp4", t: () => T("2-dars. Ivy League (Pechak ligasi) haqida"), d: () => T("Ivy League qaysi universitetlardan iborat, ular nimasi bilan farq qiladi va ularga qanday tayyorlanish kerak"), len: "12:22", mb: 28, img: "img/lessons/dars-2.webp" },
+    { id: 3, file: "video/dars-3.mp4", t: () => T("3-dars. Top universitetlar uchun qanday natijalar kerak"), d: () => T("Top universitetlarda raqobatbardosh bo'lish uchun baholar, SAT, IELTS va boshqa akademik ko'rsatkichlar"), len: "15:25", mb: 29, img: "img/lessons/dars-3.webp" },
   ];
   const abs = (f) => new URL(f, location.href).href;
   function Screen() {
-    return `${navbar(T("Video darslar"))}
+    // the navbar with the TOP 100 UNI logo in a circle on the right
+    return `<div class="navbar"><button class="icon-btn" onclick="goBack()">${ic("back")}</button><h1>${T("Video darslar")}</h1><img class="ls-brand" src="img/lessons/top100.webp" alt="TOP 100 UNI"></div>
     <div class="ls-hero"><img src="img/lessons/poster.webp" alt="" decoding="async"></div>
     <div class="card ls-who"><img src="img/lessons/icon.webp" alt="" width="64" height="64">
       <div><b class="notr">Bobirjon Bakhtiyorov</b>
@@ -21,8 +23,8 @@ window.Lessons = (() => {
       <div class="ls-player" id="lsp-${l.id}"><button class="ls-thumb" onclick="lsPlay(${l.id})" aria-label="${T("Ko'rish")}">
         <img src="${l.img}" alt="" loading="lazy"><i>${ic("play")}</i><s>${l.len}</s></button></div>
       <b>${esc(l.t())}</b><p>${esc(l.d())}</p>
-      <div class="ls-btns"><button class="btn-primary" onclick="lsPlay(${l.id})">${ic("play")} ${T("Ko'rish")}</button>
-        <button class="btn-ghost" onclick="lsSave(${l.id})">${ic("download")} ${T("Yuklab olish")} · ${l.mb} MB</button></div></div>`).join("")}
+      <div class="ls-btns"><button class="ls-b go" onclick="lsPlay(${l.id})">${ic("play")}<span>${T("Ko'rish")}</span></button>
+        <button class="ls-b dl" onclick="lsSave(${l.id})">${ic("download")}<span>${T("Yuklab olish")}</span><small>${l.mb} MB</small></button></div></div>`).join("")}
     <p class="note">${T("Video faqat \"Ko'rish\" bosilganda yuklanadi. Internet sekin bo'lsa, videoni yuklab oling va keyin internetsiz ko'ring.")}</p>
     <p class="note">${T("Yangi darslar tez orada qo'shiladi.")}</p>`;
   }

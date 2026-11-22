@@ -308,3 +308,20 @@ button.copied .ic { animation: cpPop .35s ease-out; stroke: currentColor; }
 .dlp-row.on { border-color: #22A853; background: #F1FAF4; } .dlp-row.on > i { background: #22A853; border-color: #22A853; color: #FFFFFF; }
 .dlp-row span { min-width: 0; } .dlp-row b { display: block; font-size: 14px; line-height: 1.3; } .dlp-row small { font-size: 12px; color: var(--muted); }
 .btn-primary.dlp-go { position: sticky; bottom: 0; width: 100%; margin-top: 6px; }
+
+/* ---------- v24: lesson buttons, the TOP 100 logo, Rasmiy sayt buttons ---------- */
+.ls-brand { width: 42px; height: 42px; padding: 5px; box-sizing: border-box; border-radius: 50%; object-fit: contain; background: #FFFFFF; box-shadow: 0 0 0 2px #FFFFFF, 0 4px 12px -4px rgba(0,0,0,.35); justify-self: end; }
+.ls-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ls-b { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 42px; padding: 0 12px; border-radius: 12px; border: 0; font-size: 14px; font-weight: 700; white-space: nowrap; }
+.ls-b .ic { width: 18px; height: 18px; flex: none; }
+.ls-b.go { background: linear-gradient(180deg, #22A853, #199447); color: #FFFFFF; box-shadow: 0 8px 16px -10px rgba(25,148,71,.8); }
+.ls-b.dl { background: #FFFFFF; color: var(--c-ink, #720D20); border: 1.5px solid #EDE3D7; }
+.ls-b small { font-size: 12px; font-weight: 600; color: var(--muted); }
+.ls-b:active { transform: scale(.97); }
+.dlu-site, .sd-site, .ap-btns .btn-primary, .dl-sheet .btn-primary { display: flex !important; align-items: center; justify-content: center; gap: 8px; text-align: center; }
+.dlu-site .ic, .sd-site .ic { width: 18px; height: 18px; flex: none; }
+.btn-ghost.dlu-site { height: 44px; padding: 0 14px; font-size: 14.5px; }
+.ls-btns { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+.ls-b { min-width: 0; overflow: hidden; } .ls-b span { overflow: hidden; text-overflow: ellipsis; }
+.ls-item { margin-bottom: 14px !important; }
+.ls-b { gap: 5px; padding: 0 8px; font-size: 13.5px; } .ls-b .ic { width: 16px; height: 16px; } .ls-b small { font-size: 11px; }

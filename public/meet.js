@@ -47,7 +47,7 @@ const Meet = (() => {
     if (!tabs.some(([k]) => k === tab)) tab = "meet";
     const body = !S ? spinner() : { meet: MeetTab, mentors: MentorsTab, req: ReqTab, panel: PanelTab }[tab]();
     return `${navbar("Online meeting")}
-    <div class="mt-hero"><span class="mt-live">${ic("video")} Online meeting</span><h2>${T("Top universitet bitiruvchilari bilan jonli uchrashuvlar")}</h2>
+    <div class="mt-hero"><span class="mt-live">${ic("video")} Online meeting</span>${S && S.meetings.some(live) ? `<span class="live-pill">${T("Hozir jonli")}</span>` : ""}<h2>${T("Top universitet bitiruvchilari bilan jonli uchrashuvlar")}</h2>
       <p>${T("Savol bering, tajriba o'rganing va o'z yo'lingizni toping.")}</p></div>
     <div class="mt-tabs" style="grid-template-columns:repeat(${tabs.length},1fr)">${tabs.map(([k, t, i]) => `<button class="${tab === k ? "on" : ""}" onclick="mtTab('${k}')">${ic(i)}<span>${t}</span></button>`).join("")}</div>
     <div class="mt-body">${body}</div>`;
@@ -423,6 +423,9 @@ const Meet = (() => {
   function paintBadge() {
     const seen = store.get("meet_seen", 0), n = S ? S.meetings.filter((m) => m.created > seen && m.kind === "public").length : 0;
     document.querySelectorAll("[data-mb]").forEach((el) => { el.textContent = n > 9 ? "9+" : n || ""; el.classList.toggle("on", n > 0); });
+    // a green "Hozir jonli" on the Home card while a meeting is going on
+    const on = !!(S && S.meetings.some(live));
+    document.querySelectorAll("[data-live]").forEach((el) => { el.hidden = !on; });
   }
   if (tgInit()) setTimeout(load, 2500);
   return { Screen, load, paintBadge };

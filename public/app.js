@@ -181,7 +181,7 @@ function Home() {
     <span class="um-go">Boshlash ${ic("chev")}</span></span>
   </a>
   <a class="banner studio-bn meet-bn" href="#/meet">
-    <span class="sbn-ic">${ic("video")}<i class="tile-nb" data-mb></i></span><span class="banner-sep"></span><span class="sbn-t"><b>Online meeting</b><small>${T("Top universitet bitiruvchilari bilan jonli uchrashuvlar")}</small></span><span class="banner-go">${ic("chev")}</span>
+    <span class="sbn-ic">${ic("video")}<i class="tile-nb" data-mb></i></span><span class="banner-sep"></span><span class="sbn-t"><b>Online meeting</b><span class="live-pill" data-live hidden>${T("Hozir jonli")}</span><small>${T("Top universitet bitiruvchilari bilan jonli uchrashuvlar")}</small></span><span class="banner-go">${ic("chev")}</span>
   </a>
   <div class="grid4">${tiles.map(([i, l, h, k]) => `<a class="tile4 ${k}" href="${h}"><i class="tile-ic">${ic(i)}</i><span>${l}</span>${i === "grid" ? `<i class="tile-nb" data-nb></i>` : ""}</a>`).join("")}</div>
 `;

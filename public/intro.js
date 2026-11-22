@@ -2,7 +2,7 @@
    Calm and simple: the Alumni Mentor logo appears on ivory, the crests of top universities spread out from it in a
    circle, each crest turns into a small dot, and all the dots come back together into one dot in the middle.
    About 4.5 s, plain HTML and CSS (only transform and opacity move, so it stays smooth on phones).
-   A tap or "O'tkazib yuborish" skips it. Plays once a day (and with ?intro=1 for testing). */
+   A tap or "O'tkazib yuborish" skips it. Plays every time the mini app is opened. */
 (function () {
   // monogram crests in each university's own colours (no official logos)
   const UNIS = [
@@ -14,9 +14,6 @@
     <text x="20" y="${m.length > 2 ? 27 : 28.5}" text-anchor="middle" font-family="Cinzel, Georgia, serif" font-weight="700" font-size="${m.length > 2 ? 10 : m.length > 1 ? 13 : 17}" fill="#FFFFFF">${m}</text></svg>`;
 
   function play(force) {
-    const store = window.amStore, today = new Date().toDateString();
-    if (!force && store.get("am_intro_day", "") === today) return;
-    store.set("am_intro_day", today);
     const reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
     const el = document.createElement("div");
     el.className = "ami"; el.setAttribute("role", "presentation");

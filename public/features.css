@@ -830,3 +830,11 @@ html { -webkit-tap-highlight-color: transparent; }
 .grid4 { grid-template-columns: 1fr 1fr; }
 .topbar .brand { font-size: 20px; letter-spacing: .5px; }
 
+
+/* the app's own yes / no panel (the browser's confirm box showed the site address) */
+.ask { display: grid; justify-items: center; text-align: center; gap: 12px; padding: 6px 2px 2px; }
+.ask-ic { width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; background: var(--p-soft); color: var(--p1); }
+.ask-ic .ic { width: 26px; height: 26px; }
+.sheet .ask p { margin: 0; font-size: 16px; line-height: 1.45; color: var(--text); font-weight: 600; }
+.ask-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-top: 6px; }
+.ask-btns .btn-ghost, .ask-btns .btn-primary { margin: 0; }

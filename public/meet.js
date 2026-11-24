@@ -139,7 +139,7 @@ const Meet = (() => {
     try { if (tg && tg.openLink) return tg.openLink(m.link, { try_instant_view: false }); } catch {} window.open(m.link, "_blank"); };
   window.mtGo = (id, on) => { haptic("medium"); api("/rsvp", { id, on }).then(() => { if (on) toast(T("Boshlanishidan 1 soat oldin va boshlanganda eslatamiz")); load(true); }).catch(fail);
     S.going = on ? S.going.concat(id) : S.going.filter((x) => x !== id); const m = meetOf(id); if (m) m.going = (m.going || 0) + (on ? 1 : -1); keep(); };
-  window.mtCancel = (id) => { const go = (ok) => { if (ok) api("/cancel", { id }).then(() => { toast(T("Uchrashuv bekor qilindi")); load(true); }).catch(fail); }; try { tg.showConfirm(T("Uchrashuvni bekor qilasizmi? Qatnashuvchilarga xabar boradi."), go); } catch { go(confirm(T("Uchrashuvni bekor qilasizmi? Qatnashuvchilarga xabar boradi."))); } };
+  window.mtCancel = (id) => { const go = (ok) => { if (ok) api("/cancel", { id }).then(() => { toast(T("Uchrashuv bekor qilindi")); load(true); }).catch(fail); }; confirmAsk(T("Uchrashuvni bekor qilasizmi? Qatnashuvchilarga xabar boradi.")).then(go); };
   window.mtChat = (id) => { const m = meetOf(id); store.set("mchat", { room: "m_" + id, title: m ? m.topic : "Online meeting" }); location.hash = "#/mchat"; };
   window.mtVote = (id) => { haptic("medium"); api("/vote", { id }).then((r) => { toast(T("Qo'shildingiz. Hozir {n} talaba so'ramoqda", { n: r.votes })); load(true); }).catch(fail); };
   window.mtInvite = (id) => { const q = S.requests.find((x) => x.id === id); openTg(`https://t.me/share/url?url=${encodeURIComponent("https://t.me/" + BOT)}&text=${encodeURIComponent(T("Mentor bilan ommaviy uchrashuv uchun ovoz bering: \"{t}\". Alumni Mentor ilovasida So'rovlar bo'limini oching.", { t: q ? q.topic : "" }))}`); };
@@ -212,13 +212,13 @@ const Meet = (() => {
     <button class="btn-primary" onclick="mtPassGo()">${ic("check")} ${T("Saqlash")}</button></div>`);
   window.mtStrength = (p) => { const n = [p.length >= 12, /[a-z]/.test(p), /[A-Z]/.test(p), /\d/.test(p), /[^A-Za-z0-9]/.test(p)].filter(Boolean).length; const el = document.getElementById("mp-meter"); if (el) { el.style.width = n * 20 + "%"; el.className = n === 5 ? "ok" : n >= 3 ? "mid" : ""; } };
   window.mtPassGo = () => api("/mentor/password", { old: document.getElementById("mp-old").value, pass: document.getElementById("mp-new").value }).then(() => { closeSheet(); toast(T("Parol o'zgartirildi")); }).catch(fail);
-  window.mtLogout = () => { const go = (ok) => { if (ok) api("/mentor/logout").then(() => { tab = "meet"; load(true); toast(T("Mentor rejimidan chiqdingiz")); }).catch(fail); }; try { tg.showConfirm(T("Mentor rejimidan chiqasizmi? Qayta kirish uchun parol kerak bo'ladi."), go); } catch { go(confirm(T("Mentor rejimidan chiqasizmi? Qayta kirish uchun parol kerak bo'ladi."))); } };
+  window.mtLogout = () => { const go = (ok) => { if (ok) api("/mentor/logout").then(() => { tab = "meet"; load(true); toast(T("Mentor rejimidan chiqdingiz")); }).catch(fail); }; confirmAsk(T("Mentor rejimidan chiqasizmi? Qayta kirish uchun parol kerak bo'ladi.")).then(go); };
 
   /* ---------- mentor: Google Meet ---------- */
   // Google refuses sign-in inside app web views, so the sign-in page opens in the phone's browser; on return the panel refreshes
   window.mtGoogle = () => api("/google/ticket").then((r) => { haptic("medium"); try { tg.openLink(r.url, { try_instant_view: false }); } catch { window.open(r.url, "_blank"); }
     toast(T("Brauzerda Google bilan kiring, keyin shu yerga qayting")); }).catch(fail);
-  window.mtGoogleOff = () => { const go = (ok) => { if (ok) api("/google/disconnect").then(() => { toast(T("Google uzildi")); load(true); }).catch(fail); }; try { tg.showConfirm(T("Google akkauntini uzasizmi?"), go); } catch { go(confirm(T("Google akkauntini uzasizmi?"))); } };
+  window.mtGoogleOff = () => { const go = (ok) => { if (ok) api("/google/disconnect").then(() => { toast(T("Google uzildi")); load(true); }).catch(fail); }; confirmAsk(T("Google akkauntini uzasizmi?")).then(go); };
   document.addEventListener("visibilitychange", () => { if (!document.hidden && location.hash === "#/meet") load(true); });
   window.mtAttend = (id) => {
     sheet(`<div class="ap-sheet mt-att"><h3>${T("Kim qatnashdi")}</h3><div class="busy-in"><div class="run-spin"></div></div></div>`);

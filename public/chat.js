@@ -187,7 +187,7 @@ const Chat = (() => {
   window.chatReply = (id) => { reply = byId[id]; editing = null; paintCtx(); $("ch-in").focus(); };
   window.chatEdit = (id) => { editing = byId[id]; reply = null; const inp = $("ch-in"); inp.value = editing.text || ""; paintCtx(); inp.focus(); inp.dispatchEvent(new Event("input")); };
   window.chatCopy = async (id) => { try { await navigator.clipboard.writeText(byId[id].text); toast(T("Nusxa olindi")); } catch { toast(T("Nusxa olib bo'lmadi")); } };
-  window.chatDel = (id) => { const go = (ok) => { if (ok) send({ t: "del", id }); }; try { tg.showConfirm(T("Xabarni o'chirasizmi?"), go); } catch { go(confirm(T("Xabarni o'chirasizmi?"))); } };
+  window.chatDel = (id) => { const go = (ok) => { if (ok) send({ t: "del", id }); }; confirmAsk(T("Xabarni o'chirasizmi?")).then(go); };
   window.chatPin = (id, un) => { send({ t: un ? "unpin" : "pin", id }); haptic("medium"); };
   window.chatView = (img) => { sheet(`<img class="ch-full" src="${imgUrl(img)}" alt="">`); };
 

@@ -120,7 +120,7 @@ const Ariza = (() => {
   const upd = (id, f) => { const l = list(), a = l.find((x) => x.id === id); if (a) { f(a); save(l); } };
   window.apSet = (id, k, v) => { upd(id, (a) => { a[k] = v; }); haptic("light"); keepOpen(id); };
   window.apDoc = (id, k) => { upd(id, (a) => { a.docs = a.docs || {}; a.docs[k] = !a.docs[k]; }); haptic("light"); keepOpen(id); };
-  window.apDel = (id) => { if (!confirm(T("Bu arizani o'chirasizmi?"))) return; save(list().filter((x) => x.id !== id)); render(); };
+  window.apDel = (id) => confirmAsk(T("Bu arizani o'chirasizmi?"), T("O'chirish")).then((ok) => { if (!ok) return; save(list().filter((x) => x.id !== id)); render(); });
   const keepOpen = (id) => { const y = scrollY; render(); const d = document.getElementById("ap-" + id); if (d) d.open = true; scrollTo(0, y); };
   /* ================= Application Studio =================
      Everything is prepared here, once, in the same fields and order as the official forms (Common App, UCAS);
@@ -321,7 +321,7 @@ const Ariza = (() => {
   const keepY = () => { const y = scrollY; render(); scrollTo(0, y); };
   window.stTab = (k) => { tab = k; store.set("studio_tab", k); haptic("light"); render(); scrollTo(0, 0); };
   window.stAdd = (k) => { S[k].push(k === "acts" ? { type: ACT_TYPES[0] } : k === "hon" ? { level: HON_LEVELS[0] } : k === "recs" ? { role: "teacher", st: "no" } : {}); saveS(); haptic("light"); keepY(); };
-  window.stDel = (k, i) => { if (!confirm(T("O'chirasizmi?"))) return; S[k].splice(i, 1); saveS(); keepY(); };
+  window.stDel = (k, i) => confirmAsk(T("O'chirasizmi?"), T("O'chirish")).then((ok) => { if (!ok) return; S[k].splice(i, 1); saveS(); keepY(); });
   window.stRecSt = (i, st) => { S.recs[i].st = st; saveS(); haptic("light"); keepY(); };
   window.stAsk = (i) => {
     const r = S.recs[i], me = [S.p.first, S.p.last].filter(Boolean).join(" ") || user.first_name || "";

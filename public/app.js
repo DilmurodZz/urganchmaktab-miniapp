@@ -77,6 +77,7 @@ const ICONS = {
   briefcase: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M3 13h18"/>',
   check: '<path d="m5 12.5 4.5 4.5L19 7.5"/>',
   x: '<path d="M6 6l12 12M18 6 6 18"/>',
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>',
   download: '<path d="M12 4v11M7 11l5 5 5-5M4 20h16"/>',
   file: '<path d="M6 3h8l5 5v12a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zM14 3v5h5M9 13h6M9 17h6"/>',
   globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>',
@@ -670,5 +671,5 @@ function sheet(html) {
   requestAnimationFrame(() => el.classList.add("on"));
   try { tg.BackButton.show(); } catch {}   // back closes this panel first
 }
-window.closeSheet = () => { const el = document.getElementById("sheet"); if (el) { el.classList.remove("on"); el.id = ""; setTimeout(() => el.remove(), 250); } try { if ((location.hash || "#/") === "#/") tg.BackButton.hide(); } catch {} };
+window.closeSheet = () => { if (window.askEnd) { const e = window.askEnd; window.askEnd = null; return e(false); } const el = document.getElementById("sheet"); if (el) { el.classList.remove("on"); el.id = ""; setTimeout(() => el.remove(), 250); } try { if ((location.hash || "#/") === "#/") tg.BackButton.hide(); } catch {} };
 window.openTg = (u) => { haptic("light"); if (tg && tg.openTelegramLink) tg.openTelegramLink(u); else window.open(u, "_blank"); };

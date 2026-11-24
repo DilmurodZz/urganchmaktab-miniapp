@@ -87,7 +87,15 @@ window.admToggle = (k, on) => {
 let adminInfo = null, adminInfo_busy = false;
 const adminFetch = (path, body) => fetch(SHARE_API + "/admin/" + path, body ? { method: "POST", headers: { "X-Init-Data": tg.initData, "Content-Type": "application/json" }, body: JSON.stringify(body) } : { headers: { "X-Init-Data": (tg && tg.initData) || "" } })
   .then(async (r) => { const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || r.status); return j; });
-const confirmAsk = (text) => new Promise((res) => { try { tg.showConfirm(text, res); } catch { res(window.confirm(text)); } });
+// a yes / no question as the app's own panel: the browser's confirm box shows the site address, so it is never used
+const confirmAsk = (text, yes) => new Promise((res) => {
+  let done = false; const end = (v) => { if (done) return; done = true; window.askEnd = null; closeSheet(); res(v); };
+  sheet(`<div class="ask"><i class="ask-ic">${ic("info")}</i><p>${esc(text)}</p>
+    <div class="ask-btns"><button class="btn-ghost" onclick="askEnd(false)">${T("Bekor qilish")}</button><button class="btn-primary" onclick="askEnd(true)">${esc(yes || T("Ha"))}</button></div></div>`);
+  window.askEnd = end;   // set after sheet(): opening a panel first closes the one before
+  // tapping outside the panel or the back button means "no"
+  const wrap = document.getElementById("sheet"); if (wrap) wrap.addEventListener("click", () => end(false), { once: true });
+});
 
 const admHere = () => location.hash === "#/admin" || location.hash === "#/profil";
 const admRefresh = () => { if (admHere()) { const y = scrollY; render(); scrollTo(0, y); } };
